@@ -15,6 +15,17 @@ This tool will automatically estimate and analyze the different configurations o
     chmod +x deploy_app.sh
     sudo sh deploy_app.sh
  4. Then use the web browser to visit http://VM_IP:8080 
+ 
+ Ref. Commands: 
+sudo mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | awk '/^deployment-controller-token-/{print $1}') | awk '$1=="token:"{print $2}'
+
+
+http://YOUR_VM_IP:8001/api/v1/namespaces/kube-system/services/http:kubernetes-dashboard:/proxy/
+
+
  ```
  ### Docker
  APMT unified into one container:

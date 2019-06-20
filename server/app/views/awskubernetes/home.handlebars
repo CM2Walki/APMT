@@ -45,7 +45,7 @@
 
                                 <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
                             </div>
-                        </div>
+                        </div>valueresponsetimeData
                         <!-- /.box-header -->
                         <div class="box-body">
                             <div class="row">
@@ -787,23 +787,28 @@
             var valueresponsetime = [];
             var timestampresponsetime = [];
             var valueresponsetimeData = data.responseTime;
-            valueresponsetimeData.sort(function(a, b) {
-              var aD = new Date(a.Timestamp).getTime(), bD = new Date(b.Timestamp).getTime();
-              return (aD) - (bD);
-            });
+            if(valueresponsetimeData.length > 0){
 
-            for(i=0;i<valueresponsetimeData.length; i++) {
-              timestampresponsetime.push(new Date(valueresponsetimeData[i].Timestamp * 1000).toISOString());
-              valueresponsetime.push(valueresponsetimeData[i].Average);
+              valueresponsetimeData.sort(function(a, b) {
+                var aD = new Date(a.Timestamp).getTime(), bD = new Date(b.Timestamp).getTime();
+                return (aD) - (bD);
+              });
+
+              for(i=0;i<valueresponsetimeData.length; i++) {
+                timestampresponsetime.push(new Date(valueresponsetimeData[i].Timestamp * 1000).toISOString());
+                valueresponsetime.push(valueresponsetimeData[i].Average);
+              }
             }
 
             var valuelatency = [];
             var timestamplatency = [];
             var valuelatencyData = data.latency;
-            valuelatencyData.sort(function(a, b) {
-              var aD = new Date(a.Timestamp).getTime(), bD = new Date(b.Timestamp).getTime();
-              return (aD) - (bD);
-            });
+            if(valuelatencyData.length > 0){
+              valuelatencyData.sort(function(a, b) {
+                var aD = new Date(a.Timestamp).getTime(), bD = new Date(b.Timestamp).getTime();
+                return (aD) - (bD);
+              });
+            }
 
             for(i=0;i<valuelatencyData.length; i++) {
               timestamplatency.push(new Date(valuelatencyData[i].Timestamp * 1000).toISOString());
