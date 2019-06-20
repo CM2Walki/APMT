@@ -1,20 +1,25 @@
 version: "3.0"
 services:
   frontend:
+    restart: always
     build: server
     ports:
       - "8080:8080"
     depends_on:
       - mongodb
-    restart: always
+    environment:
+      - DAEMON_HOST=daemon
+      - MONGODB_HOST=mongodb
   daemon:
-    build: https://github.com/CM2Walki/ScaleX-tune
+    restart: always
+    build: https://github.com/CM2Walki/scalexctl
     ports:
       - "20000:20000"
     depends_on:
       - mongodb
+      - frontend
+  mongodb:
     restart: always
-  db:
     image: mongo:latest
     ports:
       - "27017:27017"
