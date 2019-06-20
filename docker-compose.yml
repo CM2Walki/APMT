@@ -14,7 +14,7 @@ services:
     depends_on:
       - mongodb
     restart: always
-  mongodb:
+  db:
     image: mongo:latest
     ports:
       - "27017:27017"
