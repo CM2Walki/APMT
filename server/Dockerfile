@@ -1,16 +1,15 @@
-FROM node:boron
+FROM node:10.16.0-alpine
 
+# Bundle app source
 # Create app directory
-RUN mkdir -p /usr/src/apmt
-WORKDIR /usr/src/apmt
+COPY . /usr/src/apmt/
 
 # Install app dependencies
-COPY package.json /usr/src/apmt/
-RUN npm install
-# Bundle app source
-COPY . /usr/src/apmt
+RUN set -x \
+        && npm install
 
-EXPOSE 3000
+WORKDIR /usr/src/apmt
+
+EXPOSE 8080
 
 CMD [ "node", "index.js"]
-
