@@ -1,15 +1,20 @@
 version: "3.0"
 services:
-  server-service:
+  frontend:
     build: server
     ports:
       - "8080:8080"
     depends_on:
-      - mongodbinst
-    links:
-      - mongodbinst
+      - mongodb
     restart: always
-  mongodbinst:
+  daemon:
+    build: https://github.com/CM2Walki/ScaleX-tune
+    ports:
+      - "20000:20000"
+    depends_on:
+      - mongodb
+    restart: always
+  mongodb:
     image: mongo:latest
     ports:
       - "27017:27017"
