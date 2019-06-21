@@ -6,6 +6,7 @@ COPY . /usr/src/ScaleX/
 
 # Install app dependencies
 RUN set -x \
+        && cd /usr/src/ScaleX \
         && npm install
 
 WORKDIR /usr/src/ScaleX
