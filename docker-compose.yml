@@ -12,7 +12,7 @@ services:
       - MONGODB_HOST=mongodb
   daemon:
     restart: always
-    build: https://github.com/CM2Walki/scalexctl
+    build: https://github.com/CM2Walki/scalexctl.git
     ports:
       - "20000:20000"
     depends_on:
