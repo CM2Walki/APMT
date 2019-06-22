@@ -18,6 +18,8 @@ services:
     depends_on:
       - mongodb
       - frontend
+    environment:
+      - MONGODB_HOST=mongodb
   mongodb:
     restart: always
     image: mongo:latest
