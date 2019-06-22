@@ -26,7 +26,7 @@ http://YOUR_VM_IP:8001/api/v1/namespaces/kube-system/services/http:kubernetes-da
 ```
 
 ## Usage
-Once it starts running then you need to create the account. After login you will be required to insert the following fields:
+Once it starts running then you need to create the account. After login you will be required to insert the default configuration:
 - AWS Token
 - AWS Secret Key
 - AWS Key Pair
@@ -37,21 +37,16 @@ Once it starts running then you need to create the account. After login you will
 
 These fields are required for the interaction between ScaleX and the AWS API. They also act as default values when deploying a new test cluster.
 
-After completing the profile, the next task is to use the application deployment procedure. 
+After completing the default configuration, the next task is to use the application deployment procedure. 
 These are of three types: 
 - AWS auto-scaling group (VM scaling)
 - Kubernetes Horizontal Pod Autoscaler (POD scaling)
 - AWS auto-scaling group and Kubernetes Horizontal Pod Autoscaler (VM + POD scaling)
 
-
 After selecting deploy, there would some fields to be filled.
 Once those are filled the deployment will take place.
  
-After the deployment is done now the user can generate the load to test the autoscaling deployment.
-As part of load generator there are some default load added. 
- 
-Here is the video to show the usage
-(https://s3.amazonaws.com/videoautoscale/apmt.mp4)
+After the deployment is done the user can generate traffic on the application's loadbalancer using a load generator cluster.
 
 ## Documentation
 
