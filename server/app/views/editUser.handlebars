@@ -14,11 +14,11 @@
   <div>
     <section class="content-header">
       <h1>
-       Edit User Information
+       Edit Default Configuration
       </h1>
       <ol class="breadcrumb">
         <li><a href="/"><i class="fa fa-dashboard"></i> Home</a></li>
-        <li class="active">UserInfo</li>
+        <li class="active">User Default Configuration</li>
       </ol>
     </section>
   <section class="content">
@@ -38,47 +38,41 @@
             <tbody>
             <tr>
               <td>1</td>
-              <td>Name</td>
+              <td>Default Cluster Prefix</td>
               <td><input type="text" class="form-control" name="name" value={{toJSONname info}}></td>
             </tr>
             <tr>
               <td>2</td>
-              <td>Email</td>
-              <td><input type="email" class="form-control" name="email" id="exampleInputEmail1" value={{toJSONemail info}}></td>
-            </tr>
-
-            <tr>
-              <td>3</td>
               <td>AWS Token</td>
               <td><input type="text" class="form-control" name="awstoken" value={{toJSONawstoken info}}></td>
             </tr>
             <tr>
-              <td>4</td>
+              <td>3</td>
               <td>AWS Secret</td>
               <td><input type="text" class="form-control" name="awssecret" value={{toJSONawssecret info}}></td>
             </tr>
             <tr>
-              <td>5</td>
+              <td>4</td>
               <td>AWS Key Pair</td>
               <td><input type="text" class="form-control" name="awskeyname" value={{toJSONawskeyname info}}></td>
             </tr>
             <tr>
-              <td>6</td>
+              <td>5</td>
               <td>AWS Region</td>
               <td><input type="text" class="form-control" name="awsregion" value={{toJSONawsregion info}}></td>
             </tr>
             <tr>
-              <td>7</td>
+              <td>6</td>
               <td>AWS Subnet ID</td>
               <td><input type="text" class="form-control" name= "awssubnetid" value={{toJSONawssubnetid info}}></td>
             </tr>
             <tr>
-              <td>8</td>
+              <td>7</td>
               <td>AWS Subnet ID 2</td>
               <td><input type="text" class="form-control" name= "awssubnetid2" value={{toJSONawssubnetid2 info}}></td>
             </tr>
             <tr>
-              <td>9</td>
+              <td>8</td>
               <td>AWS Security Group ID</td>
               <td><input type="text" class="form-control" name= "awssecurityid" value={{toJSONawssecurityid info}}></td>
             </tr>
@@ -267,7 +261,7 @@
 {{else}}
   <div style="height: 600px">
     <h1>Welcome to ScaleX</h1>
-    <p>Please Sign in and to continue!</p>
+    <p>Please sign in to continue!</p>
     <p>
       <a href="/signin" class="btn btn-primary btn-lg" role="button">
         <span class="glyphicon glyphicon-user"></span>
