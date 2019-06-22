@@ -17,9 +17,9 @@ exports.describeInstances = function(awsData,req, res) {
 
   var titlesArr = [];
   titlesArr.push({"title": "Name"});
-  titlesArr.push({"title": "InstanceId"});
-  titlesArr.push({"title": "ImageId"});
-  titlesArr.push({"title": "PublicIpAddress"});
+  titlesArr.push({"title": "InstanceID"});
+  titlesArr.push({"title": "ImageID"});
+  titlesArr.push({"title": "Public IP"});
   titlesArr.push({"title": "LaunchTime"});
   titlesArr.push({"title": "State"});
 
@@ -43,9 +43,9 @@ exports.describeInstances = function(awsData,req, res) {
             row.push(instance["Instances"][0]["Tags"][0]["Value"]);
           else
             row.push("None");
-          row.push(instance["Instances"][0]["InstanceId"]);
-          row.push(instance["Instances"][0]["ImageId"]);
-          row.push(instance["Instances"][0]["PublicIpAddress"]);
+          row.push(instance["Instances"][0]["InstanceID"]);
+          row.push(instance["Instances"][0]["ImageID"]);
+          row.push(instance["Instances"][0]["Public IP"]);
           row.push(instance["Instances"][0]["LaunchTime"]);
           row.push(instance["Instances"][0]["State"]["Name"]);
           awsArr.push(row);

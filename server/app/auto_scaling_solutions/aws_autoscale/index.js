@@ -16,9 +16,9 @@ exports.describeInstances = function(awsData,req, res) {
 
   var titlesArr = [];
   titlesArr.push({"title": "Name"});
-  titlesArr.push({"title": "InstanceId"});
-  titlesArr.push({"title": "ImageId"});
-  titlesArr.push({"title": "PublicIpAddress"});
+  titlesArr.push({"title": "InstanceID"});
+  titlesArr.push({"title": "ImageID"});
+  titlesArr.push({"title": "Public IP"});
   titlesArr.push({"title": "LaunchTime"});
   titlesArr.push({"title": "State"});
 
