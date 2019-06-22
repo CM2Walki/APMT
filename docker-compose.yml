@@ -13,8 +13,6 @@ services:
   daemon:
     restart: always
     build: https://github.com/CM2Walki/scalexctl.git
-    ports:
-      - "20000:20000"
     depends_on:
       - mongodb
       - frontend
@@ -23,8 +21,6 @@ services:
   mongodb:
     restart: always
     image: mongo:latest
-    ports:
-      - "27017:27017"
     environment:
       - MONGO_DATA_DIR=/data/db
     volumes:
