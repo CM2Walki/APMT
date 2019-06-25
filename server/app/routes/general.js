@@ -2,26 +2,26 @@ const express               = require('express');
 const router                = express.Router();
 const funct                 = require('../functions');
 const passport              = require('passport');
-const kube                  = require("../auto_scaling_solutions/kubernetes/index");
-const kubeMongoFunctions    = require("../auto_scaling_solutions/kubernetes/kubeMongoFunctions");
-var http                    = require('http');
-var request                 = require('request');
 
 //===============ROUTES=================
 //displays our homepage
 router.get('/', function(req, res){
   res.render('home', {user: req.user});
 });
+
 router.get('/edituserInfo', function(req, res){
   funct.getUserInfoforEdit(req.user.username, res, req);
 });
+
 //displays our signup page
 router.get('/signin', function(req, res){
   res.render('signin');
 });
+
 router.get('/register', function(req, res){
     res.render('register');
 });
+
 //sends the request through our local signup strategy, and if successful takes user to homepage, otherwise returns then to signin page
 router.post('/local-reg', passport.authenticate('local-signup', {
     successRedirect: '/',
@@ -29,17 +29,18 @@ router.post('/local-reg', passport.authenticate('local-signup', {
   })
 );
 
-
 //sends the request through our local login/signin strategy, and if successful takes user to homepage, otherwise returns then to signin page
 router.post('/login', passport.authenticate('local-signin', {
     successRedirect: '/',
     failureRedirect: '/signin'
   })
 );
+
 /* GET getUserInfo page. */
 router.get('/userinfo', function(req, res) {
   funct.getUserInfo(req.user.username, res,req);
 });
+
 router.post('/saveuserInfo', function(req, res){
   funct.saveUserInfo(req.user.username, req.body, res.body)
     .then(function (user) {
@@ -62,6 +63,7 @@ router.post('/saveuserInfo', function(req, res){
       }
     });
 });
+
 /*
 router.use(function(req, res, next){
   // the status option, or res.statusCode = 404

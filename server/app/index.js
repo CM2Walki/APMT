@@ -82,11 +82,16 @@ app.use(session({
   saveUninitialized: true,
   cookie: { maxAge: 90000000 }
 }));
+
 app.use(passport.initialize());
+
 app.use(passport.session());
+
 // use body parser so we can get info from POST and/or URL parameters
 app.use(bodyParser.urlencoded({ extended: false }));
+
 app.use(bodyParser.json());
+
 // Session-persisted message middleware
 app.use('/',function(req, res, next){
   var err = req.session.error,
@@ -103,8 +108,6 @@ app.use('/',function(req, res, next){
 
   next();
 });
-
-
 
 // Configure express to use handlebars templates
 var hbs = exphbs.create({
@@ -146,12 +149,6 @@ var hbs = exphbs.create({
       toJSONawssecurityid: function (object) {
         return object.awssecurityid;
       },
-      toJSONlrzinfo: function (object) {
-        return object.lrzinfo;
-      },
-      toJSONother: function (object) {
-        return object.other;
-      },
 
       toJSONexercise1: function (object) {
         return JSON.stringify(object.exercise1, null,'\t');
@@ -159,14 +156,21 @@ var hbs = exphbs.create({
 
     }
 });
+
 app.engine('handlebars', hbs.engine);
+
 app.set('view engine', 'handlebars');
+
 app.set('views', path.join(__dirname, 'views/'));
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/awskubernetes',awsAutoscaleKubernetesRoutes);
+
 app.use('/kubernetes',kubernetesRoutes);
+
 app.use('/awsautoscale',awsAutoscaleRoutes);
+
 app.use('/',routes);
 
 module.exports = app;

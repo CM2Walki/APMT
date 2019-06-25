@@ -44,7 +44,7 @@ exports.localAuth = function (username, password) {
   const deferred = Q.defer();
 
   MongoClient.connect(mongodbUrl, function (err, db) {
-    let collection = db.collection(collectionName);
+    const collection = db.collection(collectionName);
 
     collection.findOne({'userInfo.username' : username})
       .then(function (result) {
@@ -75,7 +75,7 @@ exports.getUserInfo = function (username, res, req) {
   console.log(username);
 
   MongoClient.connect(mongodbUrl, function (err, db) {
-    let collection = db.collection(collectionName);
+    const collection = db.collection(collectionName);
 
     //check if username is already assigned in our database
     collection.findOne({'userInfo.username' : username})
@@ -99,7 +99,7 @@ exports.getUserInfoforEdit = function (username, res, req) {
   console.log(username);
 
   MongoClient.connect(mongodbUrl, function (err, db) {
-    let collection = db.collection(collectionName);
+    const collection = db.collection(collectionName);
     //check if username is already assigned in our database
     collection.findOne({'userInfo.username' : username})
       .then(function (result) {
@@ -134,7 +134,6 @@ exports.saveUserInfo = function (username, data, responseExData) {
           collection.update({'userInfo.username' : username},
             {$set : {
               "userInfo.name": data.name,
-              "userInfo.email": data.email,
               "userInfo.awstoken": data.awstoken ,
               "userInfo.awssecret": data.awssecret,
               "userInfo.awskeyname": data.awskeyname,
