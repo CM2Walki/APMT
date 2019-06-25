@@ -10,11 +10,10 @@ var request                 = require('request');
 //===============ROUTES=================
 //displays our homepage
 router.get('/', function(req, res){
-  console.log(req.user);
   res.render('home', {user: req.user});
 });
 router.get('/edituserInfo', function(req, res){
-  funct.getUserInfoforEdit(req.user.username, res,req);
+  funct.getUserInfoforEdit(req.user.username, res, req);
 });
 //displays our signup page
 router.get('/signin', function(req, res){
