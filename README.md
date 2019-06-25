@@ -27,8 +27,8 @@ http://YOUR_VM_IP:8001/api/v1/namespaces/kube-system/services/http:kubernetes-da
 
 ## Usage
 Once it starts running then you need to create the account. After login you will be required to insert the default configuration:
-- AWS Token
-- AWS Secret Key
+- AWS Access Key ID
+- AWS Secret Access Key
 - AWS Key Pair
 - AWS Region
 - AWS Subnet ID
