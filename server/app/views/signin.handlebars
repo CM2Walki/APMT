@@ -15,9 +15,12 @@ function validateEmail(emailField){
   const reg = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
   if (reg.test(emailField.value) === false)
   {
-    alert('Invalid Email Address');
+    document.getElementById('username').borderColor = "red";
+    document.getElementById('submitbutton').disabled = false;
     return false;
   }
+  document.getElementById('username').borderColor = "black";
+  document.getElementById('submitbutton').disabled = true;
   return true;
 }
 </script>
@@ -51,7 +54,7 @@ function validateEmail(emailField){
                     </div>
                     <!-- /.col -->
                     <div class="col-xs-4">
-                        <button type="submit" class="btn btn-primary btn-block btn-flat">Sign In</button>
+                        <button name="submitbutton" type="submit" class="btn btn-primary btn-block btn-flat">Sign In</button>
                     </div>
                     <!-- /.col -->
                 </div>
