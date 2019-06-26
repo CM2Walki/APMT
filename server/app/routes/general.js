@@ -10,11 +10,7 @@ router.get('/', function(req, res){
 });
 
 router.get('/edituserInfo', function(req, res){
-  passport.authenticate('local-signup', {
-    successRedirect: '/edituserInfo',
-    failureRedirect: '/signin'
-  });
-  funct.getUserInfoforEdit(req.user.username, res, req);
+  funct.getUserInfoforEdit(req.user, res, req);
 });
 
 //displays our signup page
@@ -42,10 +38,6 @@ router.post('/login', passport.authenticate('local-signin', {
 
 /* GET getUserInfo page. */
 router.get('/userinfo', function(req, res) {
-  passport.authenticate('local-signup', {
-    successRedirect: '/userinfo',
-    failureRedirect: '/signin'
-  });
   funct.getUserInfo(req.user.username, res, req);
 });
 

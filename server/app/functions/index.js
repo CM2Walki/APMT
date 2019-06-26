@@ -92,16 +92,16 @@ exports.getUserInfo = function (username, res, req) {
   });
 };
 
-exports.getUserInfoforEdit = function (username, res, req) {
+exports.getUserInfoforEdit = function (user, res, req) {
   MongoClient.connect(mongodbUrl, function (err, db) {
     const collection = db.collection(collectionName);
     //check if username is already assigned in our database
-    collection.findOne({'userInfo.username' : username})
+    collection.findOne({'userInfo.username' : user.username})
       .then(function (result) {
         if (null != result) {
           console.log("found");
           res.render('editUser', {
-            user: username,
+            user: user,
             info: result["userInfo"]
           });
         }
