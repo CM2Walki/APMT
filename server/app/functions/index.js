@@ -72,8 +72,6 @@ exports.localAuth = function (username, password) {
 };
 
 exports.getUserInfo = function (username, res, req) {
-  console.log(username);
-
   MongoClient.connect(mongodbUrl, function (err, db) {
     const collection = db.collection(collectionName);
 
@@ -81,7 +79,6 @@ exports.getUserInfo = function (username, res, req) {
     collection.findOne({'userInfo.username' : username})
       .then(function (result) {
         if (null != result) {
-          console.log("found in userInfo");
           res.render('user', {
               user: username,
               info: result["userInfo"]
@@ -89,7 +86,7 @@ exports.getUserInfo = function (username, res, req) {
         }
         else
         {
-          console.log("not found");
+          console.log("UserInfo not found");
         }
       });
   });
@@ -132,7 +129,7 @@ exports.saveUserInfo = function (username, data, responseExData) {
           collection.update({'userInfo.username' : username},
             {$set : {
               "userInfo.name": data.name,
-              "userInfo.awstoken": data.awstoken ,
+              "userInfo.awstoken": data.awstoken,
               "userInfo.awssecret": data.awssecret,
               "userInfo.awskeyname": data.awskeyname,
               "userInfo.awsregion": data.awsregion,

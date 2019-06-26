@@ -16,7 +16,7 @@ router.get('/', function(req, res){
   res.render('awsautoscale/home',{layout: '../awsautoscale/layouts/main',user: req.user} );
 });
 router.get('/edituserInfo', function(req, res){
-  funct.getUserInfoforEdit(req.user.username, res,req);
+  funct.getUserInfoforEdit(req.user.username, res, req);
 });
 router.get('/getUserInfoForDeploy', function(req, res){
   awsAutoScaleMongoFunctions.getUserInfoforDeploy(req.user.username, res,req);

@@ -38,14 +38,14 @@ router.post('/login', passport.authenticate('local-signin', {
 
 /* GET getUserInfo page. */
 router.get('/userinfo', function(req, res) {
-  funct.getUserInfo(req.user.username, res,req);
+  funct.getUserInfo(req.user.username, res, req);
 });
 
 router.post('/saveuserInfo', function(req, res){
   funct.saveUserInfo(req.user.username, req.body, res.body)
     .then(function (user) {
       if (user) {
-        console.log("added informtion");
+        console.log("added information");
         //dataForm:
         res.render('success', {
           user: req.user.username,
