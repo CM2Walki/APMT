@@ -10,17 +10,16 @@
 <!-- FastClick -->
 <script src="/plugins/fastclick/fastclick.js"></script>
 
-<script>
+<script type="text/javascript">
 function validateEmail(emailField){
   const reg = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
-  if (reg.test(emailField.value) === false)
-  {
-    document.getElementById('username').borderColor = "red";
-    document.getElementById('submitbutton').disabled = false;
+  if (reg.test(emailField.value) === false) {
+    document.getElementById("username").borderColor = "red";
+    document.getElementById("submitbutton").disabled = false;
     return false;
   }
-  document.getElementById('username').borderColor = "black";
-  document.getElementById('submitbutton').disabled = true;
+  document.getElementById("username").borderColor = "black";
+  document.getElementById("submitbutton").disabled = true;
   return true;
 }
 </script>
