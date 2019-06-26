@@ -1,5 +1,5 @@
 exports.getMasterScript= function(kubeData, awsData) {
-  var scriptKubernetesMaster = '#!/bin/bash \n' +
+  const scriptKubernetesMaster = '#!/bin/bash \n' +
     'sudo su - \n' +
     'iptables -I INPUT -j ACCEPT \n' +
     'apt-get update && apt-get install -y apt-transport-https \n' +
@@ -68,6 +68,6 @@ exports.getMasterScript= function(kubeData, awsData) {
     'kubectl proxy --address=\'0.0.0.0\' --port=8001 --accept-hosts=\'^*$\'& \n' +
     'fi';
 
-  var scriptKubernetesMaster64 = new Buffer(scriptKubernetesMaster).toString('base64');
+  const scriptKubernetesMaster64 = new Buffer(scriptKubernetesMaster).toString('base64');
   return (scriptKubernetesMaster64);
-}
+};

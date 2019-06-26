@@ -149,11 +149,6 @@ var hbs = exphbs.create({
       toJSONawssecurityid: function (object) {
         return object.awssecurityid;
       },
-
-      toJSONexercise1: function (object) {
-        return JSON.stringify(object.exercise1, null,'\t');
-      },
-
     }
 });
 
