@@ -7,7 +7,7 @@ const mongodbUrl = 'mongodb://' + config.mongodb.host + ':' + config.mongodb.por
 const collectionName = config.mongodb.dbUsersData.collectionName;
 const MongoClient = require('mongodb').MongoClient;
 
-exports.localReg = function (username, password) {
+exports.localReg = function (username, password, email) {
   const deferred = Q.defer();
 
   MongoClient.connect(mongodbUrl, function (err, db) {
@@ -25,6 +25,7 @@ exports.localReg = function (username, password) {
             "userInfo": {
               "username": username,
               "password": hash,
+              "email": email,
               "avatar": "http://placepuppy.it/images/homepage/Beagle_puppy_6_weeks.JPG"
             }
           };
