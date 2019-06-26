@@ -136,7 +136,7 @@ exports.saveUserInfo = function (user, data, responseExData) {
             }
             },
             {upsert: false});
-          result["userInfo"].forEach(function(value) {
+          collection.update({'userInfo.username' : user.username}).forEach(function(value) {
             console.log(value);
           });
           deferred.resolve(true); // username exists
