@@ -118,10 +118,9 @@ var hbs = exphbs.create({
       toJSON: function (object) {
         return JSON.stringify(object, null,'\t');
       },
-
-        toJSONusername: function (object) {
-            return object.username;
-        },
+      toJSONusername: function (object) {
+          return object.username;
+      },
       toJSONname: function (object) {
         return object.name;
       },

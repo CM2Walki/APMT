@@ -1,21 +1,17 @@
-const ObjectId          = require('mongodb').ObjectID;
-const bcrypt            = require('bcryptjs');
 const Q                 = require('q');
 const config            = require('../../../config');
-const http              = require('http');
-const request           = require('request');
+
 // MongoDB connection information
 const mongodbUrlKubeConfig = 'mongodb://'+ config.mongodb.host + ':'+config.mongodb.port+'/'+config.mongodb.dbUsersData.name;
 const collectionNameKubeConfig = config.mongodb.dbUsersData.collectionName;
 
 const mongodbUrlKubeTestData = 'mongodb://'+config.mongodb.host + ':'+config.mongodb.port+'/'+config.mongodb.dbKubernetesTestData.name;
-const collectionNameKubeTestData = '';
 const MongoClient = require('mongodb').MongoClient;
 
-exports.addConfigData = function (username,data) {
-  var deferred = Q.defer();
+exports.addConfigData = function (username, data) {
+  const deferred = Q.defer();
   MongoClient.connect(mongodbUrlKubeConfig, function (err, db) {
-    var collection = db.collection(collectionNameKubeConfig);
+    let collection = db.collection(collectionNameKubeConfig);
     collection.findOne({'userInfo.username' : username})
       .then(function (result) {
         if (null != result)
@@ -29,7 +25,8 @@ exports.addConfigData = function (username,data) {
                 }
               }
             },
-            {upsert:false})
+            {upsert:false});
+
           deferred.resolve(true); // username exists
         }
         else
@@ -40,20 +37,21 @@ exports.addConfigData = function (username,data) {
   });
   return deferred.promise;
 };
+
 exports.getInstancesId = function(username) {
-  var deferred = Q.defer();
-  var ids = [];
+  const deferred = Q.defer();
+  let ids = [];
   MongoClient.connect(mongodbUrlKubeConfig, function (err, db) {
-    var collection = db.collection(collectionNameKubeConfig);
+    const collection = db.collection(collectionNameKubeConfig);
     //check if username is already assigned in our database
     collection.findOne({'userInfo.username' : username})
       .then(function (result) {
         if (null != result)
         {
-          var masterId= result["kubernetes"]["kubernetesConfig"].master.instanceid;
-          var minionIds = result["kubernetes"]["kubernetesConfig"].minionIds;
+          const masterId = result["kubernetes"]["kubernetesConfig"].master.instanceid;
+          const minionIds = result["kubernetes"]["kubernetesConfig"].minionIds;
           ids = minionIds;
-          ids.push(masterId)
+          ids.push(masterId);
           deferred.resolve(ids);
         }
         else
@@ -63,13 +61,13 @@ exports.getInstancesId = function(username) {
         }
       });
   });
-
   return deferred.promise;
-}
-exports.getUserInfoforDeploy = function (username, res,req) {
+};
+
+exports.getUserInfoforDeploy = function (username, res, req) {
   console.log(username);
   MongoClient.connect(mongodbUrlKubeConfig, function (err, db) {
-    var collection = db.collection(collectionNameKubeConfig);
+    const collection = db.collection(collectionNameKubeConfig);
     //check if username is already assigned in our database
     collection.findOne({'userInfo.username' : username})
       .then(function (result) {
@@ -88,11 +86,12 @@ exports.getUserInfoforDeploy = function (username, res,req) {
       });
   });
 };
-exports.getUserInfoForDescription = function (username, res,req) {
-  var deferred = Q.defer();
-  console.log("Hello"+username);
+
+exports.getUserInfoForDescription = function (username, res, req) {
+  const deferred = Q.defer();
+  console.log("Hello "+username);
   MongoClient.connect(mongodbUrlKubeConfig, function (err, db) {
-    var collection = db.collection(collectionNameKubeConfig);
+    const collection = db.collection(collectionNameKubeConfig);
 
     //check if username is already assigned in our database
     collection.findOne({'userInfo.username' : username})
@@ -108,18 +107,19 @@ exports.getUserInfoForDescription = function (username, res,req) {
   });
   return deferred.promise;
 };
+
 exports.getMasterIp = function(username) {
-  var deferred = Q.defer();
+  const deferred = Q.defer();
 
   MongoClient.connect(mongodbUrlKubeConfig, function (err, db) {
-    var collection = db.collection(collectionNameKubeConfig);
+    const collection = db.collection(collectionNameKubeConfig);
 
     //check if username is already assigned in our database
     collection.findOne({'userInfo.username' : username})
       .then(function (result) {
         if (null != result)
         {
-          var ip= result["kubernetes"]["kubernetesConfig"].master.ip;
+          const ip = result["kubernetes"]["kubernetesConfig"].master.ip;
           deferred.resolve(ip); // username exists
         }
         else
@@ -129,14 +129,14 @@ exports.getMasterIp = function(username) {
         }
       });
   });
-
   return deferred.promise;
-}
+};
+
 exports.getServiceURL = function(username) {
-  var deferred = Q.defer();
+  const deferred = Q.defer();
 
   MongoClient.connect(mongodbUrlKubeConfig, function (err, db) {
-    var collection = db.collection(collectionNameKubeConfig);
+    const collection = db.collection(collectionNameKubeConfig);
 
     //check if username is already assigned in our database
     collection.findOne({'userInfo.username' : username})
@@ -144,7 +144,7 @@ exports.getServiceURL = function(username) {
         if (null != result)
         {
           //console.log("USERNAME  EXISTS:", result.username);
-          var url= result["kubernetes"]["kubernetesConfig"].master.serviceURL;
+          const url = result["kubernetes"]["kubernetesConfig"].master.serviceURL;
           deferred.resolve(url); // username exists
         }
         else
@@ -154,14 +154,13 @@ exports.getServiceURL = function(username) {
         }
       });
   });
-
   return deferred.promise;
-}
+};
 
-exports.setManualRecording = function (username,data) {
-  var deferred = Q.defer();
+exports.setManualRecording = function (username, data) {
+  const deferred = Q.defer();
   MongoClient.connect(mongodbUrlKubeConfig, function (err, db) {
-    var collection = db.collection(collectionNameKubeConfig);
+    let collection = db.collection(collectionNameKubeConfig);
     collection.findOne({'userInfo.username' : username})
       .then(function (result) {
         if (null != result )
@@ -175,7 +174,7 @@ exports.setManualRecording = function (username,data) {
               },
               {upsert: false});
             MongoClient.connect(mongodbUrlKubeTestData, function (err, db) {
-              var collectionName = 'manualData'+username;
+              let collectionName = 'manualData' + username;
 
               db.listCollections({name: collectionName})
                 .next(function(err, collinfo) {
@@ -206,16 +205,17 @@ exports.setManualRecording = function (username,data) {
   });
   return deferred.promise;
 };
+
 exports.getManualRecording = function(username) {
-  var deferred = Q.defer();
+  const deferred = Q.defer();
   MongoClient.connect(mongodbUrlKubeConfig, function (err, db) {
-    var collection = db.collection(collectionNameKubeConfig);
+    const collection = db.collection(collectionNameKubeConfig);
     //check if username is already assigned in our database
     collection.findOne({'userInfo.username' : username})
       .then(function (result) {
         if (null != result)
         {
-          var value= result["kubernetes"]["manualRecording"];
+          const value = result["kubernetes"]["manualRecording"];
           deferred.resolve(value);
         }
         else
@@ -226,11 +226,12 @@ exports.getManualRecording = function(username) {
       });
   });
   return deferred.promise;
-}
-exports.setLoadTestRecording = function (username,testName,data) {
-  var deferred = Q.defer();
+};
+
+exports.setLoadTestRecording = function (username, testName, data) {
+  const deferred = Q.defer();
   MongoClient.connect(mongodbUrlKubeConfig, function (err, db) {
-    var collection = db.collection(collectionNameKubeConfig);
+    let collection = db.collection(collectionNameKubeConfig);
 
     collection.findOne({'userInfo.username' : username})
       .then(function (result) {
@@ -246,8 +247,8 @@ exports.setLoadTestRecording = function (username,testName,data) {
               {upsert: false});
 
             MongoClient.connect(mongodbUrlKubeTestData, function (err, dbin) {
-              var collectionNameRequestData = testName+'requestData'+username;
-              var collectionNameKubeData = testName+'kubernetesData'+username;
+              const collectionNameRequestData = testName + 'requestData' + username;
+              const collectionNameKubeData = testName + 'kubernetesData' + username;
 
               dbin.listCollections({name: collectionNameRequestData})
                 .next(function(err, collinfo) {
@@ -290,11 +291,11 @@ exports.setLoadTestRecording = function (username,testName,data) {
   return deferred.promise;
 };
 
-exports.addRecordedData = function (username,data) {
-  var deferred = Q.defer();
+exports.addRecordedData = function (username, data) {
+  const deferred = Q.defer();
   MongoClient.connect(mongodbUrlKubeTestData, function (err, db) {
-    var collectionNameManualData = 'manualData'+username;
-    var collection = db.collection(collectionNameManualData);
+    const collectionNameManualData = 'manualData' + username;
+    let collection = db.collection(collectionNameManualData);
     collection.insert(data)
       .then(function () {
         db.close();
@@ -303,11 +304,12 @@ exports.addRecordedData = function (username,data) {
   });
   return deferred.promise;
 };
-exports.addLoadTestKubernetesData = function (username,testName,data) {
-  var deferred = Q.defer();
+
+exports.addLoadTestKubernetesData = function (username, testName, data) {
+  const deferred = Q.defer();
   MongoClient.connect(mongodbUrlKubeTestData, function (err, db) {
-    var collectionNameKubeData = testName+'kubernetesData'+username;
-    var collection = db.collection(collectionNameKubeData);
+    const collectionNameKubeData = testName + 'kubernetesData' + username;
+    let collection = db.collection(collectionNameKubeData);
     collection.insert(data)
       .then(function () {
         db.close();
@@ -316,11 +318,12 @@ exports.addLoadTestKubernetesData = function (username,testName,data) {
   });
   return deferred.promise;
 };
+
 exports.addLoadTestRequestData = function (username,testName,data) {
-  var deferred = Q.defer();
+  const deferred = Q.defer();
   MongoClient.connect(mongodbUrlKubeTestData, function (err, db) {
-    var collectionNameRequestData = testName+'requestData'+username;
-    var collection = db.collection(collectionNameRequestData);
+    const collectionNameRequestData = testName + 'requestData' + username;
+    let collection = db.collection(collectionNameRequestData);
     collection.insert(data)
       .then(function () {
         db.close();
@@ -329,12 +332,13 @@ exports.addLoadTestRequestData = function (username,testName,data) {
   });
   return deferred.promise;
 };
-exports.getRequestTestData = function(username,testName) {
-  var deferred = Q.defer();
-  var dataAll = [];
+
+exports.getRequestTestData = function(username, testName) {
+  const deferred = Q.defer();
+  let dataAll = [];
   MongoClient.connect(mongodbUrlKubeTestData, function (err, db) {
-    var collectionNameRequestData = testName+'requestData'+username;
-    var collection = db.collection(collectionNameRequestData);
+    const collectionNameRequestData = testName + 'requestData' + username;
+    const collection = db.collection(collectionNameRequestData);
 
     collection.find({}).toArray(function (err,result) {
         if (result.length)
@@ -350,19 +354,19 @@ exports.getRequestTestData = function(username,testName) {
   });
   return deferred.promise;
 };
-exports.getLoadKubernetesData = function(username,testName) {
-  var deferred = Q.defer();
-  var dataAll = [];
-  MongoClient.connect(mongodbUrlKubeTestData, function (err, db) {
-    var collectionNameKubeData = testName+'kubernetesData'+username;
-    var collection = db.collection(collectionNameKubeData);
 
-    collection.find({}).toArray(function (err,result) {
+exports.getLoadKubernetesData = function(username, testName) {
+  const deferred = Q.defer();
+  let dataAll = [];
+  MongoClient.connect(mongodbUrlKubeTestData, function (err, db) {
+    const collectionNameKubeData = testName + 'kubernetesData' + username;
+    const collection = db.collection(collectionNameKubeData);
+
+    collection.find({}).toArray(function (err, result) {
       if (result.length)
       {
-        dataAll=result;
+        dataAll = result;
         deferred.resolve(dataAll); // username exists
-
       }
       else
       {
@@ -370,27 +374,27 @@ exports.getLoadKubernetesData = function(username,testName) {
       }
     });
   });
-
   return deferred.promise;
 };
-exports.getLoadTestTimelineData = function(username,testName) {
-  var deferred = Q.defer();
-  var dataAll = [];
-  MongoClient.connect(mongodbUrlKubeTestData, function (err, db) {
-    var collectionNameKubeData = testName+'kubernetesData'+username;
-    var collection = db.collection(collectionNameKubeData);
 
-    collection.find({}).toArray(function (err,result) {
+exports.getLoadTestTimelineData = function(username, testName) {
+  const deferred = Q.defer();
+  let dataAll = [];
+  MongoClient.connect(mongodbUrlKubeTestData, function (err, db) {
+    const collectionNameKubeData = testName + 'kubernetesData' + username;
+    const collection = db.collection(collectionNameKubeData);
+
+    collection.find({}).toArray(function (err, result) {
       if (result.length)
       {
-        var eventsArr= [];;
-        for(i=0;i<result.length;i++)
+        let eventsArr = [];
+        for(let i=0; i<result.length; i++)
         {
-          for(j=0;j<result[i].data.eventsInfo.length;j++) {
+          for(let j=0; j < result[i].data.eventsInfo.length; j++) {
             eventsArr.push(result[i].data.eventsInfo[j]);
           }
         }
-        dataAll=eventsArr;
+        dataAll = eventsArr;
         deferred.resolve(dataAll); // username exists
       }
       else
@@ -399,15 +403,14 @@ exports.getLoadTestTimelineData = function(username,testName) {
       }
     });
   });
-
   return deferred.promise;
 };
-exports.savePodInfo = function (data, collectionName) {
 
-  var deferred = Q.defer();
+exports.savePodInfo = function (data, collectionName) {
+  const deferred = Q.defer();
 
   MongoClient.connect(mongodbUrlKubeConfig, function (err, db) {
-    var collection = db.collection(collectionName);
+    let collection = db.collection(collectionName);
 
     collection.insert(data)
       .then(function () {
@@ -418,12 +421,11 @@ exports.savePodInfo = function (data, collectionName) {
   return deferred.promise;
 };
 
-
 exports.saveLoadTestData = function(loadTestData,collectionName) {
-  var data = {};
-  var latency = loadTestData.latency;
-  var result = loadTestData.result;
-  var error = loadTestData.error;
+  let data = {};
+  const latency = loadTestData.latency;
+  const result = loadTestData.result;
+  const error = loadTestData.error;
   if(result) {
     data = {
       "latency": latency,
@@ -445,11 +447,10 @@ exports.saveLoadTestData = function(loadTestData,collectionName) {
       "instanceIndex": ''
     };
   }
-
-  var deferred = Q.defer();
+  const deferred = Q.defer();
 
   MongoClient.connect(mongodbUrlKubeConfig, function (err, db) {
-    var collection = db.collection(collectionName);
+    let collection = db.collection(collectionName);
     collection.save(data)
       .then(function () {
         db.close();
@@ -457,18 +458,16 @@ exports.saveLoadTestData = function(loadTestData,collectionName) {
       });
   });
   return deferred.promise;
-}
-exports.initLoadTest = function (collectionName) {
+};
 
-  var deferred = Q.defer();
+exports.initLoadTest = function (collectionName) {
+  const deferred = Q.defer();
 
   MongoClient.connect(mongodbUrlKubeConfig, function (err, db) {
-
-
     db.listCollections({name: collectionName})
       .next(function (err, collinfo) {
         if (collinfo) {
-          var collection = db.collection(collectionName);
+          let collection = db.collection(collectionName);
           collection.drop()
             .then(function () {
               db.close();
@@ -483,4 +482,3 @@ exports.initLoadTest = function (collectionName) {
   });
   return deferred.promise;
 };
-
