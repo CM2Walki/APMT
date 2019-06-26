@@ -22,7 +22,7 @@ router.get('/register', function(req, res){
     res.render('register');
 });
 
-//logs user out of site, deleting them from the session, and returns to homepage
+// logs user out of site, deleting them from the session, and returns to homepage
 router.get('/logout', function(req, res, next){
   const name = req.user.username;
   console.log("LOGGIN OUT " + req.user.username);
@@ -30,14 +30,16 @@ router.get('/logout', function(req, res, next){
   res.redirect('/');
 });
 
-//sends the request through our local signup strategy, and if successful takes user to homepage, otherwise returns then to signin page
+// Sends the request through our local register strategy, and if successful takes user to homepage,
+// otherwise returns then to register page
 router.post('/local-reg', passport.authenticate('local-signup', {
     successRedirect: '/',
     failureRedirect: '/register'
   })
 );
 
-//sends the request through our local login/signin strategy, and if successful takes user to homepage, otherwise returns then to signin page
+// Sends the request through our local login/signin strategy, and if successful takes user to homepage,
+// otherwise returns then to signin page
 router.post('/login', passport.authenticate('local-signin', {
     successRedirect: '/',
     failureRedirect: '/signin'
@@ -60,7 +62,6 @@ router.post('/saveuserInfo', function(req, res){
           dataForm: req.body,
           dataClient: req.body
         });
-        //res.json({"message": "added"});
       }
       else {
         console.log("user not found");

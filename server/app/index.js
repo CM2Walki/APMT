@@ -30,12 +30,12 @@ passport.use('local-signin', new LocalStrategy(
     .then(function (user) {
       if (user) {
         console.log("LOGGED IN AS: " + user.username);
-        req.session.success = 'You are successfully logged in ' + user.username + '!';
+        req.session.success = 'You are successfully logged in using' + user.username + '!';
         done(null, user);
       }
       if (!user) {
         console.log("COULD NOT LOG IN");
-        req.session.error = 'Could not log user in. Please try again.'; //inform user could not log them in
+        req.session.error = 'Could not log user in. E-Mail or password invalid.'; //inform user could not log them in
         done(null, user);
       }
     })
@@ -58,7 +58,7 @@ passport.use('local-signup', new LocalStrategy(
       }
       if (!user) {
         console.log("COULD NOT REGISTER");
-        req.session.error = 'That username is already in use, please try a different one.'; //inform user could not log them in
+        req.session.error = 'That E-Mail is already in use, please try a different one.'; //inform user could not log them in
         done(null, user);
       }
     })
