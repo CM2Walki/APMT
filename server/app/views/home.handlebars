@@ -32,6 +32,7 @@
         <!-- Main content -->
         <section class="content">
             <!-- Info boxes -->
+            {{#if user.awssetup}}
             <div class="row">
                 <div class="col-md-12">
                     <div class="box">
@@ -67,12 +68,13 @@
                 </div>
                 <!-- /.col -->
             </div>
-
+            {{/if}}
         </section>
         <!-- /.content -->
     </div>
     <!-- jQuery 2.2.3 -->
     <!-- page script -->
+    {{#if user.awssetup}}
     <script>
     $.get(
       "/kubernetes/describeEc2Instances",
@@ -83,6 +85,7 @@
       }
     );
     </script>
+    {{/if}}
 {{else}}
   <div style="height: 600px">
       <h1>Welcome to ScaleX</h1>

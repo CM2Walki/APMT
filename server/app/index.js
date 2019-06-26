@@ -30,12 +30,12 @@ passport.use('local-signin', new LocalStrategy(
     .then(function (user) {
       if (user) {
         console.log("LOGGED IN AS: " + user.username);
-        req.session.success = 'You are successfully logged in using' + user.username + '!';
+        req.session.success = 'You are successfully logged in using ' + user.username + '!';
         done(null, user);
       }
       if (!user) {
         console.log("COULD NOT LOG IN");
-        req.session.error = 'Could not log user in. E-Mail or password invalid.'; //inform user could not log them in
+        req.session.error = 'Login failed. E-Mail or Password invalid.'; //inform user could not log them in
         done(null, user);
       }
     })

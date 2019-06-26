@@ -7,7 +7,7 @@ const mongodbUrl = 'mongodb://' + config.mongodb.host + ':' + config.mongodb.por
 const collectionName = config.mongodb.dbUsersData.collectionName;
 const MongoClient = require('mongodb').MongoClient;
 
-exports.localReg = function (username, password, email) {
+exports.localReg = function (username, password) {
   const deferred = Q.defer();
 
   MongoClient.connect(mongodbUrl, function (err, db) {
@@ -19,12 +19,15 @@ exports.localReg = function (username, password, email) {
           console.log("USERNAME ALREADY EXISTS:", result.username);
           deferred.resolve(false); // username exists
         }
-        else  {
+        else {
           const hash = bcrypt.hashSync(password, 8);
           const user = {
             "userInfo": {
               "username": username,
               "password": hash,
+              "awssetup": false,
+              "gcesetup": false,
+              "azuresetup": false,
               "avatar": "http://placepuppy.it/images/homepage/Beagle_puppy_6_weeks.JPG"
             }
           };
@@ -50,14 +53,11 @@ exports.localAuth = function (username, password) {
       .then(function (result) {
         if (null == result) {
           console.log("USERNAME NOT FOUND:", username);
-
           deferred.resolve(false);
         }
         else {
           const hash = result["userInfo"].password;
-
           console.log("FOUND USER: " + result["userInfo"].username);
-
           if (bcrypt.compareSync(password, hash)) {
             deferred.resolve(result["userInfo"]);
           } else {
@@ -113,20 +113,17 @@ exports.getUserInfoforEdit = function (user, res, req) {
   });
 };
 
-exports.saveUserInfo = function (username, data, responseExData) {
+exports.saveUserInfo = function (user, data, responseExData) {
   const deferred = Q.defer();
 
   MongoClient.connect(mongodbUrl, function (err, db) {
     let collection = db.collection(collectionName);
-
     //check if username is already assigned in our database
-    collection.findOne({'userInfo.username' : username})
+    collection.findOne({'userInfo.username' : user.username})
       .then(function (result) {
         if (null != result)
         {
-          console.log("USERNAME EXISTS:", result["userInfo"].username);
-
-          collection.update({'userInfo.username' : username},
+          collection.update({'userInfo.username' : user.username},
             {$set : {
               "userInfo.name": data.name,
               "userInfo.awstoken": data.awstoken,
@@ -139,12 +136,14 @@ exports.saveUserInfo = function (username, data, responseExData) {
             }
             },
             {upsert: false});
-
+          result["userInfo"].forEach(function(value) {
+            console.log(value);
+          });
           deferred.resolve(true); // username exists
         }
         else
         {
-          console.log("user Not exists:", username);
+          console.log("user Not exists:", user.username);
           deferred.resolve(false); // username not exists
         }
       });

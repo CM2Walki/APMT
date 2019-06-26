@@ -52,13 +52,13 @@ router.get('/userinfo', function(req, res) {
 });
 
 router.post('/saveuserInfo', function(req, res){
-  funct.saveUserInfo(req.user.username, req.body, res.body)
+  funct.saveUserInfo(req.user, req.body, res.body)
     .then(function (user) {
       if (user) {
         console.log("added information");
         //dataForm:
         res.render('success', {
-          user: req.user.username,
+          user: req.user,
           dataForm: req.body,
           dataClient: req.body
         });
