@@ -13,13 +13,14 @@
 <script type="text/javascript">
 function validateEmail(emailField){
   const reg = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
+  const usernamefield = document.getElementById("username");
+  const submitbutton = document.getElementById("submitbutton");
   if (reg.test(emailField.value) === false) {
-    document.getElementById("username").borderColor = "red";
-    document.getElementById("submitbutton").disabled = false;
+    usernamefield.backgroundColor = "red";
     return false;
   }
-  document.getElementById("username").borderColor = "black";
-  document.getElementById("submitbutton").disabled = true;
+  usernamefield.backgroundColor = "";
+  submitbutton.disabled = false;
   return true;
 }
 </script>
@@ -33,7 +34,6 @@ function validateEmail(emailField){
         <!-- /.login-logo -->
         <div class="login-box-body">
             <p class="login-box-msg">Sign in to start your session</p>
-
             <form action="/login" method="post">
                 <div class="form-group has-feedback">
                     <input type="text" onblur="validateEmail(this);" class="form-control" placeholder="E-Mail" id="username" name="username">
