@@ -9,10 +9,18 @@
 <script src="/plugins/slimScroll/jquery.slimscroll.min.js"></script>
 <!-- FastClick -->
 <script src="/plugins/fastclick/fastclick.js"></script>
-<!-- AdminLTE App -->
-<script src="/dist/js/app.min.js"></script>
-<!-- AdminLTE for demo purposes -->
-<script src="/dist/js/demo.js"></script>
+
+<script>
+function validateEmail(emailField){
+  const reg = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
+  if (reg.test(emailField.value) === false)
+  {
+    alert('Invalid Email Address');
+    return false;
+  }
+  return true;
+}
+</script>
 
 <!-- views/signin.handlebars -->
 <div>
@@ -26,7 +34,7 @@
 
             <form action="/login" method="post">
                 <div class="form-group has-feedback">
-                    <input type="text" class="form-control" placeholder="E-Mail" name="username">
+                    <input type="text" onblur="validateEmail(this);" class="form-control" placeholder="E-Mail" name="username">
                     <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
                 </div>
                 <div class="form-group has-feedback">
