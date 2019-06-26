@@ -25,7 +25,6 @@ exports.localReg = function (username, password, email) {
             "userInfo": {
               "username": username,
               "password": hash,
-              "email": email,
               "avatar": "http://placepuppy.it/images/homepage/Beagle_puppy_6_weeks.JPG"
             }
           };
