@@ -56,10 +56,11 @@ exports.localAuth = function (username, password) {
           deferred.resolve(false);
         }
         else {
-          const hash = result["userInfo"].password;
-          console.log("FOUND USER: " + result["userInfo"].username);
+          const userInfo = result["userInfo"];
+          const hash = userInfo.password;
+          console.log("FOUND USER: " + userInfo.username);
           if (bcrypt.compareSync(password, hash)) {
-            deferred.resolve(result["userInfo"]);
+            deferred.resolve(userInfo);
           } else {
             console.log("AUTHENTICATION FAILED");
             deferred.resolve(false);
@@ -146,6 +147,12 @@ exports.saveUserInfo = function (user, data, responseExData) {
           {
             // If all the above fields are in the collection, we are good to go
             user.awssetup = true;
+            collection.update({'userInfo.username' : user.username},
+              {$set : {
+                  "userInfo.awssetup": true,
+                }
+              },
+              {upsert: false});
           }
           deferred.resolve(true); // username exists
         }
