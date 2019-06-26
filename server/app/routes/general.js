@@ -22,6 +22,14 @@ router.get('/register', function(req, res){
     res.render('register');
 });
 
+//logs user out of site, deleting them from the session, and returns to homepage
+router.get('/logout', function(req, res, next){
+  const name = req.user.username;
+  console.log("LOGGIN OUT " + req.user.username);
+  req.logout();
+  res.redirect('/');
+});
+
 //sends the request through our local signup strategy, and if successful takes user to homepage, otherwise returns then to signin page
 router.post('/local-reg', passport.authenticate('local-signup', {
     successRedirect: '/',
@@ -70,21 +78,12 @@ router.use(function(req, res, next){
   // get the "status" local available as well
   res.render('404', {user: req.user});
 });
+
 router.use(function(err, req, res, next){
   // we may use properties of the error object
   // here and next(err) appropriately, or if
   // we possibly recovered from the error, simply next().
   res.render('500', {user: req.user});
-});
-
-//logs user out of site, deleting them from the session, and returns to homepage
-router.get('/logout', function(req, res, next){
-  var name = req.user.username;
-  console.log("LOGGIN OUT " + req.user.username);
-  req.session.notice = "You have successfully been logged out " + name + "!";
-  req.session.destroy(function(err) {
-    res.redirect('/');
-  });
 });
 
 module.exports = router;
