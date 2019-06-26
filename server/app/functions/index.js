@@ -138,9 +138,7 @@ exports.saveUserInfo = function (user, data, responseExData) {
             {upsert: false});
           let counter = 0;
           result.forEach(function(value) {
-            console.log(value);
-            console.log(counter);
-            counter = counter + 1;
+            console.log(value.awstoken);
           });
           deferred.resolve(true); // username exists
         }
