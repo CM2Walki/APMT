@@ -137,6 +137,8 @@ exports.saveUserInfo = function (user, data, responseExData) {
             },
             {upsert: false});
           let counter = 0;
+          console.log(result.awstoken);
+
           result.forEach(function(value) {
             console.log(value.awstoken);
           });
