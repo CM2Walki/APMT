@@ -136,9 +136,11 @@ exports.saveUserInfo = function (user, data, responseExData) {
             }
             },
             {upsert: false});
-          let isFilledOut = false;
+          let counter = 0;
           result.forEach(function(value) {
-            console.log(value[2]);
+            console.log(value);
+            console.log(counter);
+            counter = counter + 1;
           });
           deferred.resolve(true); // username exists
         }
