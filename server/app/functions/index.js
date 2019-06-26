@@ -71,16 +71,16 @@ exports.localAuth = function (username, password) {
   return deferred.promise;
 };
 
-exports.getUserInfo = function (username, res, req) {
+exports.getUserInfo = function (user, res, req) {
   MongoClient.connect(mongodbUrl, function (err, db) {
     const collection = db.collection(collectionName);
 
     //check if username is already assigned in our database
-    collection.findOne({'userInfo.username' : username})
+    collection.findOne({'userInfo.username' : user.username})
       .then(function (result) {
         if (null != result) {
           res.render('user', {
-              user: username,
+              user: user,
               info: result["userInfo"]
             });
         }

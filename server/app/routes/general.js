@@ -38,7 +38,7 @@ router.post('/login', passport.authenticate('local-signin', {
 
 /* GET getUserInfo page. */
 router.get('/userinfo', function(req, res) {
-  funct.getUserInfo(req.user.username, res, req);
+  funct.getUserInfo(req.user, res, req);
 });
 
 router.post('/saveuserInfo', function(req, res){
