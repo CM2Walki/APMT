@@ -136,10 +136,17 @@ exports.saveUserInfo = function (user, data, responseExData) {
             }
             },
             {upsert: false});
-          let counter = 0;
-          result["userInfo"].forEach(function(value) {
-            console.log(value + " " + counter);
-          });
+          const userInfo = result["userInfo"];
+          if (userInfo.awstoken &&
+              userInfo.awssecret &&
+              userInfo.awskeyname &&
+              userInfo.awssecurityid &&
+              userInfo.awssubnetid &&
+              userInfo.awssubnetid2)
+          {
+            // If all the above fields are in the collection, we are good to go
+            user.awssetup = true;
+          }
           deferred.resolve(true); // username exists
         }
         else
