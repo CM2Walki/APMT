@@ -25,7 +25,7 @@ router.get('/register', function(req, res){
 //sends the request through our local signup strategy, and if successful takes user to homepage, otherwise returns then to signin page
 router.post('/local-reg', passport.authenticate('local-signup', {
     successRedirect: '/',
-    failureRedirect: '/signin'
+    failureRedirect: '/register'
   })
 );
 
@@ -64,7 +64,6 @@ router.post('/saveuserInfo', function(req, res){
     });
 });
 
-/*
 router.use(function(req, res, next){
   // the status option, or res.statusCode = 404
   // are equivalent, however with the option we
@@ -77,7 +76,7 @@ router.use(function(err, req, res, next){
   // we possibly recovered from the error, simply next().
   res.render('500', {user: req.user});
 });
-*/
+
 //logs user out of site, deleting them from the session, and returns to homepage
 router.get('/logout', function(req, res, next){
   var name = req.user.username;

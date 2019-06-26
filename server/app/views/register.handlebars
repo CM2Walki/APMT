@@ -17,14 +17,13 @@
 <script type="text/javascript">
   function validateEmail(emailField){
     const reg = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/;
-    const usernamefield = document.getElementById("username");
     const submitbutton = document.getElementById("submitbutton");
     if (reg.test(emailField.value) === false) {
-      usernamefield.backgroundColor = "red";
+      emailField.backgroundColor = "red";
       submitbutton.disabled = true;
       return false;
     }
-    usernamefield.backgroundColor = "";
+    emailField.backgroundColor = "";
     submitbutton.disabled = false;
     return true;
   }
