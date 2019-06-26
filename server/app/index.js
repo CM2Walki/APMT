@@ -4,8 +4,6 @@ const exphbs                        = require('express-handlebars');
 const passport                      = require('passport');
 const LocalStrategy                 = require('passport-local');
 const bodyParser                    = require('body-parser');
-const formidable                    = require("formidable");
-const request                       = require('request');
 const app                           = express();
 const session                       = require('express-session');
 const funct                         = require('./functions');
@@ -28,7 +26,7 @@ passport.deserializeUser(function(obj, done) {
 
 // Use the LocalStrategy within Passport to login users.
 passport.use('local-signin', new LocalStrategy(
-  {passReqToCallback : true}, //allows us to pass back the request to the callback
+  { passReqToCallback : true }, //allows us to pass back the request to the callback
   function(req, username, password, done) {
     funct.localAuth(username, password)
     .then(function (user) {
@@ -112,7 +110,7 @@ app.use('/',function(req, res, next){
 // Configure express to use handlebars templates
 var hbs = exphbs.create({
     defaultLayout: 'main',
-    layoutsDir: path.join(__dirname,'views','layouts'),
+    layoutsDir: path.join(__dirname, 'views', 'layouts'),
     partialsDir: path.join(__dirname),
     helpers: {
       toJSON: function (object) {

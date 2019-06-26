@@ -1,9 +1,9 @@
 const bcrypt          = require('bcryptjs');
-const Q                = require('q');
+const Q               = require('q');
 const config          = require('../../config');
 
 // MongoDB connection information
-const mongodbUrl = 'mongodb://'+ config.mongodb.host + ':'+config.mongodb.port+'/'+config.mongodb.dbUsersData.name;
+const mongodbUrl = 'mongodb://' + config.mongodb.host + ':' + config.mongodb.port + '/' + config.mongodb.dbUsersData.name;
 const collectionName = config.mongodb.dbUsersData.collectionName;
 const MongoClient = require('mongodb').MongoClient;
 
@@ -96,8 +96,6 @@ exports.getUserInfo = function (username, res, req) {
 };
 
 exports.getUserInfoforEdit = function (username, res, req) {
-  console.log(username);
-
   MongoClient.connect(mongodbUrl, function (err, db) {
     const collection = db.collection(collectionName);
     //check if username is already assigned in our database
