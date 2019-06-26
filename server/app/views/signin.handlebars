@@ -17,6 +17,7 @@ function validateEmail(emailField){
   const submitbutton = document.getElementById("submitbutton");
   if (reg.test(emailField.value) === false) {
     usernamefield.backgroundColor = "red";
+    submitbutton.disabled = true;
     return false;
   }
   usernamefield.backgroundColor = "";
@@ -53,7 +54,7 @@ function validateEmail(emailField){
                     </div>
                     <!-- /.col -->
                     <div class="col-xs-4">
-                        <button id="submitbutton" type="submit" class="btn btn-primary btn-block btn-flat">Sign In</button>
+                        <button id="submitbutton" type="submit" class="btn btn-primary btn-block btn-flat" disabled>Sign In</button>
                     </div>
                     <!-- /.col -->
                 </div>
