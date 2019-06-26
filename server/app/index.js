@@ -51,6 +51,7 @@ passport.use('local-signin', new LocalStrategy(
 passport.use('local-signup', new LocalStrategy(
   {passReqToCallback : true}, //allows us to pass back the request to the callback
   function(req, username, password, email, done) {
+    console.log(email);
     funct.localReg(username, password, email)
     .then(function (user) {
       if (user) {
@@ -117,7 +118,7 @@ var hbs = exphbs.create({
         return JSON.stringify(object, null,'\t');
       },
       toJSONusername: function (object) {
-          return object.username;
+        return object.username;
       },
       toJSONname: function (object) {
         return object.name;
