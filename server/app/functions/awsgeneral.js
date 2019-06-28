@@ -146,8 +146,9 @@ exports.describeInstances = function(awsData, req, res) {
   const params = {
     DryRun: false
   };
-
   let titlesArr = [];
+  let awsArr = [];
+
   titlesArr.push({"title": "Name"});
   titlesArr.push({"title": "InstanceID"});
   titlesArr.push({"title": "ImageID"});
@@ -155,18 +156,17 @@ exports.describeInstances = function(awsData, req, res) {
   titlesArr.push({"title": "Launch Time"});
   titlesArr.push({"title": "State"});
 
-  let awsArr = [];
   if(ec2) {
     ec2.describeInstances(params, function (err, data) {
       if (err) {
-        console.log("Error", err.stack);
         const dataAll = [
           {
             "columns": titlesArr,
             "data": awsArr
           }];
-        deferred.resolve(dataAll);
-      } else {
+        deferred.resolve(err);
+      }
+      else {
         const instancesArr = data.Reservations;
         instancesArr.forEach(function (instance) {
           let row = [];

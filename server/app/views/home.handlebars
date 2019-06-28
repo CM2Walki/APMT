@@ -47,25 +47,26 @@
                         <table class="table table-bordered table-hover">
                           <thead>
                           <tr>
-                            <th style="text-align: center;"><img src="images/aws-cloud.png" alt="aws" width="64" height="64"></th>
-                            <th style="text-align: center;"><img src="images/azure-cloud.png" alt="azure" width="64" height="64"></th>
-                            <th style="text-align: center;"><img src="images/google-cloud.png" alt="google" width="64" height="64"></th>
+                            <th style="text-align: center; width: 33.33%"><img src="images/aws-cloud.png" alt="aws" width="64" height="64"></th>
+                            <th style="text-align: center; width: 33.33%"><img src="images/azure-cloud.png" alt="azure" width="64" height="64"></th>
+                            <th style="text-align: center; width: 33.33%"><img src="images/google-cloud.png" alt="google" width="64" height="64"></th>
                           </tr>
                           </thead>
                           <tfoot>
                           <tr>
-                            <td>
+                            <td style="width: 33.33%">
                               {{#if user.awssetup}}
                                 <button id="awsStatusButton" type="button" class="btn btn-block btn-warning" disabled>Validating...</button>
+                                <br><p id="awsErrorMessage" class="btn-default"></p>
                               {{else}}
                                 <a href="/edituserInfo"><button type="button" class="btn btn-block btn-primary">Setup</button></a>
                               {{/if}}
                             </td>
-                            <td>
-                              <a href="/"><button type="button" class="btn btn-block btn-primary" disabled>TBA</button></a>
+                            <td style="width: 33.33%">
+                              <a href="/"><button type="button" class="btn btn-block btn-default" disabled><img src="images/lock.png" width="17.5" height="17.5" alt="locked"></button></a>
                             </td>
-                            <td>
-                              <a href="/"><button type="button" class="btn btn-block btn-primary" disabled>TBA</button></a>
+                            <td style="width: 33.33%">
+                              <a href="/"><button type="button" class="btn btn-block btn-default" disabled><img src="images/lock.png" width="17.5" height="17.5" alt="locked"></button></a>
                             </td>
                           </tr>
                           </tfoot>
@@ -89,20 +90,23 @@
     <!-- page script -->
     {{#if user.awssetup}}
     <script>
-      const awsStatusButton = $("#awsStatusButton");
-      try {
-        $.get(
-          "/kubernetes/describeEc2Instances",
-          function(data) {
+      $.get(
+        "/kubernetes/describeEc2Instances",
+        function(data) {
+          const awsStatusButton = $("#awsStatusButton");
+          if (data.code) {
+            awsStatusButton.removeClass("btn-warning");
+            awsStatusButton.addClass("btn-danger");
+            awsStatusButton.html("Error");
+            $("#awsErrorMessage").html(data.message);
+          }
+          else
+          {
             awsStatusButton.removeClass("btn-warning");
             awsStatusButton.addClass("btn-success");
             awsStatusButton.html("Success");
-          });
-      } catch(e) {
-        awsStatusButton.removeClass("btn-warning");
-        awsStatusButton.addClass("btn-error");
-        awsStatusButton.html("Error");
-      }
+          }
+        });
     </script>
     {{/if}}
 {{else}}

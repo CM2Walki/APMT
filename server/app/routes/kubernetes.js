@@ -215,7 +215,7 @@ router.get('/describeEc2Instances', function(req, res) {
             {
               res.send("fail");
             }
-          });
+          }).catch(err => res.send(err.toString()));
       }
       else {
         res.send("fail");
