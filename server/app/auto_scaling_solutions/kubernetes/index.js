@@ -5,6 +5,9 @@ const AWS                     = require('aws-sdk');
 const kubeMaster              = require('./masterScript');
 const kubeMinion              = require('./minionScript');
 const kubeMongoFunctions      = require('./kubeMongoFunctions');
+const awsGeneral                                = require("./../../functions/awsgeneral");
+
+const routeContext = 'kubernetes';
 
 exports.deployOnAws = function (username, kubeData, awsData,req, res) {
   var ec2 = new AWS.EC2({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
@@ -136,13 +139,13 @@ exports.deployOnAws = function (username, kubeData, awsData,req, res) {
               "instanceid" : instance["Instances"][0]["InstanceId"],
               "ip" : instance["Instances"][0]["PublicIpAddress"],
               "serviceURL" :serviceURL
-            }
+            };
             var awsMinionNodeInstanceIds = instanceIdMinions;
             var awsMasterMinion = {
               "master" : awsMasterNode,
               "minion": awsMinionNodeInstanceIds
-            }
-            kubeMongoFunctions.addConfigData(username,awsMasterMinion)
+            };
+            awsGeneral.addConfigData(username, awsMasterMinion, routeContext)
               .then(function (added) {
                 if (added) {
                   console.log("added master minion informtion");

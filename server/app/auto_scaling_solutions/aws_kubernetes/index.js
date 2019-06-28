@@ -1,74 +1,12 @@
 const Q                                         = require('q');
-const http                                      = require('http');
 const request                                   = require('request');
 const AWS                                       = require('aws-sdk');
 const awsAutoscaleKubernetesMongoFunctions      = require('./awsAutoscaleKubernetesMongoFunctions');
 const kubeMaster                                = require('./masterScript');
+const awsGeneral                                = require("./../../functions/awsgeneral");
 
-exports.describeInstances = function(awsData,req, res) {
-  var ec2 = new AWS.EC2({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
-  var cloudwatch = new AWS.CloudWatch({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
-  var autoscaling = new AWS.AutoScaling({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
-  var elbv2 = new AWS.ELBv2({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2015-12-01'});
-  var deferred = Q.defer();
-  var params = {
-    DryRun: false
-  };
+const routeContext = 'awsAutoScale';
 
-  var titlesArr = [];
-  titlesArr.push({"title": "Name"});
-  titlesArr.push({"title": "InstanceID"});
-  titlesArr.push({"title": "ImageID"});
-  titlesArr.push({"title": "Public IP"});
-  titlesArr.push({"title": "LaunchTime"});
-  titlesArr.push({"title": "State"});
-
-  var awsArr = [];
-  if(ec2) {
-    ec2.describeInstances(params, function (err, data) {
-      if (err) {
-        console.log("Error", err.stack);
-        var dataAll = [
-          {
-            "columns": titlesArr,
-            "data": awsArr
-          }
-        ];
-        deferred.resolve(dataAll);
-      } else {
-        instancesArr = data.Reservations;
-        instancesArr.forEach(function (instance) {
-          var row = []
-          if (instance["Instances"][0]["Tags"][0])
-            row.push(instance["Instances"][0]["Tags"][0]["Value"]);
-          else
-            row.push("None");
-          row.push(instance["Instances"][0]["InstanceID"]);
-          row.push(instance["Instances"][0]["ImageID"]);
-          row.push(instance["Instances"][0]["Public IP"]);
-          row.push(instance["Instances"][0]["LaunchTime"]);
-          row.push(instance["Instances"][0]["State"]["Name"]);
-          awsArr.push(row);
-        });
-        var dataAll = [{
-          "columns": titlesArr,
-          "data": awsArr
-        }
-        ];
-        deferred.resolve(dataAll);
-      }
-    });
-  }
-  else {
-    var dataAll = [{
-      "columns": titlesArr,
-      "data": awsArr
-    }
-    ];
-    deferred.resolve(dataAll);
-  }
-  return deferred.promise;
-}
 exports.deployAutoscaler = function(username, awsDeployData,kubeData, awsData,req, res) {
   var ec2 = new AWS.EC2({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
   var cloudwatch = new AWS.CloudWatch({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
@@ -447,7 +385,7 @@ exports.deployAutoscaler = function(username, awsDeployData,kubeData, awsData,re
                                     "name": awsData.s3BucketName
                                   }
                                 };
-                                awsAutoscaleKubernetesMongoFunctions.addConfigData(username,awsAutoScaleData)
+                                awsGeneral.addConfigData(username,awsAutoScaleData, routeContext)
                                   .then(function (added) {
                                     if (added) {
                                       console.log("added awsAutoScaleData informtion");
@@ -512,7 +450,7 @@ exports.terminateAutoScale = function(awsData,username,req, res) {
     });
     var deferred = Q.defer();
 
-    awsAutoscaleKubernetesMongoFunctions.getAwsAutoScaleInfo(username)
+    awsGeneral.getAwsAutoScaleInfo(username)
       .then(function (awsDeployInfo) {
         if (awsDeployInfo) {
           try{
@@ -640,7 +578,7 @@ exports.getCurrentData = function(awsData,username,req,res) {
     apiVersion: '2015-12-01'
   });
 
-  awsAutoscaleKubernetesMongoFunctions.getAwsAutoScaleInfo(username)
+  awsGeneral.getAwsAutoScaleInfo(username)
     .then(function (awsDeployInfo) {
       if (awsDeployInfo) {
           var d = new Date();
@@ -924,21 +862,17 @@ exports.getCurrentData = function(awsData,username,req,res) {
                                                   if (err) console.log(err, err.stack); // an error occurred
                                                   else {
                                                     dataAll.HTTPCode5XXCountELB = data;
-                                                    awsAutoscaleKubernetesMongoFunctions.getLatencyData(username)
+                                                    awsGeneral.getLatencyData(username)
                                                       .then(function (latencyarray) {
-                                                        //console.log(latencyarray)
                                                         if (latencyarray) {
                                                           dataAll.latency = latencyarray;
-                                                          awsAutoscaleKubernetesMongoFunctions.getResponseTimeData(username)
+                                                          awsGeneral.getResponseTimeData(username)
                                                             .then(function (resptimearray) {
-                                                              //console.log(resptimearray)
                                                               if (resptimearray) {
                                                                 dataAll.responseTime = resptimearray;
                                                                 // successful response
                                                                 awsAutoscaleKubernetesMongoFunctions.addCurrentRecordedData(username, dataAll);
                                                                 res.send(dataAll);
-                                                                console.log("data sent for matrics_write");
-                                                                console.log(dataAll);
                                                               }
                                                             });
                                                         }

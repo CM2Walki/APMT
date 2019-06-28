@@ -1,14 +1,13 @@
 const express               = require('express');
 const router                = express.Router();
 const funct                 = require('../functions');
-const passport              = require('passport');
 const kube                  = require("../auto_scaling_solutions/kubernetes/index");
 const kubeMongoFunctions    = require("../auto_scaling_solutions/kubernetes/kubeMongoFunctions");
-var http                    = require('http');
-var request                 = require('request');
-var loadtest                 = require('loadtest');
+const request               = require('request');
+const loadtest              = require('loadtest');
+const awsGeneral            = require("../functions/awsgeneral");
 
-
+const routeContext = 'kubernetes';
 
 //===============ROUTES=================
 //displays our homepage
@@ -28,7 +27,7 @@ router.get('/edituserInfo', function(req, res){
   funct.getUserInfoforEdit(req.user.username, res,req);
 });
 router.get('/deploykubernetesAws', function(req, res){
-  kubeMongoFunctions.getUserInfoforDeploy(req.user.username, res,req);
+  awsGeneral.getUserInfoForDeploy(req.user.username, res, req, routeContext);
 });
 router.get('/loadtesthome', function(req, res){
   res.render('kubernetes/loadtesthome',{layout: '../kubernetes/layouts/main',user: req.user} );
@@ -196,17 +195,17 @@ router.get('/getNodesData', function(req, res) {
     });
 });
 router.get('/describeEc2Instances', function(req, res) {
-  kubeMongoFunctions.getUserInfoForDescription(req.user.username, res,req)
+  awsGeneral.getUserInfoForDescription(req.user.username, res, req)
     .then(function (data) {
       if (data) {
-        var awsdata = {
+        const awsData = {
           "accessKeyId": data.awstoken,
           "secretAccessKey": data.awssecret,
           "region": data.awsregion,
           "s3BucketName": data.s3bucketname,
           "awsKeyName": data.awskeyname
         };
-        var b = kube.describeInstances(awsdata, req, res)
+        awsGeneral.describeInstances(awsData, req, res)
           .then(function (data) {
             if (data) {
               res.send(data);
@@ -219,7 +218,7 @@ router.get('/describeEc2Instances', function(req, res) {
     });
 });
 router.get('/terminateEc2Instances', function(req, res) {
-  kubeMongoFunctions.getUserInfoForDescription(req.user.username, res,req)
+  awsGeneral.getUserInfoForDescription(req.user.username, res, req)
     .then(function (data) {
       if (data) {
         var awsdata = {
@@ -277,7 +276,7 @@ router.post('/basicLoadTest', function(req,res){
   kubeMongoFunctions.initLoadTest('testLoad')
     .then(function (removed) {
 
-      kubeMongoFunctions.getServiceURL(req.user.username)
+      awsGeneral.getServiceURL(req.user.username, routeContext)
         .then(function (url) {
           if (url) {
             console.log("Found URL informtion");
@@ -557,7 +556,7 @@ router.post('/loadTest', function(req,res){
                   });
 
               }, 2000);
-              kubeMongoFunctions.getServiceURL(req.user.username)
+              awsGeneral.getServiceURL(req.user.username, routeContext)
                 .then(function (url) {
                   if (url) {
                     console.log("Found URL informtion");
@@ -665,7 +664,7 @@ router.post('/triangleLoadTest', function(req,res){
                   clearInterval(intervalReq);
                   return;
                 }
-              kubeMongoFunctions.getServiceURL(req.user.username)
+              awsGeneral.getServiceURL(req.user.username, routeContext)
                 .then(function (url) {
                   if (url) {
                     console.log("Found URL informtion");
@@ -768,7 +767,7 @@ router.post('/linearIncreaseLoadTest', function(req,res){
                   clearInterval(intervalReq);
                   return;
                 }
-                kubeMongoFunctions.getServiceURL(req.user.username)
+                awsGeneral.getServiceURL(req.user.username, routeContext)
                   .then(function (url) {
                     if (url) {
                       console.log("Found URL informtion");
@@ -861,7 +860,7 @@ router.post('/linearIncreaseConstantLoadTest', function(req,res){
                   clearInterval(intervalReq);
                   return;
                 }
-                kubeMongoFunctions.getServiceURL(req.user.username)
+                awsGeneral.getServiceURL(req.user.username, routeContext)
                   .then(function (url) {
                     if (url) {
                       console.log("Found URL informtion");
@@ -962,7 +961,7 @@ router.post('/upDownLoadTest', function(req,res){
                   clearInterval(intervalReq);
                   return;
                 }
-                kubeMongoFunctions.getServiceURL(req.user.username)
+                awsGeneral.getServiceURL(req.user.username, routeContext)
                   .then(function (url) {
                     if (url) {
                       console.log("Found URL informtion");

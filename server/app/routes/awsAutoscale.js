@@ -1,108 +1,107 @@
 const express                       = require('express');
 const router                        = express.Router();
-const funct                         = require('../functions');
-const passport                      = require('passport');
 const awsAutoscale                  = require("../auto_scaling_solutions/aws_autoscale/index");
 const awsAutoScaleMongoFunctions    = require("../auto_scaling_solutions/aws_autoscale/awsAutoscaleMongoFunctions");
-var http                            = require('http');
-var request                         = require('request');
-var loadtest                        = require('loadtest');
+const loadtest                      = require('loadtest');
+const awsGeneral                    = require("../functions/awsgeneral");
 
-
+const routeContext = 'awsAutoScale';
 
 //===============ROUTES=================
 //displays our homepage
 router.get('/', function(req, res){
-  res.render('awsautoscale/home',{layout: '../awsautoscale/layouts/main',user: req.user} );
+  res.render('awsautoscale/home', {layout: '../awsautoscale/layouts/main',user: req.user} );
 });
-router.get('/edituserInfo', function(req, res){
-  funct.getUserInfoforEdit(req.user.username, res, req);
-});
+
 router.get('/getUserInfoForDeploy', function(req, res){
-  awsAutoScaleMongoFunctions.getUserInfoforDeploy(req.user.username, res,req);
+  awsGeneral.getUserInfoForDeploy(req.user.username, res, req, routeContext);
 });
+
 router.get('/loadtesthome', function(req, res){
   res.render('awsautoscale/loadtesthome',{layout: '../awsautoscale/layouts/main',user: req.user} );
 });
-router.get('/describeEc2Instances', function(req, res) {
-  awsAutoScaleMongoFunctions.getUserInfoForDescription(req.user.username, res,req)
-    .then(function (data) {
-      if (data) {
-        var awsdata = {
-          "accessKeyId": data.awstoken,
-          "secretAccessKey": data.awssecret,
-          "region": data.awsregion,//"us-west-2",
-          "s3BucketName": data.s3bucketname,
-          "awsKeyName": data.awskeyname
-        };
-        var b = awsAutoscale.describeInstances(awsdata, req, res)
-          .then(function (data) {
-            if (data) {
-              res.send(data);
-            }
-          });
-      }
-      else {
-        res.send("fail")
-      }
-    });
-});
-router.get('/describeAwsAutoscaleGroups', function(req, res) {
-  awsAutoScaleMongoFunctions.getUserInfoForDescription(req.user.username, res,req)
-    .then(function (data) {
-      if (data) {
-        var awsdata = {
-          "accessKeyId": data.awstoken,
-          "secretAccessKey": data.awssecret,
-          "region": data.awsregion,
-          "s3BucketName": data.s3bucketname,
-          "awsKeyName": data.awskeyname
-        };
-        var b = awsAutoscale.describeAutoscalingGroups(awsdata, req, res)
-          .then(function (data) {
-            if (data) {
-              res.send(data);
-            }
-          });
-      }
-      else {
-        res.send("fail")
-      }
-    });
-});
-router.get('/describeAwsLoadBalancer', function(req, res) {
-  awsAutoScaleMongoFunctions.getUserInfoForDescription(req.user.username, res,req)
-    .then(function (data) {
-      if (data) {
-        var awsdata = {
-          "accessKeyId": data.awstoken,
-          "secretAccessKey": data.awssecret,
-          "region": data.awsregion,
-          "s3BucketName": data.s3bucketname,
-          "awsKeyName": data.awskeyname
-        };
-        var b = awsAutoscale.describeLoadBalancer(awsdata, req, res)
-          .then(function (data) {
-            if (data) {
-              res.send(data);
-            }
-          });
-      }
-      else {
-        res.send("fail")
-      }
-    });
-});
-router.post('/deployawsautoscale', function(req, res){
-  var data = req.body;
 
-  var appUrl =  data.giturl;
-  var splitArr = appUrl.split('/');
-  var appNameTemp = splitArr[splitArr.length -1];
-  var appNametemparr = appNameTemp.split('.');
-  var appName = appNametemparr[0];
-console.log(JSON.stringify(data));
-  var awsDeployData =
+router.get('/describeEc2Instances', function(req, res) {
+  awsGeneral.getUserInfoForDescription(req.user.username, res, req)
+    .then(function (data) {
+      if (data) {
+        const awsData = {
+          "accessKeyId": data.awstoken,
+          "secretAccessKey": data.awssecret,
+          "region": data.awsregion,
+          "s3BucketName": data.s3bucketname,
+          "awsKeyName": data.awskeyname
+        };
+        awsGeneral.describeInstances(awsData, req, res)
+          .then(function (data) {
+            if (data) {
+              res.send(data);
+            }
+          });
+      }
+      else {
+        res.send("fail")
+      }
+    });
+});
+
+router.get('/describeAwsAutoscaleGroups', function(req, res) {
+  awsGeneral.getUserInfoForDescription(req.user.username, res, req)
+    .then(function (data) {
+      if (data) {
+        const awsData = {
+          "accessKeyId": data.awstoken,
+          "secretAccessKey": data.awssecret,
+          "region": data.awsregion,
+          "s3BucketName": data.s3bucketname,
+          "awsKeyName": data.awskeyname
+        };
+        awsAutoscale.describeAutoscalingGroups(awsData, req, res)
+          .then(function (data) {
+            if (data) {
+              res.send(data);
+            }
+          });
+      }
+      else {
+        res.send("fail")
+      }
+    });
+});
+
+router.get('/describeAwsLoadBalancer', function(req, res) {
+  awsGeneral.getUserInfoForDescription(req.user.username, res, req)
+    .then(function (data) {
+      if (data) {
+        const awsData = {
+          "accessKeyId": data.awstoken,
+          "secretAccessKey": data.awssecret,
+          "region": data.awsregion,
+          "s3BucketName": data.s3bucketname,
+          "awsKeyName": data.awskeyname
+        };
+        awsAutoscale.describeLoadBalancer(awsData, req, res)
+          .then(function (data) {
+            if (data) {
+              res.send(data);
+            }
+          });
+      }
+      else {
+        res.send("fail")
+      }
+    });
+});
+
+router.post('/deployawsautoscale', function(req, res){
+  const data = req.body;
+  const appUrl =  data.giturl;
+  const splitArr = appUrl.split('/');
+  const appNameTemp = splitArr[splitArr.length -1];
+  const appNametemparr = appNameTemp.split('.');
+  const appName = appNametemparr[0];
+
+  const awsDeployData =
     {
       "image": data.imageid,
       "launchConfig": {
@@ -117,7 +116,7 @@ console.log(JSON.stringify(data));
         "name": 'awsautoscale',
         "maxInst": data.maxInst,
         "minInst": data.minInst,
-        "subnet": "" +data.awssubnetid,
+        "subnet": "" + data.awssubnetid,
         "upPolicy": {
           "name": 'awsautoscaleUpPolicy',
           "adjustmentType": data.adjustmentType,
@@ -153,7 +152,7 @@ console.log(JSON.stringify(data));
       },
       "loadBal":{
         "name": 'awsloadbal',
-        "subnetsArr":[ ""+data.awssubnetid,""+data.awssubnetid2
+        "subnetsArr":[ ""+ data.awssubnetid,"" + data.awssubnetid2
           ],
       },
       "application":{
@@ -163,8 +162,7 @@ console.log(JSON.stringify(data));
       }
     };
 
-  console.log("sdf"+JSON.stringify(awsDeployData));
-  var awsdata = {
+  const awsData = {
     "accessKeyId": data.awstoken,
     "secretAccessKey": data.awssecret,
     "region": data.awsregion,
@@ -173,26 +171,28 @@ console.log(JSON.stringify(data));
     "securityId": [data.awssecurityid]
   };
 
-  awsAutoscale.deployAutoscaler(req.user.username,awsDeployData, awsdata,req, res);
+  awsAutoscale.deployAutoscaler(req.user.username, awsDeployData, awsData, req, res);
 });
+
 router.get('/terminate', function(req, res) {
-  awsAutoScaleMongoFunctions.getUserInfoForDescription(req.user.username, res,req)
+  awsGeneral.getUserInfoForDescription(req.user.username, res, req)
     .then(function (data) {
       if (data) {
-        var awsdata = {
+        const awsData = {
           "accessKeyId": data.awstoken,
           "secretAccessKey": data.awssecret,
           "region": data.awsregion,
           "s3BucketName": data.s3bucketname,
           "awsKeyName": data.awskeyname
         };
-        var b = awsAutoscale.terminateAutoScale(awsdata, req.user.username, req, res);
+        awsAutoscale.terminateAutoScale(awsData, req.user.username, req, res);
       }
       else {
         res.send("fail")
       }
     });
 });
+
 router.post('/loadTest', function(req,res){
   formElements = req.body;
   var startTime = new Date().getTime();
@@ -207,23 +207,22 @@ router.post('/loadTest', function(req,res){
             clearInterval(interval);
             return;
           }
-          awsAutoScaleMongoFunctions.getUserInfoForDescription(req.user.username, res,req)
+          awsGeneral.getUserInfoForDescription(req.user.username, res, req)
             .then(function (data) {
               if (data) {
-                var awsdata = {
+                const awsData = {
                   "accessKeyId": data.awstoken,
                   "secretAccessKey": data.awssecret,
                   "region": data.awsregion,
                   "s3BucketName": data.s3bucketname,
                   "awsKeyName": data.awskeyname
                 };
-                awsAutoscale.saveAutoscalingGroupData(awsdata,req.user.username,loadTestName);
+                awsAutoscale.saveAutoscalingGroupData(awsData, req.user.username, loadTestName);
               }
             });
-
         }, 2000);
 
-        awsAutoScaleMongoFunctions.getServiceURL(req.user.username)
+        awsGeneral.getServiceURL(req.user.username, routeContext)
           .then(function (url) {
             if (url) {
               console.log("Found URL informtion");
@@ -278,6 +277,7 @@ router.post('/loadTest', function(req,res){
       }
     });
 });
+
 router.post('/triangleLoadTest', function(req,res){
   formElements = req.body;
   var startTime = new Date().getTime();
@@ -292,7 +292,7 @@ router.post('/triangleLoadTest', function(req,res){
             clearInterval(intervalAws);
             return;
           }
-          awsAutoScaleMongoFunctions.getUserInfoForDescription(req.user.username, res,req)
+          awsGeneral.getUserInfoForDescription(req.user.username, res, req)
             .then(function (data) {
               if (data) {
                 var awsdata = {
@@ -305,7 +305,6 @@ router.post('/triangleLoadTest', function(req,res){
                 awsAutoscale.saveAutoscalingGroupData(awsdata,req.user.username,loadTestName);
               }
             });
-
         }, 2000);
         var requests = 1;
         res.render('awsautoscale/success', {
@@ -319,7 +318,8 @@ router.post('/triangleLoadTest', function(req,res){
             clearInterval(intervalReq);
             return;
           }
-          awsAutoScaleMongoFunctions.getServiceURL(req.user.username)
+
+          awsGeneral.getServiceURL(req.user.username, routeContext)
             .then(function (url) {
               if (url) {
                 console.log("Found URL informtion");
@@ -375,6 +375,7 @@ router.post('/triangleLoadTest', function(req,res){
       }
     });
 });
+
 router.post('/linearIncreaseLoadTest', function(req,res){
   formElements = req.body;
   var startTime = new Date().getTime();
@@ -389,17 +390,17 @@ router.post('/linearIncreaseLoadTest', function(req,res){
             clearInterval(intervalAws);
             return;
           }
-          awsAutoScaleMongoFunctions.getUserInfoForDescription(req.user.username, res,req)
+          awsGeneral.getUserInfoForDescription(req.user.username, res, req)
             .then(function (data) {
               if (data) {
-                var awsdata = {
+                const awsData = {
                   "accessKeyId": data.awstoken,
                   "secretAccessKey": data.awssecret,
                   "region": data.awsregion,
                   "s3BucketName": data.s3bucketname,
                   "awsKeyName": data.awskeyname
                 };
-                awsAutoscale.saveAutoscalingGroupData(awsdata,req.user.username,loadTestName);
+                awsAutoscale.saveAutoscalingGroupData(awsData, req.user.username, loadTestName);
               }
             });
 
@@ -416,7 +417,8 @@ router.post('/linearIncreaseLoadTest', function(req,res){
             clearInterval(intervalReq);
             return;
           }
-          awsAutoScaleMongoFunctions.getServiceURL(req.user.username)
+
+          awsGeneral.getServiceURL(req.user.username, routeContext)
             .then(function (url) {
               if (url) {
                 console.log("Found URL informtion");
@@ -464,6 +466,7 @@ router.post('/linearIncreaseLoadTest', function(req,res){
       }
     });
 });
+
 router.post('/linearIncreaseConstantLoadTest', function(req,res){
   formElements = req.body;
   var startTime = new Date().getTime();
@@ -478,17 +481,17 @@ router.post('/linearIncreaseConstantLoadTest', function(req,res){
             clearInterval(intervalAws);
             return;
           }
-          awsAutoScaleMongoFunctions.getUserInfoForDescription(req.user.username, res,req)
+          awsGeneral.getUserInfoForDescription(req.user.username, res, req)
             .then(function (data) {
               if (data) {
-                var awsdata = {
+                const awsData = {
                   "accessKeyId": data.awstoken,
                   "secretAccessKey": data.awssecret,
                   "region": data.awsregion,
                   "s3BucketName": data.s3bucketname,
                   "awsKeyName": data.awskeyname
                 };
-                awsAutoscale.saveAutoscalingGroupData(awsdata,req.user.username,loadTestName);
+                awsAutoscale.saveAutoscalingGroupData(awsData, req.user.username, loadTestName);
               }
             });
 
@@ -505,7 +508,7 @@ router.post('/linearIncreaseConstantLoadTest', function(req,res){
             clearInterval(intervalReq);
             return;
           }
-          awsAutoScaleMongoFunctions.getServiceURL(req.user.username)
+          awsGeneral.getServiceURL(req.user.username, routeContext)
             .then(function (url) {
               if (url) {
                 console.log("Found URL informtion");
@@ -561,6 +564,7 @@ router.post('/linearIncreaseConstantLoadTest', function(req,res){
       }
     });
 });
+
 router.post('/upDownLoadTest', function(req,res){
   formElements = req.body;
   var flag=true;
@@ -576,7 +580,7 @@ router.post('/upDownLoadTest', function(req,res){
             clearInterval(intervalAws);
             return;
           }
-          awsAutoScaleMongoFunctions.getUserInfoForDescription(req.user.username, res,req)
+          awsGeneral.getUserInfoForDescription(req.user.username, res, req)
             .then(function (data) {
               if (data) {
                 var awsdata = {
@@ -586,7 +590,7 @@ router.post('/upDownLoadTest', function(req,res){
                   "s3BucketName": data.s3bucketname,
                   "awsKeyName": data.awskeyname
                 };
-                awsAutoscale.saveAutoscalingGroupData(awsdata,req.user.username,loadTestName);
+                awsAutoscale.saveAutoscalingGroupData(awsdata, req.user.username, loadTestName);
               }
             });
 
@@ -603,7 +607,8 @@ router.post('/upDownLoadTest', function(req,res){
             clearInterval(intervalReq);
             return;
           }
-          awsAutoScaleMongoFunctions.getServiceURL(req.user.username)
+
+          awsGeneral.getServiceURL(req.user.username, routeContext)
             .then(function (url) {
               if (url) {
                 console.log("Found URL informtion");
@@ -703,7 +708,7 @@ router.post('/getLoadTestData', function(req,res){
           "barRPS" : barRPS,
           "totalTimeSeconds" : totalTimeSeconds,
           "errors" : errors
-        }
+        };
         res.send(allData);
       }
       else {
@@ -717,39 +722,39 @@ router.post('/getLoadTestData', function(req,res){
           "barRPS" : '',
           "totalTimeSeconds" : '',
           "errors" : ''
-        }
+        };
         res.send(allData);
       }
     });
 });
-router.get('/getCurrentData', function(req,res){
 
-  awsAutoScaleMongoFunctions.getUserInfoForDescription(req.user.username, res,req)
+router.get('/getCurrentData', function(req, res){
+  awsGeneral.getUserInfoForDescription(req.user.username, res, req)
     .then(function (data) {
       if (data) {
-        var awsdata = {
+        const awsData = {
           "accessKeyId": data.awstoken,
           "secretAccessKey": data.awssecret,
           "region": data.awsregion,
           "s3BucketName": data.s3bucketname,
           "awsKeyName": data.awskeyname
         };
-        var b = awsAutoscale.getCurrentData(awsdata, req.user.username, req, res);
+        awsAutoscale.getCurrentData(awsData, req.user.username, req, res);
       }
       else {
         console.log("fail");
         res.send("fail")
       }
     });
+});
 
-
-})
 router.use(function(req, res, next){
   // the status option, or res.statusCode = 404
   // are equivalent, however with the option we
   // get the "status" local available as well
   //res.render('404',{user: req.user});
 });
+
 router.use(function(err, req, res, next){
   // we may use properties of the error object
   // here and next(err) appropriately, or if

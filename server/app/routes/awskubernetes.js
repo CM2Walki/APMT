@@ -1,14 +1,13 @@
 const express                                 = require('express');
 const router                                  = express.Router();
 const funct                                   = require('../functions');
-const passport                                = require('passport');
 const awsAutoscaleKubernetes                  = require("../auto_scaling_solutions/aws_kubernetes/index");
 const awsAutoscaleKubernetesMongoFunctions    = require("../auto_scaling_solutions/aws_kubernetes/awsAutoscaleKubernetesMongoFunctions");
-var http                                      = require('http');
-var request                                   = require('request');
-var loadtest                                  = require('loadtest');
+const request                                 = require('request');
+const loadtest                                = require('loadtest');
+const awsGeneral                              = require("../functions/awsgeneral");
 
-
+const routeContext = 'awsKubeAutoScale';
 
 //===============ROUTES=================
 //displays our homepage
@@ -16,26 +15,26 @@ router.get('/', function(req, res){
   res.render('awskubernetes/home',{layout: '../awskubernetes/layouts/main',user: req.user} );
 });
 router.get('/edituserInfo', function(req, res){
-  funct.getUserInfoforEdit(req.user.username, res,req);
+  funct.getUserInfoforEdit(req.user.username, res, req);
 });
 router.get('/getUserInfoForDeploy', function(req, res){
-  awsAutoscaleKubernetesMongoFunctions.getUserInfoforDeploy(req.user.username, res,req);
+  awsGeneral.getUserInfoForDeploy(req.user.username, res, req, routeContext);
 });
 router.get('/loadtesthome', function(req, res){
   res.render('awskubernetes/loadtesthome',{layout: '../awskubernetes/layouts/main',user: req.user} );
 });
 router.get('/describeEc2Instances', function(req, res) {
-  awsAutoscaleKubernetesMongoFunctions.getUserInfoForDescription(req.user.username, res,req)
+  awsGeneral.getUserInfoForDescription(req.user.username, res, req)
     .then(function (data) {
       if (data) {
-        var awsdata = {
+        const awsData = {
           "accessKeyId": data.awstoken,
           "secretAccessKey": data.awssecret,
           "region": data.awsregion,
           "s3BucketName": data.s3bucketname,
           "awsKeyName": data.awskeyname
         };
-        var b = awsAutoscaleKubernetes.describeInstances(awsdata, req, res)
+        awsGeneral.describeInstances(awsData, req, res)
           .then(function (data) {
             if (data) {
               res.send(data);
@@ -48,7 +47,7 @@ router.get('/describeEc2Instances', function(req, res) {
     });
 });
 router.get('/describeAwsAutoscaleGroups', function(req, res) {
-  awsAutoscaleKubernetesMongoFunctions.getUserInfoForDescription(req.user.username, res,req)
+  awsGeneral.getUserInfoForDescription(req.user.username, res, req)
     .then(function (data) {
       if (data) {
         var awsdata = {
@@ -71,7 +70,7 @@ router.get('/describeAwsAutoscaleGroups', function(req, res) {
     });
 });
 router.get('/describeAwsLoadBalancer', function(req, res) {
-  awsAutoscaleKubernetesMongoFunctions.getUserInfoForDescription(req.user.username, res,req)
+  awsGeneral.getUserInfoForDescription(req.user.username, res, req)
     .then(function (data) {
       if (data) {
         var awsdata = {
@@ -198,7 +197,7 @@ router.post('/deployawsautoscale', function(req, res){
   awsAutoscaleKubernetes.deployAutoscaler(req.user.username,awsDeployData,kubedata, awsdata,req, res);
 });
 router.get('/terminate', function(req, res) {
-  awsAutoscaleKubernetesMongoFunctions.getUserInfoForDescription(req.user.username, res,req)
+  awsGeneral.getUserInfoForDescription(req.user.username, res, req)
     .then(function (data) {
       if (data) {
         var awsdata = {
@@ -577,7 +576,7 @@ router.post('/loadTest', function(req,res){
                   clearInterval(interval);
                   return;
                 }
-                awsAutoscaleKubernetesMongoFunctions.getUserInfoForDescription(req.user.username, res,req)
+                awsGeneral.getUserInfoForDescription(req.user.username, res, req)
                   .then(function (data) {
                     if (data) {
                       var awsdata = {
@@ -593,7 +592,7 @@ router.post('/loadTest', function(req,res){
 
               }, 2000);
 
-              awsAutoscaleKubernetesMongoFunctions.getServiceURL(req.user.username)
+              awsGeneral.getServiceURL(req.user.username, routeContext)
                 .then(function (url) {
                   if (url) {
                     console.log("Found URL informtion");
@@ -691,7 +690,7 @@ router.post('/triangleLoadTest', function(req,res){
                   clearInterval(intervalAws);
                   return;
                 }
-                awsAutoscaleKubernetesMongoFunctions.getUserInfoForDescription(req.user.username, res,req)
+                awsGeneral.getUserInfoForDescription(req.user.username, res, req)
                   .then(function (data) {
                     if (data) {
                       var awsdata = {
@@ -718,7 +717,7 @@ router.post('/triangleLoadTest', function(req,res){
                   clearInterval(intervalReq);
                   return;
                 }
-                awsAutoscaleKubernetesMongoFunctions.getServiceURL(req.user.username)
+                awsGeneral.getServiceURL(req.user.username, routeContext)
                   .then(function (url) {
                     if (url) {
                       console.log("Found URL informtion");
@@ -817,7 +816,7 @@ router.post('/linearIncreaseLoadTest', function(req,res){
                   clearInterval(intervalAws);
                   return;
                 }
-                awsAutoscaleKubernetesMongoFunctions.getUserInfoForDescription(req.user.username, res,req)
+                awsGeneral.getUserInfoForDescription(req.user.username, res, req)
                   .then(function (data) {
                     if (data) {
                       var awsdata = {
@@ -844,7 +843,7 @@ router.post('/linearIncreaseLoadTest', function(req,res){
                   clearInterval(intervalReq);
                   return;
                 }
-                awsAutoscaleKubernetesMongoFunctions.getServiceURL(req.user.username)
+                awsGeneral.getServiceURL(req.user.username, routeContext)
                   .then(function (url) {
                     if (url) {
                       console.log("Found URL informtion");
@@ -935,7 +934,7 @@ router.post('/linearIncreaseConstantLoadTest', function(req,res){
                   clearInterval(intervalAws);
                   return;
                 }
-                awsAutoscaleKubernetesMongoFunctions.getUserInfoForDescription(req.user.username, res,req)
+                awsGeneral.getUserInfoForDescription(req.user.username, res, req)
                   .then(function (data) {
                     if (data) {
                       var awsdata = {
@@ -945,7 +944,7 @@ router.post('/linearIncreaseConstantLoadTest', function(req,res){
                         "s3BucketName": data.s3bucketname,
                         "awsKeyName": data.awskeyname
                       };
-                      awsAutoscaleKubernetes.saveAutoscalingGroupData(awsdata,req.user.username,loadTestName);
+                      awsAutoscaleKubernetes.saveAutoscalingGroupData(awsdata, req.user.username, loadTestName);
                     }
                   });
 
@@ -962,7 +961,7 @@ router.post('/linearIncreaseConstantLoadTest', function(req,res){
                   clearInterval(intervalReq);
                   return;
                 }
-                awsAutoscaleKubernetesMongoFunctions.getServiceURL(req.user.username)
+                awsGeneral.getServiceURL(req.user.username, routeContext)
                   .then(function (url) {
                     if (url) {
                       console.log("Found URL informtion");
@@ -1061,7 +1060,7 @@ router.post('/upDownLoadTest', function(req,res){
                   clearInterval(intervalAws);
                   return;
                 }
-                awsAutoscaleKubernetesMongoFunctions.getUserInfoForDescription(req.user.username, res,req)
+                awsGeneral.getUserInfoForDescription(req.user.username, res, req)
                   .then(function (data) {
                     if (data) {
                       var awsdata = {
@@ -1071,10 +1070,9 @@ router.post('/upDownLoadTest', function(req,res){
                         "s3BucketName": data.s3bucketname,
                         "awsKeyName": data.awskeyname
                       };
-                      awsAutoscaleKubernetes.saveAutoscalingGroupData(awsdata,req.user.username,loadTestName);
+                      awsAutoscaleKubernetes.saveAutoscalingGroupData(awsdata, req.user.username, loadTestName);
                     }
                   });
-
               }, 2000);
               var requests = 1;
               var flag = true;
@@ -1089,7 +1087,7 @@ router.post('/upDownLoadTest', function(req,res){
                   clearInterval(intervalReq);
                   return;
                 }
-                awsAutoscaleKubernetesMongoFunctions.getServiceURL(req.user.username)
+                awsGeneral.getServiceURL(req.user.username, routeContext)
                   .then(function (url) {
                     if (url) {
                       console.log("Found URL informtion");
@@ -1280,8 +1278,7 @@ router.get('/stopRecordingData', function(req,res){
 });
 
 router.get('/getCurrentData', function(req,res){
-
-  awsAutoscaleKubernetesMongoFunctions.getUserInfoForDescription(req.user.username, res,req)
+  awsGeneral.getUserInfoForDescription(req.user.username, res, req)
     .then(function (data) {
       if (data) {
         var awsdata = {
@@ -1291,16 +1288,14 @@ router.get('/getCurrentData', function(req,res){
           "s3BucketName": data.s3bucketname,
           "awsKeyName": data.awskeyname
         };
-        var b = awsAutoscaleKubernetes.getCurrentData(awsdata, req.user.username, req, res);
+        awsAutoscaleKubernetes.getCurrentData(awsdata, req.user.username, req, res);
       }
       else {
         console.log("fail");
         res.send("fail")
       }
     });
-
-
-})
+});
 router.use(function(req, res, next){
   // the status option, or res.statusCode = 404
   // are equivalent, however with the option we

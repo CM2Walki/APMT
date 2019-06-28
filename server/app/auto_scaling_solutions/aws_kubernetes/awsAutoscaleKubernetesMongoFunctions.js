@@ -13,32 +13,7 @@ const mongodbUrlAwsKubeAutoScaleTestData = 'mongodb://'+ config.mongodb.host + '
 const collectionNameAwsAutoScaleTestData = '';
 const MongoClient = require('mongodb').MongoClient;
 
-exports.addConfigData = function (username,data) {
-  var deferred = Q.defer();
-  MongoClient.connect(mongodbUrlConfig, function (err, db) {
-    var collection = db.collection(collectionNameConfig);
-    collection.findOne({'userInfo.username' : username})
-      .then(function (result) {
-        if (null != result)
-        {
-          collection.update({'userInfo.username' : username},
-            {
-              $set : {
-                "awsKubeAutoScale.awsKubeAutoScaleConfig": data
 
-              }
-            },
-            {upsert:false})
-          deferred.resolve(true); // username exists
-        }
-        else
-        {
-          deferred.resolve(false); // username not exists
-        }
-      });
-  });
-  return deferred.promise;
-};
 
 exports.addFurtherConfigData = function (username,data) {
   var deferred = Q.defer();
@@ -52,7 +27,6 @@ exports.addFurtherConfigData = function (username,data) {
             {
               $set : {
                 "awsKubeAutoScale.ipConfig": data
-
               }
             },
             {upsert:false})
@@ -66,6 +40,7 @@ exports.addFurtherConfigData = function (username,data) {
   });
   return deferred.promise;
 };
+
 exports.getInstancesId = function(username) {
   var deferred = Q.defer();
   var ids = [];
@@ -79,7 +54,7 @@ exports.getInstancesId = function(username) {
           var masterId= result["awsKubeAutoScale"]["kubernetesConfig"].master.instanceid;
           var minionIds = result["awsKubeAutoScale"]["kubernetesConfig"].minionIds;
           ids = minionIds;
-          ids.push(masterId)
+          ids.push(masterId);
           deferred.resolve(ids);
         }
         else
@@ -89,50 +64,9 @@ exports.getInstancesId = function(username) {
         }
       });
   });
-
-  return deferred.promise;
-}
-exports.getUserInfoforDeploy = function (username, res,req) {
-  console.log(username);
-  MongoClient.connect(mongodbUrlConfig, function (err, db) {
-    var collection = db.collection(collectionNameConfig);
-    //check if username is already assigned in our database
-    collection.findOne({'userInfo.username' : username})
-      .then(function (result) {
-        if (null != result) {
-          console.log("found");
-          res.render('awskubernetes/deploy', {
-            layout: '../awskubernetes/layouts/main',
-            user: username,
-            info: result["userInfo"]
-          });
-        }
-        else
-        {
-          console.log("not found");
-        }
-      });
-  });
-};
-exports.getUserInfoForDescription = function (username, res,req) {
-  var deferred = Q.defer();
-  MongoClient.connect(mongodbUrlConfig, function (err, db) {
-    var collection = db.collection(collectionNameConfig);
-
-    //check if username is already assigned in our database
-    collection.findOne({'userInfo.username' : username})
-      .then(function (result) {
-        if (null != result) {
-          deferred.resolve(result["userInfo"]);
-        }
-        else
-        {
-          console.log("not found");
-        }
-      });
-  });
   return deferred.promise;
 };
+
 exports.getMasterIp = function(username) {
   var deferred = Q.defer();
 
@@ -156,106 +90,8 @@ exports.getMasterIp = function(username) {
   });
 
   return deferred.promise;
-}
-exports.getAwsAutoScaleInfo = function(username) {
-  var deferred = Q.defer();
-  var deployInfo = {};
-  MongoClient.connect(mongodbUrlConfig, function (err, db) {
-    var collection = db.collection(collectionNameConfig);
+};
 
-    //check if username is already assigned in our database
-    collection.findOne({'userInfo.username' : username})
-      .then(function (result) {
-        if (null != result)
-        {
-          deployInfo= result["awsKubeAutoScale"];
-          deferred.resolve(deployInfo); // username exists
-        }
-        else
-        {
-          console.log("Error", username);
-          deferred.resolve(deployInfo); // username not exists
-        }
-      });
-  });
-
-  return deferred.promise;
-}
-exports.getLatencyData = function(username) {
-  var deferred = Q.defer();
-  var latencyarray = {};
-  MongoClient.connect('mongodb://'+ config.mongodb.host + ':'+config.mongodb.port+'/dbPerfData', function (err, db) {
-    var collection = db.collection('usersPerfData');
-
-    //check if username is already assigned in our database
-    collection.findOne({"username": username}, {"LatencyDatapoints": []})
-      .then(function (result) {
-        if (null != result)
-        {
-          latencyarray = result["LatencyDatapoints"];
-          deferred.resolve(latencyarray); // username exists
-        }
-        else
-        {
-          console.log("Error", username);
-          deferred.resolve(latencyarray); // username not exists
-        }
-      });
-  });
-
-  return deferred.promise;
-}
-
-exports.getResponseTimeData = function(username) {
-  var deferred = Q.defer();
-  var resptimearray = {};
-  MongoClient.connect('mongodb://'+ config.mongodb.host + ':'+config.mongodb.port+'/dbPerfData', function (err, db) {
-    var collection = db.collection('usersPerfData');
-
-    //check if username is already assigned in our database
-    collection.findOne({"username": username}, {"ResponseTimeDatapoints": []})
-      .then(function (result) {
-        if (null != result)
-        {
-          resptimearray = result["ResponseTimeDatapoints"];
-          deferred.resolve(resptimearray); // username exists
-        }
-        else
-        {
-          console.log("Error", username);
-          deferred.resolve(resptimearray); // username not exists
-        }
-      });
-  });
-
-  return deferred.promise;
-}
-
-exports.getServiceURL = function(username) {
-  var deferred = Q.defer();
-
-  MongoClient.connect(mongodbUrlConfig, function (err, db) {
-    var collection = db.collection(collectionNameConfig);
-
-    //check if username is already assigned in our database
-    collection.findOne({'userInfo.username' : username})
-      .then(function (result) {
-        if (null != result)
-        {
-          console.log("USERNAME  EXISTS:", result.username);
-          var url= result["awsKubeAutoScale"]["ipConfig"]["LoadBalIp"];
-          deferred.resolve(url); // username exists
-        }
-        else
-        {
-          console.log("user Not exists:", username);
-          deferred.resolve(false); // username not exists
-        }
-      });
-  });
-
-  return deferred.promise;
-}
 exports.addCurrentRecordedData = function (username,data) {
   MongoClient.connect(mongodbUrlAwsKubeAutoScaleTestData, function (err, db) {
     var collectionNameCurrentData = 'currentData'+username;
@@ -333,6 +169,7 @@ exports.setLoadTestRecording = function (username,testName,data) {
   });
   return deferred.promise;
 };
+
 exports.addLoadTestRequestData = function (username,testName,data) {
   var deferred = Q.defer();
   MongoClient.connect(mongodbUrlAwsKubeAutoScaleTestData, function (err, db) {
@@ -347,6 +184,7 @@ exports.addLoadTestRequestData = function (username,testName,data) {
   });
   return deferred.promise;
 };
+
 exports.addRecordedData = function (username,data) {
   var deferred = Q.defer();
   MongoClient.connect(mongodbUrlAwsKubeAutoScaleTestData, function (err, db) {
@@ -360,6 +198,7 @@ exports.addRecordedData = function (username,data) {
   });
   return deferred.promise;
 };
+
 exports.addLoadTestKubernetesData = function (username,testName,data) {
   var deferred = Q.defer();
   MongoClient.connect(mongodbUrlAwsKubeAutoScaleTestData, function (err, db) {
@@ -373,6 +212,7 @@ exports.addLoadTestKubernetesData = function (username,testName,data) {
   });
   return deferred.promise;
 };
+
 exports.addautoscaleData = function (username,testName,data) {
   var deferred = Q.defer();
   MongoClient.connect(mongodbUrlAwsKubeAutoScaleTestData, function (err, db) {
@@ -386,6 +226,7 @@ exports.addautoscaleData = function (username,testName,data) {
   });
   return deferred.promise;
 };
+
 exports.setManualRecording = function (username,data) {
   var deferred = Q.defer();
   MongoClient.connect(mongodbUrlConfig, function (err, db) {
@@ -438,6 +279,7 @@ exports.setManualRecording = function (username,data) {
   });
   return deferred.promise;
 };
+
 exports.getManualRecording = function(username) {
   var deferred = Q.defer();
   MongoClient.connect(mongodbUrlConfig, function (err, db) {
@@ -461,6 +303,7 @@ exports.getManualRecording = function(username) {
   });
   return deferred.promise;
 }
+
 exports.getServiceURLPort = function(username) {
   var deferred = Q.defer();
 
@@ -487,7 +330,8 @@ exports.getServiceURLPort = function(username) {
   });
 
   return deferred.promise;
-}
+};
+
 exports.setServiceURLPort = function(username, port) {
   var deferred = Q.defer();
 
@@ -505,7 +349,8 @@ exports.setServiceURLPort = function(username, port) {
     deferred.resolve(true); // username exists
   });
   return deferred.promise;
-}
+};
+
 exports.getTestData = function(username,testName) {
   var deferred = Q.defer();
   var dataAll = [];
@@ -528,6 +373,7 @@ exports.getTestData = function(username,testName) {
   });
   return deferred.promise;
 };
+
 exports.getRequestTestData = function(username,testName) {
   var deferred = Q.defer();
   var dataAll = [];
@@ -550,6 +396,7 @@ exports.getRequestTestData = function(username,testName) {
   });
   return deferred.promise;
 };
+
 exports.getLoadKubernetesData = function(username,testName) {
   var deferred = Q.defer();
   var dataAll = [];
@@ -573,6 +420,7 @@ exports.getLoadKubernetesData = function(username,testName) {
 
   return deferred.promise;
 };
+
 exports.getAutoscaleData = function(username,testName) {
   var deferred = Q.defer();
   var dataAll = [];
@@ -586,8 +434,6 @@ exports.getAutoscaleData = function(username,testName) {
         dataAll=result;
         db.close();
         deferred.resolve(dataAll); // username exists
-
-
       }
       else
       {
@@ -598,6 +444,7 @@ exports.getAutoscaleData = function(username,testName) {
 
   return deferred.promise;
 };
+
 exports.getLoadTestTimelineData = function(username,testName) {
   var deferred = Q.defer();
   var dataAll = [];
@@ -608,7 +455,7 @@ exports.getLoadTestTimelineData = function(username,testName) {
     collection.find({}).limit(1000).toArray(function (err,result) {
       if (result.length)
       {
-        var eventsArr= [];;
+        var eventsArr= [];
         for(i=0;i<result.length;i++)
         {
           for(j=0;j<result[i].data.eventsInfo.length;j++) {
@@ -629,6 +476,7 @@ exports.getLoadTestTimelineData = function(username,testName) {
 
   return deferred.promise;
 };
+
 exports.addAutoscalingData = function (username,testName,data) {
   var deferred = Q.defer();
   MongoClient.connect(mongodbUrlAwsKubeAutoScaleTestData, function (err, db) {
@@ -643,6 +491,7 @@ exports.addAutoscalingData = function (username,testName,data) {
   });
   return deferred.promise;
 };
+
 exports.addGenericTestData = function (username, data) {
   var deferred = Q.defer();
   MongoClient.connect(mongodbUrlAwsKubeAutoScaleTestData, function (err, db) {

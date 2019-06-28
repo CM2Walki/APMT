@@ -1,94 +1,28 @@
 const Q                                 = require('q');
-const http                              = require('http');
-const request                           = require('request');
 const AWS                               = require('aws-sdk');
 const awsAutoscalingMongoFunctions      = require('./awsAutoscaleMongoFunctions');
+const awsGeneral                        = require("./../../functions/awsgeneral");
 
-exports.describeInstances = function(awsData,req, res) {
-  var ec2 = new AWS.EC2({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
-  var cloudwatch = new AWS.CloudWatch({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
-  var autoscaling = new AWS.AutoScaling({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
-  var elbv2 = new AWS.ELBv2({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2015-12-01'});
-  var deferred = Q.defer();
-  var params = {
-    DryRun: false
-  };
+const routeContext = 'awsAutoScale';
 
-  var titlesArr = [];
-  titlesArr.push({"title": "Name"});
-  titlesArr.push({"title": "InstanceID"});
-  titlesArr.push({"title": "ImageID"});
-  titlesArr.push({"title": "Public IP"});
-  titlesArr.push({"title": "LaunchTime"});
-  titlesArr.push({"title": "State"});
-
-  var awsArr = [];
-  if(ec2) {
-    ec2.describeInstances(params, function (err, data) {
-      if (err) {
-        console.log("Error", err.stack);
-        var dataAll = [
-          {
-            "columns": titlesArr,
-            "data": awsArr
-          }
-        ];
-        deferred.resolve(dataAll);
-      } else {
-        instancesArr = data.Reservations;
-        instancesArr.forEach(function (instance) {
-          var row = []
-          if (instance["Instances"][0]["Tags"][0])
-            row.push(instance["Instances"][0]["Tags"][0]["Value"]);
-          else
-            row.push("None");
-          row.push(instance["Instances"][0]["InstanceId"]);
-          row.push(instance["Instances"][0]["ImageId"]);
-          row.push(instance["Instances"][0]["PublicIpAddress"]);
-          row.push(instance["Instances"][0]["LaunchTime"]);
-          row.push(instance["Instances"][0]["State"]["Name"]);
-          awsArr.push(row);
-        });
-        var dataAll = [{
-          "columns": titlesArr,
-          "data": awsArr
-        }
-        ];
-        deferred.resolve(dataAll);
-      }
-    });
-  }
-  else {
-    var dataAll = [{
-      "columns": titlesArr,
-      "data": awsArr
-    }
-    ];
-    deferred.resolve(dataAll);
-  }
-  return deferred.promise;
-}
-exports.deployAutoscaler = function(username, awsDeployData, awsData,req, res) {
-  var ec2 = new AWS.EC2({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
+exports.deployAutoscaler = function(username, awsDeployData, awsData, req, res) {
   var cloudwatch = new AWS.CloudWatch({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
   var autoscaling = new AWS.AutoScaling({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
   var elbv2 = new AWS.ELBv2({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2015-12-01'});
   var deferred = Q.defer();
 
-
-  var scriptAnalyzer = '#!/bin/bash \n ' +
-    'sudo apt-get update \n ' +
-    'sudo apt-get -y install docker.io \n ' +
-    'sudo apt-get -y install nodejs \n ' +
-    'sudo apt-get -y install npm \n ' +
-    'sudo iptables -A INPUT -p tcp --dport 3001 -j ACCEPT \n ' +
-    'sudo curl -L https://github.com/docker/compose/releases/download/1.13.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose \n ' +
-    'sudo chmod +x /usr/local/bin/docker-compose \n ' +
-    'git clone ' +awsDeployData.application.giturl+' \n ' +
-    'cd ' +awsDeployData.application.name+' \n ' +
-    'sudo docker-compose up --build & \n ';
+  var scriptAnalyzer = '#!/bin/bash\n' +
+    'sudo apt-get update\n' +
+    'sudo apt-get -y install docker.io\n' +
+    'sudo apt-get -y install nodejs\n' +
+    'sudo apt-get -y install npm\n' +
+    'sudo iptables -A INPUT -p tcp --dport 3001 -j ACCEPT\n' +
+    'sudo curl -L https://github.com/docker/compose/releases/download/1.13.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose\n' +
+    'sudo chmod +x /usr/local/bin/docker-compose\n' +
+    'git clone ' + awsDeployData.application.giturl + '\n' +
+    'cd ' + awsDeployData.application.name + '\n' +
+    'sudo docker-compose up --build &\n';
   var scriptAnalyzerBase64 = new Buffer(scriptAnalyzer).toString('base64');
-
 
   var paramsLaunchConfiguration = {
     ImageId: awsDeployData.image,
@@ -318,7 +252,7 @@ exports.deployAutoscaler = function(username, awsDeployData, awsData,req, res) {
                                     }
                                   }
                                 };
-                                awsAutoscalingMongoFunctions.addConfigData(username,awsAutoScaleData)
+                                awsGeneral.addConfigData(username, awsAutoScaleData, routeContext)
                                   .then(function (added) {
                                     if (added) {
                                       console.log("added awsAutoScaleData informtion");
@@ -348,7 +282,8 @@ exports.deployAutoscaler = function(username, awsDeployData, awsData,req, res) {
     dataForm: req.body,
     dataClient: "Request Sent to Server for Deployment"
   });
-}
+};
+
 exports.terminateAutoScale = function(awsData,username,req, res) {
   var ec2 = new AWS.EC2({
     accessKeyId: awsData.accessKeyId,
@@ -376,7 +311,7 @@ exports.terminateAutoScale = function(awsData,username,req, res) {
   });
   var deferred = Q.defer();
 
-  awsAutoscalingMongoFunctions.getAwsAutoScaleInfo(username)
+  awsGeneral.getAwsAutoScaleInfo(username)
     .then(function (awsDeployInfo) {
       if (awsDeployInfo) {
 
@@ -429,8 +364,9 @@ exports.terminateAutoScale = function(awsData,username,req, res) {
         });
       }
     });
-}
-exports.getCurrentData = function(awsData,username,req,res) {
+};
+
+exports.getCurrentData = function(awsData, username, req, res) {
   var ec2 = new AWS.EC2({
     accessKeyId: awsData.accessKeyId,
     secretAccessKey: awsData.secretAccessKey,
@@ -456,7 +392,7 @@ exports.getCurrentData = function(awsData,username,req,res) {
     apiVersion: '2015-12-01'
   });
 
-  awsAutoscalingMongoFunctions.getAwsAutoScaleInfo(username)
+  awsGeneral.getAwsAutoScaleInfo(username)
     .then(function (awsDeployInfo) {
       if (awsDeployInfo) {
           var d = new Date();
@@ -522,9 +458,9 @@ exports.getCurrentData = function(awsData,username,req,res) {
         });
       }
     });
-}
+};
 
-exports.describeAutoscalingGroups = function(awsData,req, res) {
+exports.describeAutoscalingGroups = function(awsData, req, res) {
   var ec2 = new AWS.EC2({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
   var cloudwatch = new AWS.CloudWatch({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
   var autoscaling = new AWS.AutoScaling({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
@@ -588,8 +524,9 @@ exports.describeAutoscalingGroups = function(awsData,req, res) {
     deferred.resolve(dataAll);
   }
   return deferred.promise;
-}
-exports.saveAutoscalingGroupData = function(awsData,username, testname) {
+};
+
+exports.saveAutoscalingGroupData = function(awsData, username, testname) {
   var ec2 = new AWS.EC2({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
   var cloudwatch = new AWS.CloudWatch({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
   var autoscaling = new AWS.AutoScaling({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
@@ -663,8 +600,9 @@ exports.saveAutoscalingGroupData = function(awsData,username, testname) {
       }
     });// successful response
   }
-}
-exports.describeLoadBalancer = function(awsData,req, res) {
+};
+
+exports.describeLoadBalancer = function(awsData, req, res) {
   var ec2 = new AWS.EC2({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
   var cloudwatch = new AWS.CloudWatch({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
   var autoscaling = new AWS.AutoScaling({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
@@ -682,7 +620,6 @@ exports.describeLoadBalancer = function(awsData,req, res) {
   titlesArr.push({"title": "Scheme"});
   titlesArr.push({"title": "CreatedTime"});
   titlesArr.push({"title": "State"});
-
 
   var awsArr = [];
   if(elbv2) {
@@ -730,4 +667,4 @@ exports.describeLoadBalancer = function(awsData,req, res) {
     deferred.resolve(dataAll);
   }
   return deferred.promise;
-}
+};

@@ -8,36 +8,6 @@ const collectionNameKubeConfig = config.mongodb.dbUsersData.collectionName;
 const mongodbUrlKubeTestData = 'mongodb://'+config.mongodb.host + ':'+config.mongodb.port+'/'+config.mongodb.dbKubernetesTestData.name;
 const MongoClient = require('mongodb').MongoClient;
 
-exports.addConfigData = function (username, data) {
-  const deferred = Q.defer();
-  MongoClient.connect(mongodbUrlKubeConfig, function (err, db) {
-    let collection = db.collection(collectionNameKubeConfig);
-    collection.findOne({'userInfo.username' : username})
-      .then(function (result) {
-        if (null != result)
-        {
-          collection.update({'userInfo.username' : username},
-            {
-              $set : {
-                "kubernetes.kubernetesConfig": {
-                  "master": data.master,
-                  "minionIds": data.minion
-                }
-              }
-            },
-            {upsert:false});
-
-          deferred.resolve(true); // username exists
-        }
-        else
-        {
-          deferred.resolve(false); // username not exists
-        }
-      });
-  });
-  return deferred.promise;
-};
-
 exports.getInstancesId = function(username) {
   const deferred = Q.defer();
   let ids = [];
@@ -64,50 +34,6 @@ exports.getInstancesId = function(username) {
   return deferred.promise;
 };
 
-exports.getUserInfoforDeploy = function (username, res, req) {
-  console.log(username);
-  MongoClient.connect(mongodbUrlKubeConfig, function (err, db) {
-    const collection = db.collection(collectionNameKubeConfig);
-    //check if username is already assigned in our database
-    collection.findOne({'userInfo.username' : username})
-      .then(function (result) {
-        if (null != result) {
-          console.log("found");
-          res.render('kubernetes/kubernetesAws', {
-            layout: '../kubernetes/layouts/main',
-            user: username,
-            info: result["userInfo"]
-          });
-        }
-        else
-        {
-          console.log("not found");
-        }
-      });
-  });
-};
-
-exports.getUserInfoForDescription = function (username, res, req) {
-  const deferred = Q.defer();
-  console.log("Hello "+username);
-  MongoClient.connect(mongodbUrlKubeConfig, function (err, db) {
-    const collection = db.collection(collectionNameKubeConfig);
-
-    //check if username is already assigned in our database
-    collection.findOne({'userInfo.username' : username})
-      .then(function (result) {
-        if (null != result) {
-          deferred.resolve(result["userInfo"]);
-        }
-        else
-        {
-          console.log("not found");
-        }
-      });
-  });
-  return deferred.promise;
-};
-
 exports.getMasterIp = function(username) {
   const deferred = Q.defer();
 
@@ -121,31 +47,6 @@ exports.getMasterIp = function(username) {
         {
           const ip = result["kubernetes"]["kubernetesConfig"].master.ip;
           deferred.resolve(ip); // username exists
-        }
-        else
-        {
-          console.log("user Not exists:", username);
-          deferred.resolve(false); // username not exists
-        }
-      });
-  });
-  return deferred.promise;
-};
-
-exports.getServiceURL = function(username) {
-  const deferred = Q.defer();
-
-  MongoClient.connect(mongodbUrlKubeConfig, function (err, db) {
-    const collection = db.collection(collectionNameKubeConfig);
-
-    //check if username is already assigned in our database
-    collection.findOne({'userInfo.username' : username})
-      .then(function (result) {
-        if (null != result)
-        {
-          //console.log("USERNAME  EXISTS:", result.username);
-          const url = result["kubernetes"]["kubernetesConfig"].master.serviceURL;
-          deferred.resolve(url); // username exists
         }
         else
         {
