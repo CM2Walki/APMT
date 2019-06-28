@@ -154,6 +154,17 @@ exports.saveUserInfo = function (user, data, responseExData) {
               },
               {upsert: false});
           }
+          else
+          {
+            // If all the above fields are in the collection, we are good to go
+            user.awssetup = false;
+            collection.update({'userInfo.username' : user.username},
+              {$set : {
+                  "userInfo.awssetup": false,
+                }
+              },
+              {upsert: false});
+          }
           deferred.resolve(true); // username exists
         }
         else
