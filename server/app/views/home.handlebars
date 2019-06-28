@@ -47,15 +47,19 @@
                         <table class="table table-bordered table-hover">
                           <thead>
                           <tr>
-                            <th><img src="images/aws-cloud.png" width="64" height="64"></th>
-                            <th><img src="images/azure-cloud.png" width="64" height="64"></th>
-                            <th><img src="images/google-cloud.png" width="64" height="64"></th>
+                            <th><centre><img src="images/aws-cloud.png" width="64" height="64"></centre></th>
+                            <th><centre><img src="images/azure-cloud.png" width="64" height="64"></centre></th>
+                            <th><centre><img src="images/google-cloud.png" width="64" height="64"></centre></th>
                           </tr>
                           </thead>
-                          <tbody>
+                          <tfoot>
                           <tr>
                             <td>
-                              <a href="/edituserInfo"><button type="button" class="btn btn-block btn-primary">Setup</button></a>
+                              {{#if user.awssetup}}
+                                <a href="/edituserInfo"><button type="button" class="btn btn-block btn-primary">Setup</button></a>
+                              {{else}}
+                                <button id="awsStatusButton" type="button" class="btn btn-block btn-warning" disabled>Validating...</button>
+                              {{/if}}
                             </td>
                             <td>
                               <a href="/"><button type="button" class="btn btn-block btn-primary" disabled>TBA</button></a>
@@ -64,15 +68,11 @@
                               <a href="/"><button type="button" class="btn btn-block btn-primary" disabled>TBA</button></a>
                             </td>
                           </tr>
-                          </tbody>
+                          </tfoot>
                         </table>
-                      </div>
-                      <div class="overlay" id = "overlayInstanceId">
-                        <i class="fa fa-refresh fa-spin"></i>
                       </div>
                       <!-- /.chart-responsive -->
                     </div>
-                    <!-- /.col -->
                     <!-- /.col -->
                   </div>
                   <!-- /.row -->
@@ -102,12 +102,11 @@
                                 <div class="box-body">
                                   <table id="awsinstanceData" class="table table-bordered table-striped"></table>
                                 </div>
-                                <div class="overlay" id = "overlayInstanceId">
+                                <div class="overlay" id="overlayawsInstanceId">
                                   <i class="fa fa-refresh fa-spin"></i>
                                 </div>
                                   <!-- /.chart-responsive -->
                               </div>
-                              <!-- /.col -->
                               <!-- /.col -->
                           </div>
                           <!-- /.row -->
@@ -129,7 +128,9 @@
       "/kubernetes/describeEc2Instances",
       function(data) {
         $("#awsinstanceData").DataTable(data[0]);
-        $("#overlayInstanceId").hide("slow");
+        $("#overlayawsInstanceId").hide("slow");
+        $("#awsStatusButton").classList.remove("btn-warning");
+        $("#awsStatusButton").classList.add("btn-success");
       }
     );
     </script>
