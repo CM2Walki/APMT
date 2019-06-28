@@ -47,9 +47,14 @@
                         <table class="table table-bordered table-hover">
                           <thead>
                           <tr>
-                            <th><centre><img src="images/aws-cloud.png" width="64" height="64"></centre></th>
-                            <th><centre><img src="images/azure-cloud.png" width="64" height="64"></centre></th>
-                            <th><centre><img src="images/google-cloud.png" width="64" height="64"></centre></th>
+                            <th style="text-align: center;">
+                              <div class="overlay" id="overlayAWS">
+                                <i class="fa fa-refresh fa-spin"></i>
+                              </div>
+                              <img src="images/aws-cloud.png" width="64" height="64">
+                            </th>
+                            <th style="text-align: center;"><img src="images/azure-cloud.png" width="64" height="64"></th>
+                            <th style="text-align: center;"><img src="images/google-cloud.png" width="64" height="64"></th>
                           </tr>
                           </thead>
                           <tfoot>
@@ -127,10 +132,9 @@
     $.get(
       "/kubernetes/describeEc2Instances",
       function(data) {
-        if (data)
+        if (data !== 400)
         {
-          $("#awsinstanceData").DataTable(data[0]);
-          $("#overlayawsInstanceId").hide("slow");
+          $("#overlayAWS").hide("slow");
           $("#awsStatusButton").removeClass("btn-warning");
           $("#awsStatusButton").addClass("btn-success");
         }

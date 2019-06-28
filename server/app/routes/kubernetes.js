@@ -213,7 +213,7 @@ router.get('/describeEc2Instances', function(req, res) {
           });
       }
       else {
-        res.send("fail")
+        res.send(400);
       }
     });
 });
