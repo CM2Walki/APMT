@@ -205,10 +205,15 @@ router.get('/describeEc2Instances', function(req, res) {
           "s3BucketName": data.s3bucketname,
           "awsKeyName": data.awskeyname
         };
+
         awsGeneral.describeInstances(awsData, req, res)
           .then(function (data) {
             if (data) {
               res.send(data);
+            }
+            else
+            {
+              res.send(400);
             }
           });
       }

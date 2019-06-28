@@ -96,11 +96,13 @@
           if (data !== 400) {
             awsStatusButton.removeClass("btn-warning");
             awsStatusButton.addClass("btn-success");
+            awsStatusButton.innerHTML = awsStatusButton.innerHTML.replace(/./g,'Success');
           }
           else
           {
             awsStatusButton.removeClass("btn-warning");
             awsStatusButton.addClass("btn-error");
+            awsStatusButton.innerHTML = awsStatusButton.innerHTML.replace(/./g,'Error');
           }
         }
       );
