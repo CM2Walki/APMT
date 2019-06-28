@@ -93,7 +93,7 @@ exports.getUserInfo = function (user, res, req) {
   });
 };
 
-exports.getUserInfoforEdit = function (user, res, req) {
+exports.getUserInfoForEdit = function (user, res, req) {
   MongoClient.connect(mongodbUrl, function (err, db) {
     const collection = db.collection(collectionName);
     //check if username is already assigned in our database
@@ -138,33 +138,52 @@ exports.saveUserInfo = function (user, data, responseExData) {
             },
             {upsert: false});
           const userInfo = result["userInfo"];
-          if (userInfo.awstoken &&
-              userInfo.awssecret &&
-              userInfo.awskeyname &&
-              userInfo.awssecurityid &&
-              userInfo.awssubnetid &&
-              userInfo.awssubnetid2)
-          {
-            // If all the above fields are in the collection, we are good to go
-            user.awssetup = true;
-            collection.update({'userInfo.username' : user.username},
-              {$set : {
-                  "userInfo.awssetup": true,
-                }
-              },
-              {upsert: false});
-          }
-          else
-          {
-            // If all the above fields are in the collection, we are good to go
-            user.awssetup = false;
-            collection.update({'userInfo.username' : user.username},
-              {$set : {
-                  "userInfo.awssetup": false,
-                }
-              },
-              {upsert: false});
-          }
+          const awsSetup = (userInfo.awstoken &&
+            userInfo.awssecret &&
+            userInfo.awskeyname &&
+            userInfo.awssecurityid &&
+            userInfo.awssubnetid &&
+            userInfo.awssubnetid2);
+          // If all the above fields are in the collection, we are good to go
+          user.awssetup = awsSetup;
+          collection.update({'userInfo.username' : user.username},
+            {$set : {
+                "userInfo.awssetup": awsSetup,
+              }
+            },
+            {upsert: false});
+          deferred.resolve(true); // username exists
+        }
+        else
+        {
+          console.log("user Not exists:", user.username);
+          deferred.resolve(false); // username not exists
+        }
+      });
+  });
+  return deferred.promise;
+};
+
+// TODO: Add logic for all the other CSPs
+exports.checkCSPSetup = function (user, data, res) {
+  const deferred = Q.defer();
+
+  MongoClient.connect(mongodbUrl, function (err, db) {
+    let collection = db.collection(collectionName);
+    //check if username is already assigned in our database
+    collection.findOne({'userInfo.username' : user.username})
+      .then(function (result) {
+        if (null != result)
+        {
+          const userInfo = result["userInfo"];
+          user.awssetup = (userInfo.awstoken &&
+            userInfo.awssecret &&
+            userInfo.awskeyname &&
+            userInfo.awssecurityid &&
+            userInfo.awssubnetid &&
+            userInfo.awssubnetid2);
+          user.gcesetup = false; // Hardcoded until we have support
+          user.azuresetup = false; // Hardcoded until we have support
           deferred.resolve(true); // username exists
         }
         else

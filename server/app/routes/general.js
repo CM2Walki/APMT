@@ -5,27 +5,32 @@ const passport              = require('passport');
 
 //===============ROUTES=================
 //displays our homepage
-router.get('/', function(req, res){
-  res.render('home', {user: req.user});
+router.get('/', function(req, res) {
+  funct.checkCSPSetup(req.user, req.body, res.body)
+    .then(function (user) {
+      if (user) {
+        res.render('home', {user: req.user});
+      }
+    });
 });
 
-router.get('/edituserInfo', function(req, res){
-  funct.getUserInfoforEdit(req.user, res, req);
+router.get('/edituserInfo', function(req, res) {
+  funct.getUserInfoForEdit(req.user, res, req);
 });
 
 //displays our signup page
-router.get('/signin', function(req, res){
+router.get('/signin', function(req, res) {
   res.render('signin');
 });
 
-router.get('/register', function(req, res){
+router.get('/register', function(req, res) {
     res.render('register');
 });
 
 // logs user out of site, deleting them from the session, and returns to homepage
-router.get('/logout', function(req, res, next){
+router.get('/logout', function(req, res, next) {
   const name = req.user.username;
-  console.log("LOGGIN OUT " + req.user.username);
+  console.log("LOGGING OUT " + req.user.username);
   req.logout();
   res.redirect('/');
 });

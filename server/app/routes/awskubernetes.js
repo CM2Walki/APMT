@@ -15,7 +15,7 @@ router.get('/', function(req, res){
   res.render('awskubernetes/home',{layout: '../awskubernetes/layouts/main',user: req.user} );
 });
 router.get('/edituserInfo', function(req, res){
-  funct.getUserInfoforEdit(req.user.username, res, req);
+  funct.getUserInfoForEdit(req.user.username, res, req);
 });
 router.get('/getUserInfoForDeploy', function(req, res){
   awsGeneral.getUserInfoForDeploy(req.user.username, res, req, routeContext);
@@ -532,7 +532,7 @@ router.post('/getLoadTestTimelineData', function(req,res){
 
 
 router.get('/edituserInfo', function(req, res){
-  funct.getUserInfoforEdit(req.user.username, res,req);
+  funct.getUserInfoForEdit(req.user.username, res, req);
 });
 
 router.post('/loadTest', function(req,res){

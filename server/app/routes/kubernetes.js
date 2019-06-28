@@ -24,7 +24,7 @@ router.get('/timelineKubernetes', function(req, res){
   res.render('kubernetes/timeline', {layout: '../kubernetes/layouts/main',user: req.user} );
 });
 router.get('/edituserInfo', function(req, res){
-  funct.getUserInfoforEdit(req.user.username, res,req);
+  funct.getUserInfoForEdit(req.user.username, res, req);
 });
 router.get('/deploykubernetesAws', function(req, res){
   awsGeneral.getUserInfoForDeploy(req.user.username, res, req, routeContext);
