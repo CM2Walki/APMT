@@ -56,9 +56,9 @@
                           <tr>
                             <td>
                               {{#if user.awssetup}}
-                                <a href="/edituserInfo"><button type="button" class="btn btn-block btn-primary">Setup</button></a>
-                              {{else}}
                                 <button id="awsStatusButton" type="button" class="btn btn-block btn-warning" disabled>Validating...</button>
+                              {{else}}
+                                <a href="/edituserInfo"><button type="button" class="btn btn-block btn-primary">Setup</button></a>
                               {{/if}}
                             </td>
                             <td>
@@ -127,10 +127,13 @@
     $.get(
       "/kubernetes/describeEc2Instances",
       function(data) {
-        $("#awsinstanceData").DataTable(data[0]);
-        $("#overlayawsInstanceId").hide("slow");
-        $("#awsStatusButton").classList.remove("btn-warning");
-        $("#awsStatusButton").classList.add("btn-success");
+        if (data)
+        {
+          $("#awsinstanceData").DataTable(data[0]);
+          $("#overlayawsInstanceId").hide("slow");
+          $("#awsStatusButton").removeClass("btn-warning");
+          $("#awsStatusButton").addClass("btn-success");
+        }
       }
     );
     </script>
