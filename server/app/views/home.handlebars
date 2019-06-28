@@ -47,14 +47,9 @@
                         <table class="table table-bordered table-hover">
                           <thead>
                           <tr>
-                            <th style="text-align: center;">
-                              <div class="overlay" id="overlayAWS">
-                                <i class="fa fa-refresh fa-spin"></i>
-                              </div>
-                              <img src="images/aws-cloud.png" width="64" height="64">
-                            </th>
-                            <th style="text-align: center;"><img src="images/azure-cloud.png" width="64" height="64"></th>
-                            <th style="text-align: center;"><img src="images/google-cloud.png" width="64" height="64"></th>
+                            <th style="text-align: center;"><img src="images/aws-cloud.png" alt="aws" width="64" height="64"></th>
+                            <th style="text-align: center;"><img src="images/azure-cloud.png" alt="azure" width="64" height="64"></th>
+                            <th style="text-align: center;"><img src="images/google-cloud.png" alt="google" width="64" height="64"></th>
                           </tr>
                           </thead>
                           <tfoot>
@@ -87,41 +82,6 @@
             </div>
             <!-- /.col -->
           </div>
-          {{#if user.awssetup}}
-          <div class="row">
-              <div class="col-md-12">
-                  <div class="box">
-                      <div class="box-header with-border">
-                          <h3 class="box-title">AWS Instance States</h3>
-
-                          <div class="box-tools pull-right">
-                              <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
-                              </button>
-
-                              <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
-                          </div>
-                      </div>
-                      <div class="box-body">
-                          <div class="row">
-                              <div class="col-md-12">
-                                <div class="box-body">
-                                  <table id="awsinstanceData" class="table table-bordered table-striped"></table>
-                                </div>
-                                <div class="overlay" id="overlayawsInstanceId">
-                                  <i class="fa fa-refresh fa-spin"></i>
-                                </div>
-                                  <!-- /.chart-responsive -->
-                              </div>
-                              <!-- /.col -->
-                          </div>
-                          <!-- /.row -->
-                      </div>
-                  </div>
-                  <!-- /.box -->
-              </div>
-              <!-- /.col -->
-            </div>
-            {{/if}}
         </section>
         <!-- /.content -->
     </div>
@@ -129,17 +89,21 @@
     <!-- page script -->
     {{#if user.awssetup}}
     <script>
-    $.get(
-      "/kubernetes/describeEc2Instances",
-      function(data) {
-        if (data !== 400)
-        {
-          $("#overlayAWS").hide("slow");
-          $("#awsStatusButton").removeClass("btn-warning");
-          $("#awsStatusButton").addClass("btn-success");
+      $.get(
+        "/kubernetes/describeEc2Instances",
+        function(data) {
+          const awsStatusButton = $("#awsStatusButton");
+          if (data !== 400) {
+            awsStatusButton.removeClass("btn-warning");
+            awsStatusButton.addClass("btn-success");
+          }
+          else
+          {
+            awsStatusButton.removeClass("btn-warning");
+            awsStatusButton.addClass("btn-error");
+          }
         }
-      }
-    );
+      );
     </script>
     {{/if}}
 {{else}}
