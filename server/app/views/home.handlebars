@@ -92,6 +92,7 @@
       $.get(
         "/kubernetes/describeEc2Instances",
         function(data) {
+          console.log(data);
           const awsStatusButton = $("#awsStatusButton");
           if (data instanceof Error) {
             awsStatusButton.removeClass("btn-warning");
