@@ -195,32 +195,36 @@ router.get('/getNodesData', function(req, res) {
     });
 });
 router.get('/describeEc2Instances', function(req, res) {
-  awsGeneral.getUserInfoForDescription(req.user.username, res, req)
-    .then(function (data) {
-      if (data) {
-        const awsData = {
-          "accessKeyId": data.awstoken,
-          "secretAccessKey": data.awssecret,
-          "region": data.awsregion,
-          "s3BucketName": data.s3bucketname,
-          "awsKeyName": data.awskeyname
-        };
+  try {
+    awsGeneral.getUserInfoForDescription(req.user.username, res, req)
+      .then(function (data) {
+        if (data) {
+          const awsData = {
+            "accessKeyId": data.awstoken,
+            "secretAccessKey": data.awssecret,
+            "region": data.awsregion,
+            "s3BucketName": data.s3bucketname,
+            "awsKeyName": data.awskeyname
+          };
 
-        awsGeneral.describeInstances(awsData, req, res)
-          .then(function (data) {
-            if (data) {
-              res.send(data);
-            }
-            else
-            {
-              res.send(400);
-            }
-          });
-      }
-      else {
-        res.send(400);
-      }
-    });
+          awsGeneral.describeInstances(awsData, req, res)
+            .then(function (data) {
+              if (data) {
+                res.send(data);
+              }
+              else
+              {
+                res.send("fail");
+              }
+            });
+        }
+        else {
+          res.send("fail");
+        }
+      });
+    } catch (ex) {
+    res.send(ex);
+  }
 });
 router.get('/terminateEc2Instances', function(req, res) {
   awsGeneral.getUserInfoForDescription(req.user.username, res, req)

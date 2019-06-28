@@ -93,16 +93,16 @@
         "/kubernetes/describeEc2Instances",
         function(data) {
           const awsStatusButton = $("#awsStatusButton");
-          if (data !== 400) {
+          if (data instanceof Error) {
             awsStatusButton.removeClass("btn-warning");
-            awsStatusButton.addClass("btn-success");
-            awsStatusButton.innerHTML = awsStatusButton.innerHTML.replace(/./g,'Success');
+            awsStatusButton.addClass("btn-error");
+            awsStatusButton.html("Error");
           }
           else
           {
             awsStatusButton.removeClass("btn-warning");
-            awsStatusButton.addClass("btn-error");
-            awsStatusButton.innerHTML = awsStatusButton.innerHTML.replace(/./g,'Error');
+            awsStatusButton.addClass("btn-success");
+            awsStatusButton.html("Success");
           }
         }
       );
