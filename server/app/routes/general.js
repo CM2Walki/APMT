@@ -6,12 +6,19 @@ const passport              = require('passport');
 //===============ROUTES=================
 //displays our homepage
 router.get('/', function(req, res) {
-  funct.checkCSPSetup(req.user, req.body, res.body)
-    .then(function (user) {
-      if (user) {
-        res.render('home', {user: req.user});
-      }
-    });
+  if (req.user)
+  {
+    funct.checkCSPSetup(req.user, req.body, res.body)
+      .then(function (user) {
+        if (user) {
+          res.render('home', {user: req.user});
+        }
+      });
+  }
+  else
+  {
+    res.render('home', {user: req.user});
+  }
 });
 
 router.get('/edituserInfo', function(req, res) {
