@@ -129,6 +129,12 @@ var hbs = exphbs.create({
       toJSONawssecret: function (object) {
         return object.awssecret;
       },
+      toJSONawstokensecret: function (object) {
+        return object.awstoken.replace(/./g, '*');
+      },
+      toJSONawssecretsecret: function (object) {
+        return object.awssecret.replace(/./g, '*');
+      },
       toJSONawskeyname: function (object) {
         return object.awskeyname;
       },
