@@ -89,24 +89,20 @@
     <!-- page script -->
     {{#if user.awssetup}}
     <script>
-      $.get(
-        "/kubernetes/describeEc2Instances",
-        function(data) {
-          console.log(data);
-          const awsStatusButton = $("#awsStatusButton");
-          if (data instanceof Error) {
-            awsStatusButton.removeClass("btn-warning");
-            awsStatusButton.addClass("btn-error");
-            awsStatusButton.html("Error");
-          }
-          else
-          {
+      const awsStatusButton = $("#awsStatusButton");
+      try {
+        $.get(
+          "/kubernetes/describeEc2Instances",
+          function(data) {
             awsStatusButton.removeClass("btn-warning");
             awsStatusButton.addClass("btn-success");
             awsStatusButton.html("Success");
-          }
-        }
-      );
+          });
+      } catch(e) {
+        awsStatusButton.removeClass("btn-warning");
+        awsStatusButton.addClass("btn-error");
+        awsStatusButton.html("Error");
+      }
     </script>
     {{/if}}
 {{else}}
