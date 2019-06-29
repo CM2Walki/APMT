@@ -18,8 +18,8 @@ exports.getInstancesId = function(username) {
       .then(function (result) {
         if (null != result)
         {
-          const masterId = result["kubernetes"]["kubernetesConfig"].master.instanceid;
-          const minionIds = result["kubernetes"]["kubernetesConfig"].minionIds;
+          const masterId = result["awsKubernetes"]["kubernetesConfig"].master.instanceid;
+          const minionIds = result["awsKubernetes"]["kubernetesConfig"].minionIds;
           ids = minionIds;
           ids.push(masterId);
           deferred.resolve(ids);
@@ -45,7 +45,7 @@ exports.getMasterIp = function(username) {
       .then(function (result) {
         if (null != result)
         {
-          const ip = result["kubernetes"]["kubernetesConfig"].master.ip;
+          const ip = result["awsKubernetes"]["kubernetesConfig"].master.ip;
           deferred.resolve(ip); // username exists
         }
         else
@@ -116,7 +116,7 @@ exports.getManualRecording = function(username) {
       .then(function (result) {
         if (null != result)
         {
-          const value = result["kubernetes"]["manualRecording"];
+          const value = result["awsKubernetes"]["manualRecording"];
           deferred.resolve(value);
         }
         else
@@ -142,7 +142,7 @@ exports.setLoadTestRecording = function (username, testName, data) {
             collection.update({'userInfo.username': username},
               {
                 $set: {
-                  ["kubernetes."+testName+".enable"]: data
+                  ["awsKubernetes."+testName+".enable"]: data
                 }
               },
               {upsert: false});

@@ -106,7 +106,7 @@ exports.getServiceURL = function(username, context) {
         if (null != result)
         {
           let url;
-          if (context === "kubernetes")
+          if (context === "awsKubernetes")
           {
             url = result[context]["kubernetesConfig"].master.serviceURL;
           }

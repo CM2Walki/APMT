@@ -1,10 +1,28 @@
 <!-- views/home.handlebars -->
+<!-- jQuery 2.2.3 -->
+<script src="/plugins/jQuery/jquery-2.2.3.min.js"></script>
+<!-- Bootstrap 3.3.6 -->
+<script src="/bootstrap/js/bootstrap.min.js"></script>
+<!-- DataTables -->
+<script src="/plugins/datatables/jquery.dataTables.min.js"></script>
+<script src="/plugins/datatables/dataTables.bootstrap.min.js"></script>
+<!-- SlimScroll -->
+<script src="/plugins/slimScroll/jquery.slimscroll.min.js"></script>
+<!-- FastClick -->
+<script src="/plugins/fastclick/fastclick.js"></script>
+<!-- AdminLTE App -->
+<script src="/dist/js/app.min.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="/dist/js/demo.js"></script>
+<!-- ChartJS 1.0.1 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.1.4/Chart.min.js"></script>
+
 {{#if user}}
     <div>
         <!-- Content Header (Page header) -->
         <section >
             <h1>
-                AWS-Autoscale Dashboard | Load Test
+                Kubernetes Dashboard | Load Test
             </h1>
             <ol class="breadcrumb">
                 <li><a href="/"><i class="fa fa-dashboard"></i> Home</a></li>
@@ -42,7 +60,7 @@
                 </div>
                 <!-- /.box-header -->
                 <div class="box-body">
-                    <form action="/awsautoscale/loadtest" method="post">
+                    <form action="/awsKubernetes/loadtest" method="post">
                         <div class="form-group">
                           <div class="form-group"  style="float:left;">
                             <label class="col-sm-6 control-label">Load Test Name:</label>
@@ -109,7 +127,7 @@
                 </div>
                 <!-- /.box-header -->
                 <div class="box-body">
-                  <form  action="/awsautoscale/loadtest" method="post">
+                  <form  action="/awsKubernetes/loadtest" method="post">
                     <div class="form-group">
                       <div class="form-group" style="float:left;">
                         <label class="col-sm-6 control-label">Load Test Name:</label>
@@ -175,7 +193,7 @@
                 </div>
                 <!-- /.box-header -->
                 <div class="box-body">
-                  <form action="/awsautoscale/loadtest" method="post">
+                  <form action="/awsKubernetes/loadtest" method="post">
                     <div class="form-group">
                       <div class="form-group" style="float:left;">
                         <label class="col-sm-6 control-label">Load Test Name:</label>
@@ -240,7 +258,7 @@
                   </div>
                 </div>
                 <div class="box-body">
-                  <form action="/awsautoscale/loadtest" method="post">
+                  <form action="/awsKubernetes/loadtest" method="post">
                     <div class="form-group">
                       <div class="form-group" style="float:left;">
                         <label class="col-sm-6 control-label">Load Test Name:</label>
@@ -305,7 +323,7 @@
                       </div>
                     </div>
                     <div class="box-body">
-                      <form action="/awsautoscale/linearIncreaseLoadTest" method="post">
+                      <form action="/awsKubernetes/linearIncreaseLoadTest" method="post">
                         <div class="form-group">
                           <div class="form-group" style="float:left;">
                             <label class="col-sm-6 control-label">Load Test Name:</label>
@@ -370,7 +388,7 @@
                       </div>
                     </div>
                     <div class="box-body">
-                      <form action="/awsautoscale/linearIncreaseConstantLoadTest" method="post">
+                      <form action="/awsKubernetes/linearIncreaseConstantLoadTest" method="post">
                         <div class="form-group">
                           <div class="form-group" style="float:left;">
                             <label class="col-sm-6 control-label">Load Test Name:</label>
@@ -435,7 +453,7 @@
                       </div>
                     </div>
                     <div class="box-body">
-                      <form action="/awsautoscale/triangleLoadTest" method="post">
+                      <form action="/awsKubernetes/triangleLoadTest" method="post">
                         <div class="form-group">
                           <div class="form-group" style="float:left;">
                             <label class="col-sm-6 control-label">Load Test Name:</label>
@@ -491,7 +509,7 @@
                   <!-- DIRECT CHAT DANGER -->
                   <div class="box box-danger direct-chat direct-chat-danger">
                     <div class="box-header with-border">
-                      <h3 class="box-title">Up Down Load Test</h3>
+                      <h3 class="box-title">Random Increase Decrease Load Test</h3>
 
                       <div class="box-tools pull-right">
                         <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
@@ -500,7 +518,7 @@
                       </div>
                     </div>
                     <div class="box-body">
-                      <form action="/awsautoscale/upDownLoadTest" method="post">
+                      <form action="/awsKubernetes/upDownLoadTest" method="post">
                         <div class="form-group">
                           <div class="form-group" style="float:left;">
                             <label class="col-sm-6 control-label">Load Test Name:</label>
@@ -570,13 +588,15 @@
                     <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
                   </div>
                 </div>
+
+
                 <div class="box-body no-padding">
                   <div class="row">
                     <div class="col-md-12 col-sm-12">
                       <div class="col-lg-6">
                         <section class="panel">
                           <header class="panel-heading">
-                            AutoScale Instances
+                            AutoScale Pods
                           </header>
                           <div class="panel-body text-center">
                             <canvas id="autoscaleInstances" height="400" width="500"></canvas>
@@ -590,7 +610,7 @@
                       <div class="col-lg-6">
                         <section class="panel">
                           <header class="panel-heading">
-                            AutoScale Group CPU-Utilization
+                            Avg Group CPU-Utilization
                           </header>
                           <div class="panel-body text-center">
                             <canvas id="linecpuUtilization" height="400" width="500"></canvas>
@@ -704,7 +724,7 @@
                       <div class="col-lg-6">
                         <section class="panel">
                           <header class="panel-heading">
-                            Errors
+                            Total Errors
                           </header>
                           <div class="panel-body text-center">
                             <canvas id="barErrors" height="300" width="400"></canvas>
@@ -723,53 +743,109 @@
               </div>
             </div>
           </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="box box-primary">
+                <div class="box-header with-border">
+                  <h3 class="box-title">Pods TimeLine Graph</h3>
+
+                  <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                    </button>
+
+                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                  </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="box-body">
+                        <canvas id="podTime" height="300" width="400"></canvas>
+                      </div>
+                      <!-- /.chart-responsive -->
+                    </div>
+                    <!-- /.col -->
+                  </div>
+                  <!-- /.row -->
+                </div>
+                <!-- ./box-body -->
+
+                <!-- /.box-footer -->
+              </div>
+              <!-- /.box -->
+            </div>
+            <!-- /.col -->
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div class="box box-success">
+                <div class="box-header with-border">
+                  <h3 class="box-title">Pods TimeLine Data</h3>
+
+                  <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                    </button>
+
+                    <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                  </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="box-body">
+                        <table id="podTimeLineData"class="table table-bordered table-striped">
+                        </table>
+                      </div>
+                      <div class="overlay" id = "overlaypodTimeLineDataid">
+                        <i class="fa fa-refresh fa-spin"></i>
+                      </div>
+                      <!-- /.chart-responsive -->
+                    </div>
+                    <!-- /.col -->
+                  </div>
+                  <!-- /.row -->
+                </div>
+                <!-- ./box-body -->
+
+                <!-- /.box-footer -->
+              </div>
+              <!-- /.box -->
+            </div>
+            <!-- /.col -->
+          </div>
         </section>
         <!-- /.content -->
     </div>
-    <!-- jQuery 2.2.3 -->
-    <script src="/plugins/jQuery/jquery-2.2.3.min.js"></script>
+
     <!-- page script -->
     <script>
 
-      $.get(
-        "/awsautoscale/getcurrentData",
+      $.post(
+        "/awsKubernetes/getLoadKubernetesData",{
+          testName: "upDownLoadTest"
+        },
         function(data) {
+            console.log(data);
           //data=JSON.parse(data);
-          var instancesDataArr = data.instances.Datapoints;
-          instancesDataArr.sort(function(a, b) {
-            var aD = new Date(a.Timestamp).getTime(), bD = new Date(b.Timestamp).getTime();
-            return (aD) - (bD);
-          });
-
-          var timestamparr = [];
-          var valuearr = [];
-          for(i=0;i<instancesDataArr.length; i++) {
-              timestamparr.push(instancesDataArr[i].Timestamp);
-              valuearr.push(instancesDataArr[i].Average);
-          }
-
-          var cpuUtilizationDataArr = data.cpuUtilization.Datapoints;
-          var timestamparrCPUUti = [];
-          var valuearrCPUUTI = [];
-          cpuUtilizationDataArr.sort(function(a, b) {
-            var aD = new Date(a.Timestamp).getTime(), bD = new Date(b.Timestamp).getTime();
-            return (aD) - (bD);
-          });
-          for(i=0;i<cpuUtilizationDataArr.length; i++) {
-            timestamparrCPUUti.push(cpuUtilizationDataArr[i].Timestamp);
-            valuearrCPUUTI.push(cpuUtilizationDataArr[i].Average);
-          }
           var ctx = document.getElementById('autoscaleInstances').getContext('2d');
           var myChart = new Chart(ctx, {
             type: 'line',
             data: {
-              labels: timestamparr,
+              labels: data.timestamp,
               datasets: [{
-                label: 'Auto Scale Instances',
-                data: valuearr,
+                label: 'Desired Replicas',
+                data: data.desiredReplicas,
                 borderColor: "red",
                 fill: false
-              }]
+              },
+                {
+                  label: 'Current Replicas',
+                  data: data.currentReplicas,
+                  borderColor: "blue",
+                  fill: false
+                }]
             }
           });
           $("#overlayautoscaleInstances").hide("slow");
@@ -777,13 +853,19 @@
           var myChartLatency = new Chart(ctxLatency, {
             type: 'line',
             data: {
-              labels: timestamparrCPUUti,
+              labels: data.timestamp,
               datasets: [{
-                label: 'CPU-Utilization',
-                data: valuearrCPUUTI,
+                label: 'CPU-Utilization Current',
+                data: data.cpuPercentageCurrent,
                 borderColor: "blue",
                 fill: false
-              }
+              },
+                {
+                  label: 'CPU-Utilization Avg',
+                  data: data.cpuPercentageAvg,
+                  borderColor: "red",
+                  fill: false
+                }
               ]
             }
           });
@@ -791,11 +873,12 @@
         });
 
       $.post(
-        "/awsautoscale/getLoadTestData",{
-          testName: "triangleLoadTest"
+        "/awsKubernetes/getLoadTestData",{
+          testName: "upDownLoadTest"
         },
         function(data) {
           var allData = data;
+          console.log("All");
           console.log(allData);
 
 
@@ -807,7 +890,7 @@
               datasets: [{
                 label: 'Request Elapsed Sec',
                 data: allData.datarequestElapsed,
-                backgroundColor: "rgba(255,153,0,0.6)"
+                borderColor: "rgba(255,153,0,0.6)"
               }]
             }
           });
@@ -880,7 +963,260 @@
           $("#overlaybarErrors").hide("slow");
         }
       );
+      function updateGraph(loadTestName)
+      {
+        alert(loadTestName);
+        $.post(
+          "/awsKubernetes/getLoadTestData",{
+            testName: loadTestName
+          },
+          function(data) {
+            allData = data;
 
+            console.log(allData);
+            console.log(allData);
+            var ctx = document.getElementById('line').getContext('2d');
+            var myChart = new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: allData.requestIndex,
+                datasets: [{
+                  label: 'Request Elapsed Sec',
+                  data: allData.datarequestElapsed,
+                  borderColor: "rgba(255,153,0,0.6)"
+                }]
+              }
+            });
+
+            var ctxLatency = document.getElementById('lineLatency').getContext('2d');
+
+            var myChartLatency = new Chart(ctxLatency, {
+              type: 'line',
+              data: {
+                labels: allData.requestIndex,
+                datasets: [{
+                  label: 'Max Latency',
+                  data: allData.maxLatency,
+                  borderColor: "rgba(255,153,0,0.6)",
+                  fill: false,
+                }, {
+                  label: 'Min Latency',
+                  data: allData.minLatency,
+                  borderColor: "red",
+                  fill: false,
+                },{
+                  label: 'Mean Latency',
+                  data: allData.meanLatency,
+                  borderColor: "#54D",
+                  fill: false,
+                }
+                ]
+              }
+            });
+
+            var ctxLatency = document.getElementById('barRPS').getContext('2d');
+            var myChartLatency = new Chart(ctxLatency, {
+              type: 'bar',
+              data: {
+                labels: allData.requestIndex,
+                datasets: [{
+                  label: 'Requests Per Second',
+                  data: allData.barRPS,
+                  backgroundColor: "54D"
+                }
+                ]
+              }
+            });
+            var ctxlatencyTotal = document.getElementById('lineLatencyTotal').getContext('2d');
+            var myChartLatencyTotal = new Chart(ctxlatencyTotal, {
+              type: 'line',
+              data: {
+                labels: allData.requestIndex,
+                datasets: [{
+                  label: 'Total Latency Time (in Sec)',
+                  data: allData.totalTimeSeconds,
+                  backgroundColor: "#54F5B7"
+                }]
+              }
+            });
+            var ctxErrors = document.getElementById('barErrors').getContext('2d');
+            var myChartErrors = new Chart(ctxErrors, {
+              type: 'bar',
+              data: {
+                labels: allData.requestIndex,
+                datasets: [{
+                  label: 'Errors',
+                  data: allData.errors,
+                  backgroundColor: "#F5C454"
+                }
+                ]
+              }
+            });
+          }
+        );
+      }
+      $.post(
+        "/awsKubernetes/getLoadTestTimelineData",{
+          testName: "upDownLoadTest"
+        },
+        function(data) {
+          console.log(data);
+          var result = $.map(data, function(val, key) {
+
+            if(val.kind == "Pod")
+            {
+              var obj ={
+                name: key
+              };
+
+              if(val.Scheduled)
+              {
+                obj.scheduled = val.Scheduled.firstTimestamp;
+              }
+              if(val.FailedScheduling)
+              {
+                obj.FailedScheduling = val.FailedScheduling.firstTimestamp;
+              }
+              if(val.SuccessfulMountVolume)
+              {
+                obj.SuccessfulMountVolume = val.SuccessfulMountVolume.firstTimestamp;
+              }
+              if(val.Pulling)
+              {
+                obj.Pulling = val.Pulling.firstTimestamp;
+              }
+              if(val.Pulled)
+              {
+                obj.Pulled = val.Pulled.firstTimestamp;
+              }
+              if(val.Created)
+              {
+                obj.Created = val.Created.firstTimestamp;
+              }
+              if(val.Started)
+              {
+                obj.Started = val.Started.firstTimestamp;
+              }
+              if(val.Killing)
+              {
+                obj.Killing = val.Killing.firstTimestamp;
+              }
+
+              return obj;
+            }
+          });
+          function getRandomColor() {
+            var letters = '0123456789ABCDEF';
+            var color = '#';
+            for (var i = 0; i < 6; i++) {
+              color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+          }
+          var dataset=[];
+          var allData = [];
+          for(i=0;i<result.length;i++)
+          {
+            var row = [];
+            var row2 = [];
+            var set = {};
+            row.push(result[i].FailedScheduling);
+            row.push(result[i].scheduled);
+            row.push(result[i].SuccessfulMountVolume);
+            row.push(result[i].Pulling);
+            row.push(result[i].Pulled);
+            row.push(result[i].Created);
+            row.push(result[i].Started);
+            row.push(result[i].Killing);
+
+            row2.push(result[i].name);
+            if(result[i].FailedScheduling)
+              row2.push(result[i].FailedScheduling);
+            else
+              row2.push('none');
+            if(result[i].scheduled)
+              row2.push(result[i].scheduled);
+            else
+              row2.push('none');
+            if(result[i].SuccessfulMountVolume)
+              row2.push(result[i].SuccessfulMountVolume);
+            else
+              row2.push('none');
+            if(result[i].Pulling)
+              row2.push(result[i].Pulling);
+            else
+              row2.push('none');
+            if(result[i].Pulled)
+              row2.push(result[i].Pulled);
+            else
+              row2.push('none');
+            if(result[i].Created)
+              row2.push(result[i].Created);
+            else
+              row2.push('none');
+            if(result[i].Started)
+              row2.push(result[i].Started);
+            else
+              row2.push('none');
+            if(result[i].Killing)
+              row2.push(result[i].Killing);
+            else
+              row2.push('none');
+
+
+            set = {
+              label: result[i].name,
+              data: row,
+              borderColor: getRandomColor(),
+              fill: false
+            };
+
+            dataset.push(set);
+            allData.push(row2);
+          }
+
+          var podTime = document.getElementById('podTime').getContext('2d');
+          var myChartLatency = new Chart(podTime, {
+            type: 'line',
+            data: {
+              labels: ["Failed","scheduled","MountVol","Pulling","Pulled", "Created", "Started","Killing" ],
+              datasets: dataset
+            },
+            options: {
+              scales: {
+                yAxes: [{
+                  ticks: {
+                    beginAtZero: false,
+                    //scaleStepWidth:100
+                  }
+                }]
+              }
+            }
+          });
+          var titlesArr = [];
+
+          titlesArr.push({"title": "name"});
+          titlesArr.push({"title": "FailedScheduling"});
+          titlesArr.push({"title": "scheduled"});
+          titlesArr.push({"title": "SuccessfulMountVolume"});
+          titlesArr.push({"title": "Pulling"});
+          titlesArr.push({"title": "Pulled"});
+          titlesArr.push({"title": "Created"});
+          titlesArr.push({"title": "Started"});
+          titlesArr.push({"title": "Killing"});
+
+
+          console.log("Success Send Description");
+          var dataAll = {
+            "columns": titlesArr,
+            "data": allData
+          };
+          //data=JSON.parse(data);
+          $("#podTimeLineData").DataTable(dataAll);
+          $("#overlaypodTimeLineDataid").hide("slow");
+          console.log(result);
+        }
+      );
     </script>
 
 {{else}}
@@ -896,4 +1232,3 @@
   </div>
 
 {{/if}}
-

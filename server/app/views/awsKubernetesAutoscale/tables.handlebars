@@ -4,7 +4,7 @@
         <!-- Content Header (Page header) -->
         <section class="content-header">
             <h1>
-              Kubernetes Data
+              AWS Autoscale + Kubernetes Data
             </h1>
             <ol class="breadcrumb">
                 <li><a href="/"><i class="fa fa-dashboard"></i> Home</a></li>
@@ -213,7 +213,7 @@
     <script>
 
       $.get(
-        "/kubernetes/getPodsList",
+        "/awsKubernetesAutoscale/getPodsList",
         function(data) {
           //data=JSON.parse(data);
           $("#podData").DataTable(data[0]);
@@ -227,7 +227,7 @@
       );
 
       $.get(
-        "/kubernetes/getServicesList",
+        "/awsKubernetesAutoscale/getServicesList",
         function(data) {
           //data=JSON.parse(data);
           $("#serviceData").DataTable( data[0] );
@@ -235,7 +235,7 @@
         }
       );
       $.get(
-        "/kubernetes/getReplicationControllers",
+        "/awsKubernetesAutoscale/getReplicationControllers",
         function(data) {
           //data=JSON.parse(data);
           $("#rpcData").DataTable(data[0]);
@@ -243,7 +243,7 @@
         }
       );
       $.get(
-        "/kubernetes/geNodesData",
+        "/awsKubernetesAutoscale/getNodesData",
         function(data) {
           //data=JSON.parse(data);
           $("#nodeData").DataTable( data[0] );
@@ -253,7 +253,7 @@
         }
       );
       $.get(
-        "/kubernetes/getAutoScalingList",
+        "/awsKubernetesAutoscale/getAutoScalingList",
         function(data) {
           //data=JSON.parse(data);
           $("#hpaData").DataTable( data[0] );

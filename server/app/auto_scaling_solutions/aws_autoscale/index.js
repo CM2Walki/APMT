@@ -276,8 +276,8 @@ exports.deployAutoscaler = function(username, awsDeployData, awsData, req, res) 
       });
     }           // successful response
   });
-  res.render('awsautoscale/success', {
-    layout: '../awsautoscale/layouts/main',
+  res.render('awsAutoscale/success', {
+    layout: '../awsAutoscale/layouts/main',
     user: username,
     dataForm: req.body,
     dataClient: "Request Sent to Server for Deployment"

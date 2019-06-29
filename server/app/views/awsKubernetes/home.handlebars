@@ -22,7 +22,7 @@
         <!-- Content Header (Page header) -->
         <section >
             <h1>
-                Kubernetes Dashboard
+                AWS-Kubernetes Dashboard
             </h1>
             <ol class="breadcrumb">
                 <li><a href="/"><i class="fa fa-dashboard"></i> Home</a></li>
@@ -68,12 +68,12 @@
                                   <table class="table table-bordered text-center">
                                   <tr>
                                     <td>
-                                      <a href="/kubernetes/deploykubernetesAws" class="btn btn-block btn-primary">Deploy</a>
+                                      <a href="/awsKubernetes/deploykubernetesAws" class="btn btn-block btn-primary">Deploy</a>
                                     </td>
                                   </tr>
                                   <tr>
                                     <td>
-                                      <a href="/kubernetes/terminateEc2Instances" class="btn btn-block btn-success" style="background-color: darkred">Terminate</a>
+                                      <a href="/awsKubernetes/terminateEc2Instances" class="btn btn-block btn-danger">Terminate</a>
                                     </td>
                                   </tr>
                                   </tr>
@@ -104,7 +104,7 @@
 
 
     $.get(
-      "/kubernetes/describeEc2Instances",
+      "/awsKubernetes/describeEc2Instances",
       function(data) {
         //data=JSON.parse(data);
         $("#instanceData").DataTable(data[0]);

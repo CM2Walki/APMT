@@ -63,7 +63,7 @@
     <script>
 
       $.get(
-        "/awskubernetes/getTimeLineData",
+        "/awsKubernetesAutoscale/getTimeLineData",
         function(data) {
           //data=JSON.parse(data);
           $("#timeLineData").DataTable(data[0]);

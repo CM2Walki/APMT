@@ -4,13 +4,13 @@ exports.getMasterScript= function(kubeData, awsData) {
     'iptables -I INPUT -j ACCEPT \n' +
     'apt-get update && apt-get install -y apt-transport-https \n' +
     'curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \n' +
-    'cat <<EOF >/etc/apt/sources.list.d/kubernetes.list\n' +
-    'deb http://apt.kubernetes.io/ kubernetes-xenial main\n' +
+    'cat <<EOF >/etc/apt/sources.list.d/awsKubernetes.list\n' +
+    'deb http://apt.kubernetes.io/ awsKubernetes-xenial main\n' +
     'EOF\n' +
     'apt-get update\n' +
     'apt-get install -y docker-engine \n' +
     'apt-get install -y docker.io \n' +
-    'apt-get install -y kubelet kubeadm kubernetes-cni \n' +
+    'apt-get install -y kubelet kubeadm awsKubernetes-cni \n' +
     'apt-get install -y s3cmd \n' +
     'echo -e "access_key=' + awsData.accessKeyId + '\nsecret_key=' + awsData.secretAccessKey + '" > /root/.s3cfg \n' +
     'kubeadm token generate  > token.txt \n' +
@@ -23,12 +23,12 @@ exports.getMasterScript= function(kubeData, awsData) {
     'wget -O ip.txt http://s3.amazonaws.com/' + awsData.s3BucketName + '/ip.txt \n' +
     'kubeadm init --token "$(< token.txt)" \n' +
     'su ubuntu \n' +
-    'sudo cp /etc/kubernetes/admin.conf $HOME/ \n' +
+    'sudo cp /etc/awsKubernetes/admin.conf $HOME/ \n' +
     'sudo chown $(id -u):$(id -g) $HOME/admin.conf \n' +
     'export KUBECONFIG=$HOME/admin.conf \n' +
     'echo "export KUBECONFIG=$HOME/admin.conf\" >> ~/.bashrc \n' +
     'sudo source ~/.bashrc \n' +
-    'kubectl taint nodes --all node-role.kubernetes.io/master- \n' +
+    'kubectl taint nodes --all node-role.awsKubernetes.io/master- \n' +
     'kubectl apply -f https://git.io/weave-kube-1.6 \n' +
     'kubectl create -f https://git.io/kube-dashboard \n' +
     'kubectl create serviceaccount heapster --namespace=kube-system \n' +

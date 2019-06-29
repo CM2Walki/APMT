@@ -8,9 +8,9 @@ const app                           = express();
 const session                       = require("express-session");
 const funct                         = require("./functions");
 const routes                        = require("./routes/general");
-const kubernetesRoutes              = require("./routes/kubernetes");
+const kubernetesRoutes              = require("./routes/awsKubernetes");
 const awsAutoscaleRoutes            = require("./routes/awsAutoscale");
-const awsAutoscaleKubernetesRoutes  = require("./routes/awskubernetes");
+const awsAutoscaleKubernetesRoutes  = require("./routes/awsKubernetesAutoscale");
 //===============PASSPORT=================
 
 // Passport session setup.
@@ -153,11 +153,11 @@ app.set("views", path.join(__dirname, "views/"));
 
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/awskubernetes",awsAutoscaleKubernetesRoutes);
+app.use("/awsKubernetesAutoscale",awsAutoscaleKubernetesRoutes);
 
-app.use("/kubernetes",kubernetesRoutes);
+app.use("/awsKubernetes",kubernetesRoutes);
 
-app.use("/awsautoscale",awsAutoscaleRoutes);
+app.use("/awsAutoscale",awsAutoscaleRoutes);
 
 app.use("/",routes);
 

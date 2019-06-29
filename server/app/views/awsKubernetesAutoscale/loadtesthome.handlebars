@@ -45,7 +45,7 @@
                 </div>
                 <!-- /.box-header -->
                 <div class="box-body">
-                  <form action="/awskubernetes/loadtest" method="post">
+                  <form action="/awsKubernetesAutoscale/loadtest" method="post">
                     <div class="form-group">
                       <div class="form-group"  style="float:left;">
                         <label class="col-sm-6 control-label">Load Test Name:</label>
@@ -112,7 +112,7 @@
                 </div>
                 <!-- /.box-header -->
                 <div class="box-body">
-                  <form  action="/awskubernetes/loadtest" method="post">
+                  <form  action="/awsKubernetesAutoscale/loadtest" method="post">
                     <div class="form-group">
                       <div class="form-group" style="float:left;">
                         <label class="col-sm-6 control-label">Load Test Name:</label>
@@ -178,7 +178,7 @@
                 </div>
                 <!-- /.box-header -->
                 <div class="box-body">
-                  <form action="/awskubernetes/loadtest" method="post">
+                  <form action="/awsKubernetesAutoscale/loadtest" method="post">
                     <div class="form-group">
                       <div class="form-group" style="float:left;">
                         <label class="col-sm-6 control-label">Load Test Name:</label>
@@ -243,7 +243,7 @@
                   </div>
                 </div>
                 <div class="box-body">
-                  <form action="/awskubernetes/loadtest" method="post">
+                  <form action="/awsKubernetesAutoscale/loadtest" method="post">
                     <div class="form-group">
                       <div class="form-group" style="float:left;">
                         <label class="col-sm-6 control-label">Load Test Name:</label>
@@ -308,7 +308,7 @@
                   </div>
                 </div>
                 <div class="box-body">
-                  <form action="/awskubernetes/linearIncreaseLoadTest" method="post">
+                  <form action="/awsKubernetesAutoscale/linearIncreaseLoadTest" method="post">
                     <div class="form-group">
                       <div class="form-group" style="float:left;">
                         <label class="col-sm-6 control-label">Load Test Name:</label>
@@ -373,7 +373,7 @@
                   </div>
                 </div>
                 <div class="box-body">
-                  <form action="/awskubernetes/linearIncreaseConstantLoadTest" method="post">
+                  <form action="/awsKubernetesAutoscale/linearIncreaseConstantLoadTest" method="post">
                     <div class="form-group">
                       <div class="form-group" style="float:left;">
                         <label class="col-sm-6 control-label">Load Test Name:</label>
@@ -438,7 +438,7 @@
                   </div>
                 </div>
                 <div class="box-body">
-                  <form action="/awskubernetes/triangleLoadTest" method="post">
+                  <form action="/awsKubernetesAutoscale/triangleLoadTest" method="post">
                     <div class="form-group">
                       <div class="form-group" style="float:left;">
                         <label class="col-sm-6 control-label">Load Test Name:</label>
@@ -503,7 +503,7 @@
                   </div>
                 </div>
                 <div class="box-body">
-                  <form action="/awskubernetes/upDownLoadTest" method="post">
+                  <form action="/awsKubernetesAutoscale/upDownLoadTest" method="post">
                     <div class="form-group">
                       <div class="form-group" style="float:left;">
                         <label class="col-sm-6 control-label">Load Test Name:</label>
@@ -871,7 +871,7 @@
   <!-- page script -->
   <script>
     $.post(
-      "/awskubernetes/getLoadKubernetesData",{
+      "/awsKubernetesAutoscale/getLoadKubernetesData",{
         testName: "linearLoadTest"
       },
       function(data) {
@@ -908,7 +908,7 @@
       });
 
     $.post(
-      "/awskubernetes/getautoScaleData",{
+      "/awsKubernetesAutoscale/getautoScaleData",{
         testName: "linearLoadTest"
       },
       function(data) {
@@ -942,7 +942,7 @@
       });
 
     $.post(
-      "/awskubernetes/getLoadTestData",{
+      "/awsKubernetesAutoscale/getLoadTestData",{
         testName: "linearLoadTest"
       },
       function(data) {
@@ -1017,7 +1017,7 @@
       }
     );
     $.post(
-      "/awskubernetes/getLoadTestTimelineData",{
+      "/awsKubernetesAutoscale/getLoadTestTimelineData",{
         testName: "linearLoadTest"
       },
       function(data) {

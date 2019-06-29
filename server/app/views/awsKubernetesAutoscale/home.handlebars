@@ -28,11 +28,9 @@
                 <li class="active">Dashboard</li>
             </ol>
         </section>
-
         <!-- Main content -->
         <section class="content">
             <!-- Info boxes -->
-
             <div class="row">
                 <div class="col-md-12">
                     <div class="box">
@@ -45,7 +43,7 @@
 
                                 <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
                             </div>
-                        </div>valueresponsetimeData
+                        </div>
                         <!-- /.box-header -->
                         <div class="box-body">
                             <div class="row">
@@ -67,12 +65,12 @@
                                   <table class="table table-bordered text-center">
                                   <tr>
                                     <td>
-                                      <a href="/awskubernetes/getUserInfoForDeploy" class="btn btn-block btn-primary">Deploy</a>
+                                      <a href="/awsKubernetesAutoscale/getUserInfoForDeploy" class="btn btn-block btn-primary">Deploy</a>
                                     </td>
                                   </tr>
                                   <tr>
                                     <td>
-                                      <a href="/awskubernetes/terminate" class="btn btn-block btn-success" style="background-color: darkred">Terminate</a>
+                                      <a href="/awsKubernetesAutoscale/terminate" class="btn btn-block btn-danger">Terminate</a>
                                     </td>
                                   </tr>
                                   </table>
@@ -354,7 +352,7 @@
     {
         alert(loadTestName);
       $.post(
-        "/awskubernetes/getLoadTestData",{
+        "/awsKubernetesAutoscale/getLoadTestData",{
           testName: loadTestName
         },
         function(data) {
@@ -442,7 +440,7 @@
     }
 
     $.get(
-      "/awskubernetes/describeEc2Instances",
+      "/awsKubernetesAutoscale/describeEc2Instances",
       function(data) {
         //data=JSON.parse(data);
         $("#instanceData").DataTable(data[0]);
@@ -451,7 +449,7 @@
       }
     );
       $.get(
-        "/awskubernetes/describeAwsAutoscaleGroups",
+        "/awsKubernetesAutoscale/describeAwsAutoscaleGroups",
         function(data) {
           //data=JSON.parse(data);
           $("#autoscalegroupData").DataTable(data[0]);
@@ -460,7 +458,7 @@
         }
       );
       $.get(
-        "/awskubernetes/describeAwsLoadBalancer",
+        "/awsKubernetesAutoscale/describeAwsLoadBalancer",
         function(data) {
           //data=JSON.parse(data);
           $("#awsloadBalancer").DataTable(data[0]);
@@ -481,7 +479,7 @@
       var myChartErrorResponsecount;
       function callUpdate(){
         $.get(
-          "/awskubernetes/getcurrentData",
+          "/awsKubernetesAutoscale/getcurrentData",
           function(data) {
             // Clear previous
             if (myChart)

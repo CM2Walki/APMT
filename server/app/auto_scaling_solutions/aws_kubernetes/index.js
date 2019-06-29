@@ -1,558 +1,176 @@
-const Q                                         = require('q');
-const request                                   = require('request');
-const AWS                                       = require('aws-sdk');
-const awsAutoscaleKubernetesMongoFunctions      = require('./awsAutoscaleKubernetesMongoFunctions');
-const kubeMaster                                = require('./masterScript');
+const Q                       = require('q');
+const http                    = require('http');
+const request                 = require('request');
+const AWS                     = require('aws-sdk');
+const kubeMaster              = require('./masterScript');
+const kubeMinion              = require('./minionScript');
+const kubeMongoFunctions      = require('./kubeMongoFunctions');
 const awsGeneral                                = require("./../../functions/awsgeneral");
 
-const routeContext = 'awsAutoScale';
+const routeContext = 'awsKubernetes';
 
-exports.deployAutoscaler = function(username, awsDeployData,kubeData, awsData,req, res) {
+exports.deployOnAws = function (username, kubeData, awsData,req, res) {
   var ec2 = new AWS.EC2({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
   var cloudwatch = new AWS.CloudWatch({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
   var autoscaling = new AWS.AutoScaling({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
   var elbv2 = new AWS.ELBv2({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2015-12-01'});
-  var deferred = Q.defer();
-  try {
-    var paramsLaunchConfiguration = {
-      ImageId: awsDeployData.image,
-      InstanceType: awsDeployData.launchConfig.typeInst,
-      InstanceMonitoring: {
-        Enabled: true
-      },
-      SecurityGroups: awsData.securityId,
-      LaunchConfigurationName: awsDeployData.launchConfig.name,
-      KeyName: awsData.awsKeyName,
-      UserData: kubeMaster.getMasterScript(kubeData, awsData)
-    };
 
-    var paramsTargetGroup = {
-      Name: awsDeployData.targetGroupConfig.name, /* required */
-      Port: 80, /* required */
-      Protocol: 'HTTP', /* required */
-      VpcId: '',//'vpc-7552e212', /* required */
-      Matcher: {
-        HttpCode: '200' /* required */
-      },
-    };
-    var paramsLoadBalancer = {
-      Name: awsDeployData.loadBal.name, /* required */
-      Subnets: awsDeployData.loadBal.subnetsArr,
-      //[ /* required */
-      //'subnet-fd25cdb4',
-      //'subnet-d92dfbbe'
-      /* more items */
-      //],
-      Tags: [
-        {
-          Key: 'Name', /* required */
-          Value: 'LoadBal'
-        },
-        /* more items */
-      ],
-      SecurityGroups: awsData.securityId,
-    };
-    var paramsListener = {
-      DefaultActions: [/* required */
-        {
-          TargetGroupArn: '', /* required */
-          Type: 'forward' /* required */
-        },
-        /* more items */
-      ],
-      LoadBalancerArn: '', /* required */
-      Port: 80, /* required */
-      Protocol: 'HTTP', /* required */
-    };
-    var paramsAutoScaler = {
-      AutoScalingGroupName: awsDeployData.autoScale.name,
-      LaunchConfigurationName: awsDeployData.launchConfig.name,
-      MaxSize: 1,
-      MinSize: 1,
-      VPCZoneIdentifier: awsDeployData.autoScale.subnet,//"subnet-fd25cdb4",
-      TargetGroupARNs: [],
-      TerminationPolicies: [
-        'NewestInstance'
-      ]
-    };
-    var paramsAutoScalingMetricsEnable = {
-      AutoScalingGroupName: awsDeployData.autoScale.name,
-      Granularity: "1Minute"
-    };
-    var paramsAutoScalingUpPolicy = {
-      AdjustmentType: awsDeployData.autoScale.upPolicy.adjustmentType,//'ExactCapacity', /* required */
-      AutoScalingGroupName: awsDeployData.autoScale.name, /* required */
-      PolicyName: awsDeployData.autoScale.upPolicy.name, /* required */
-      Cooldown: 0,
-      EstimatedInstanceWarmup: 0,
-      MetricAggregationType: awsDeployData.autoScale.upPolicy.metricAggregationType,//'Average',
-      // MinAdjustmentMagnitude: 1,
-      PolicyType: awsDeployData.autoScale.upPolicy.policyType,//'StepScaling',
-      StepAdjustments: [
-        {
-          ScalingAdjustment: awsDeployData.autoScale.upPolicy.scalingAdjustment, /* required */
-          MetricIntervalLowerBound: 0.0,
-          //MetricIntervalUpperBound: 0.0
-        },
-        /* more items */
-      ]
-    };
-    var paramsAutoScalingDownPolicy = {
-      AdjustmentType: awsDeployData.autoScale.downPolicy.adjustmentType,//'ExactCapacity', /* required */
-      AutoScalingGroupName: awsDeployData.autoScale.name, /* required */
-      PolicyName: awsDeployData.autoScale.downPolicy.name, /* required */
-      Cooldown: 0,
-      EstimatedInstanceWarmup: 0,
-      MetricAggregationType: awsDeployData.autoScale.downPolicy.metricAggregationType,//'Average',
-      // MinAdjustmentMagnitude: 1,
-      PolicyType: awsDeployData.autoScale.downPolicy.policyType,//'StepScaling',
-      StepAdjustments: [
-        {
-          ScalingAdjustment: awsDeployData.autoScale.downPolicy.scalingAdjustment, /* required */
-          //MetricIntervalLowerBound: 0.0,
-          MetricIntervalUpperBound: 0.0
-        },
-        /* more items */
-      ]
-    };
-    var paramsAutoScalingUpPolicyAlarm = {
-      AlarmName: awsDeployData.autoScale.upPolicy.alarm.name, /* required */
-      ComparisonOperator: awsDeployData.autoScale.upPolicy.alarm.ComparisonOperator,//'GreaterThanOrEqualToThreshold', /* required */
-      EvaluationPeriods: 2, /* required */
-      MetricName: awsDeployData.autoScale.upPolicy.alarm.metricName,//'CPUUtilization', /* required */
-      Namespace: 'AWS/EC2', /* required */
-      Period: 300, /* required */
-      AlarmActions: [],
-      Dimensions: [
-        {
-          Name: 'AutoScalingGroupName', /* required */
-          Value: awsDeployData.autoScale.name /* required */
-        },
-        /* more items */
-      ],
-      Threshold: awsDeployData.autoScale.upPolicy.alarm.threshold, /* required */
-      ActionsEnabled: true,
-      AlarmDescription: awsDeployData.autoScale.upPolicy.alarm.description,//'Increase CPU utilization above 70',
-      Statistic: awsDeployData.autoScale.upPolicy.alarm.Statistic,//'Average',
-      Unit: awsDeployData.autoScale.upPolicy.alarm.Unit//'Percent'
-    };
-    var paramsAutoScalingDownPolicyAlarm = {
-      AlarmName: awsDeployData.autoScale.downPolicy.alarm.name, /* required */
-      ComparisonOperator: awsDeployData.autoScale.downPolicy.alarm.ComparisonOperator,//'GreaterThanOrEqualToThreshold', /* required */
-      EvaluationPeriods: 2, /* required */
-      MetricName: awsDeployData.autoScale.downPolicy.alarm.metricName, /* required */
-      Namespace: 'AWS/EC2', /* required */
-      Period: 300, /* required */
-      AlarmActions: [],
-      Dimensions: [
-        {
-          Name: 'AutoScalingGroupName', /* required */
-          Value: awsDeployData.autoScale.name /* required */
-        },
-        /* more items */
-      ],
-      Threshold: awsDeployData.autoScale.downPolicy.alarm.threshold, /* required */
-      ActionsEnabled: true,
-      AlarmDescription: awsDeployData.autoScale.downPolicy.alarm.description,//'Increase CPU utilization above 70',
-      Statistic: awsDeployData.autoScale.downPolicy.alarm.Statistic,//'Average',
-      Unit: awsDeployData.autoScale.downPolicy.alarm.Unit//'Percent'
-    };
-  }catch(err){
-    console.log(err);
-  }
+//First Create Master Node wait for around 2 minutes and then create Minion Node
+  // Master Config
+  var paramsMaster = {
+    ImageId: kubeData.master.image,
+    InstanceType: kubeData.master.typeInst,
+    SecurityGroupIds: awsData.securityId,
+    Monitoring: {
+      Enabled: true /* required */
+    },
+    MinCount:kubeData.master.numInst,
+    MaxCount:kubeData.master.numInst,
+    KeyName: awsData.awsKeyName,
+    UserData: kubeMaster.getMasterScript(kubeData, awsData)
+  };
 
-  elbv2.createLoadBalancer(paramsLoadBalancer, function(err, loadBalancerData) {
-    if (err) console.log(err, err.stack); // an error occurred
-    else
+  var instanceIdMaster = "";
+
+  ec2.runInstances(paramsMaster, function(err, data) {
+    if (err) {
+      console.log("Could not create Master instance", err);
+      return;
+    }
+    instanceIdMaster = data.Instances[0].InstanceId;
+    // Add tags to the instance
+    if(kubeData.master.name == "")
     {
-      console.log(loadBalancerData);
-      paramsTargetGroup.VpcId = loadBalancerData.LoadBalancers[0].VpcId;
-      paramsListener.LoadBalancerArn= loadBalancerData.LoadBalancers[0].LoadBalancerArn;
-      elbv2.createTargetGroup(paramsTargetGroup, function(err, data) {
-        if (err) console.log(err, err.stack); // an error occurred
-        else
-        {
-          console.log(data);
+      kubeData.master.name = "MasterNode";
+    }
+    var paramsMasterTag = {Resources: [instanceIdMaster], Tags: [{
+        Key: 'Name',
+        Value: kubeData.master.name
+      }]
+    };
 
-          paramsListener.DefaultActions[0].TargetGroupArn= data.TargetGroups[0].TargetGroupArn;
-          paramsAutoScaler.TargetGroupARNs.push(data.TargetGroups[0].TargetGroupArn);
-
-          elbv2.createListener(paramsListener, function(err, data) {
-            if (err) console.log(err, err.stack); // an error occurred
-            else
-            {
-              autoscaling.createLaunchConfiguration(paramsLaunchConfiguration, function (err, data) {
-                if (err) console.log(err, err.stack); // an error occurred
-                else {
-                  // successful response
-                  console.log(data);
-                  autoscaling.createAutoScalingGroup(paramsAutoScaler, function (err, data) {
-                    if (err) console.log(err, err.stack); // an error occurred
-                    else {
-                      console.log(data);
-                      setTimeout(function(){
-
-                        var params = {
-                          AutoScalingGroupName: awsDeployData.autoScale.name,
-                          MaxSize: awsDeployData.autoScale.maxInst,
-                          MinSize: awsDeployData.autoScale.minInst
-                        };
-                        autoscaling.updateAutoScalingGroup(params, function(err, data) {
-                          if (err) console.log(err, err.stack); // an error occurred
-                          else     console.log(data);           // successful response
-                        });
-
-                      }, 140000);
-
-                      var DescribbeAutoScalingarams = {
-                        InstanceIds: [ ]
-                      };
-                      setTimeout(function() {
-                        autoscaling.describeAutoScalingInstances(DescribbeAutoScalingarams, function (err, data) {
-                          if (err) console.log(err, err.stack); // an error occurred
-                          else {
-
-                            console.log(data);
-                            var masterInstId = data.AutoScalingInstances[0].InstanceId;
-
-                            var paramMasterDescription = {
-                              DryRun: false,
-                              InstanceIds: [masterInstId]
-                            };
-                            ec2.describeInstances(paramMasterDescription, function (err, data) {
-                              if (err) {
-                                console.log("Error", err.stack);
-                              } else {
-                                var awsMasterNode = [];
-                                var instance = data.Reservations[0];
-                                var serviceURL = "";
-                                var urlService = "http://" + instance["Instances"][0]["PublicIpAddress"] + ":8001/api/v1/services/";
-                                var max = 200;
-                                var retry = (function () {
-                                  var count = 0;
-                                  return function (next) {
-                                    console.log(urlService);
-                                    request({
-                                      url: urlService,
-                                      method: "GET",
-                                      json: true,
-                                      headers: {
-                                        "content-type": "application/json",
-                                      }
-                                    }, function (error, response, body) {
-                                      if (error || response.statusCode !== 200 || body.items == "undefined") {
-                                        console.log('fail');
-
-                                        if (count++ < max) {
-                                          return setTimeout(function () {
-                                            retry(next);
-                                          }, 2500);
-                                        } else {
-                                          return next(new Error('max retries reached'));
-                                        }
-                                      }
-                                      console.log('success');
-                                      next(null, body);
-                                    });
-                                  }
-                                })();
-                                var portNumber = '';
-                                retry(function (err, body) {
-                                  var servicesArr = body.items;
-                                  for (i = 0; i < servicesArr.length; i++) {
-                                    if (servicesArr[i]["metadata"]['name'].indexOf(kubeData.application.name) !== -1) {
-                                      portNumber = servicesArr[i]["spec"]["ports"][0].nodePort;
-                                      serviceURL = url = "http://" + instance["Instances"][0]["PublicIpAddress"] + ":" + portNumber + "/api/test";
-                                      console.log(serviceURL);
-                                      var paramsTargetGroup = {
-                                        Name: awsDeployData.targetGroupConfig.name +'main', /* required */
-                                        Port: portNumber, /* required */
-                                        Protocol: 'HTTP', /* required */
-                                        VpcId: '',//'vpc-7552e212', /* required */
-                                        Matcher: {
-                                          HttpCode: '200' /* required */
-                                        },
-                                      };
-                                      var paramsListener = {
-                                        DefaultActions: [/* required */
-                                          {
-                                            TargetGroupArn: '', /* required */
-                                            Type: 'forward' /* required */
-                                          },
-                                          /* more items */
-                                        ],
-                                        LoadBalancerArn: '', /* required */
-                                        Port: portNumber, /* required */
-                                        Protocol: 'HTTP', /* required */
-                                      };
-
-                                      paramsTargetGroup.VpcId = loadBalancerData.LoadBalancers[0].VpcId;
-                                      paramsListener.LoadBalancerArn = loadBalancerData.LoadBalancers[0].LoadBalancerArn;
-                                      elbv2.createTargetGroup(paramsTargetGroup, function (err, TGdata) {
-                                        if (err) console.log(err, err.stack); // an error occurred
-                                        else {
-                                          console.log(data);
-
-                                          paramsListener.DefaultActions[0].TargetGroupArn = TGdata.TargetGroups[0].TargetGroupArn;
-                                          elbv2.createListener(paramsListener, function (err, data) {
-                                            if (err) console.log(err, err.stack); // an error occurred
-                                            else {
-                                              var params = {
-                                                AutoScalingGroupName: awsDeployData.autoScale.name,
-                                                TargetGroupARNs: [TGdata.TargetGroups[0].TargetGroupArn]
-                                              };
-                                              autoscaling.attachLoadBalancerTargetGroups(params, function (err, data) {
-                                                if (err) console.log(err, err.stack); // an error occurred
-                                                else     console.log(data);           // successful response
-                                              });
-                                              var ipConfigData = {
-                                                "Masterip": instance["Instances"][0]["PublicIpAddress"],
-                                                "serviceURL": serviceURL,
-                                                "listener": paramsListener,
-                                                "target": paramsTargetGroup,
-                                                "LoadBalIp": loadBalancerData.LoadBalancers[0].DNSName + ":" + portNumber
-                                              }
-                                              awsAutoscaleKubernetesMongoFunctions.addFurtherConfigData(username, ipConfigData)
-                                                .then(function (added) {
-                                                  if (added) {
-                                                    console.log("added ipconfig informtion");
-                                                  }
-                                                  else {
-                                                    console.log("user not found");
-                                                  }
-                                                });
-                                            }
-                                          });
-                                        }
-                                      });
-                                      break;
-                                    }
-                                  }
-                                });
-                              }
-                            });
-                          }
-                        });
-                      },140000);
-                      setTimeout(function(){
-
-                        autoscaling.enableMetricsCollection(paramsAutoScalingMetricsEnable, function(err, data) {
-                          if (err) console.log(err, err.stack); // an error occurred
-                          else     console.log(data);           // successful response
-                        });
-
-                        autoscaling.putScalingPolicy(paramsAutoScalingUpPolicy, function (err, data) {
-                          if (err) console.log(err, err.stack); // an error occurred
-                          else {
-                            console.log(data.PolicyARN);
-                            paramsAutoScalingUpPolicyAlarm.AlarmActions.push(data.PolicyARN);
-                            cloudwatch.putMetricAlarm(paramsAutoScalingUpPolicyAlarm, function (err, data) {
-                              if (err) console.log(err, err.stack); // an error occurred
-                              else {
-                                console.log(data);
-                              }
-                            });
-                          }// successful response
-                        });
-                      }, 4000);
-                      setTimeout(function(){
-                        autoscaling.putScalingPolicy(paramsAutoScalingDownPolicy, function (err, data) {
-                          if (err) console.log(err, err.stack); // an error occurred
-                          else {
-                            console.log(data.PolicyARN);
-                            paramsAutoScalingDownPolicyAlarm.AlarmActions.push(data.PolicyARN);
-                            cloudwatch.putMetricAlarm(paramsAutoScalingDownPolicyAlarm, function (err, data) {
-                              if (err) console.log(err, err.stack); // an error occurred
-                              else {
-                                console.log(data);
-                                var awsAutoScaleData = {
-                                  "launchConfig":paramsLaunchConfiguration,
-                                  "targetGroup": paramsTargetGroup,
-                                  "loadBal": paramsLoadBalancer,
-                                  "listener": paramsListener,
-                                  "scaling": paramsAutoScaler,
-                                  "scalingPolicy":{
-                                    "up":{
-                                      "policy":paramsAutoScalingUpPolicy,
-                                      "alarm":paramsAutoScalingUpPolicyAlarm
-                                    },
-                                    "down":{
-                                      "policy":paramsAutoScalingDownPolicy,
-                                      "alarm":paramsAutoScalingDownPolicyAlarm
-                                    }
-                                  },
-                                  "s3bucketInfo":{
-                                    "name": awsData.s3BucketName
-                                  }
-                                };
-                                awsGeneral.addConfigData(username,awsAutoScaleData, routeContext)
-                                  .then(function (added) {
-                                    if (added) {
-                                      console.log("added awsAutoScaleData informtion");
-                                    }
-                                    else {
-                                      console.log("user not found");
-                                    }
-                                  });
-                              }
-                            });
-                          }// successful response
-                        });
-                      }, 8000);
-                    }                     // successful response
-                  });
-                }
-              })
-            }           // successful response
-          });
-        }           // successful response
-      });
-    }           // successful response
+    ec2.createTags(paramsMasterTag, function(err) {
+      console.log("Tagging instance", err ? "failure" : "success");
+    });
   });
-  res.render('awskubernetes/success', {
-    layout: '../awskubernetes/layouts/main',
+
+  setTimeout(function () {
+    // Minion Config
+    var paramsMinion = {
+      ImageId: kubeData.minion.image,
+      InstanceType: kubeData.minion.typeInst,
+      SecurityGroupIds:awsData.securityId,
+      Monitoring: {
+        Enabled: true /* required */
+      },
+      MinCount:kubeData.minion.numInst,
+      MaxCount:kubeData.minion.numInst,
+      KeyName: awsData.awsKeyName,
+      UserData: kubeMinion.getMinionScript(kubeData, awsData)
+    };
+    ec2.runInstances(paramsMinion, function(err, data) {
+      if (err) {
+        console.log("Could not create Minion instance", err);
+        return;
+      }
+      var instanceIdMinions = [];
+      var tags = [];
+      for(i=0; i< data.Instances.length; i++)
+      {
+        instanceIdMinions.push(data.Instances[i].InstanceId)
+        tags.push({
+          Key: 'Name',
+          Value: "MinionNode"
+        });
+      }
+      var paramMasterDescription = {
+        DryRun: false,
+        InstanceIds: [instanceIdMaster]
+      };
+      ec2.describeInstances(paramMasterDescription, function (err, data) {
+        if (err) {
+          console.log("Error", err.stack);
+        } else {
+          var awsMasterNode= [];
+          var instance = data.Reservations[0];
+          var serviceURL = "";
+          var urlService= "http://"+instance["Instances"][0]["PublicIpAddress"]+":8001/api/v1/services/";
+          var max= 100;
+          var retry = (function() {
+            var count = 0;
+            return function(next) {
+              request({
+                url: urlService,
+                method: "GET",
+                json: true,
+                headers: {
+                  "content-type": "application/json",
+                }}, function (error, response, body) {
+                if (error || response.statusCode !== 200 || body.items =="undefined") {
+                  console.log('fail');
+
+                  if (count++ < max) {
+                    return setTimeout(function() {
+                      retry(next);
+                    }, 2500);
+                  } else {
+                    return next(new Error('max retries reached'));
+                  }
+                }
+                console.log('success');
+                next(null, body);
+              });
+            }
+          })();
+          retry(function(err, body) {
+            var servicesArr = body.items;
+            for(i=0;i<servicesArr.length;i++)
+            {
+              if(servicesArr[i]["metadata"]['name'].indexOf(kubeData.application.name)!== -1)
+              {
+                var portNumber = servicesArr[i]["spec"]["ports"][0].nodePort;
+                serviceURL = url= "http://"+instance["Instances"][0]["PublicIpAddress"]+":"+ portNumber+"/api/test";
+                console.log(serviceURL);
+                break;
+              }
+            }
+            awsMasterNode = {
+              "tag" : instance["Instances"][0]["Tags"][0]["Value"],
+              "instanceid" : instance["Instances"][0]["InstanceId"],
+              "ip" : instance["Instances"][0]["PublicIpAddress"],
+              "serviceURL" :serviceURL
+            };
+            var awsMinionNodeInstanceIds = instanceIdMinions;
+            var awsMasterMinion = {
+              "master" : awsMasterNode,
+              "minion": awsMinionNodeInstanceIds
+            };
+            awsGeneral.addConfigData(username, awsMasterMinion, routeContext)
+              .then(function (added) {
+                if (added) {
+                  console.log("added master minion informtion");
+                }
+                else {
+                  console.log("user not found");
+                }
+              });
+          });
+
+        }
+      });
+      var paramsMinionTags = {Resources: instanceIdMinions, Tags:tags }
+      ec2.createTags(paramsMinionTags, function(err) {
+        console.log("Tagging instance", err ? "failure" : "success");
+      });
+    });
+  }, 120000);
+  res.render('success', {
     user: username,
     dataForm: req.body,
     dataClient: "Request Sent to Server for Deployment"
   });
-}
-exports.terminateAutoScale = function(awsData,username,req, res) {
-  try {
-    var ec2 = new AWS.EC2({
-      accessKeyId: awsData.accessKeyId,
-      secretAccessKey: awsData.secretAccessKey,
-      region: awsData.region,
-      apiVersion: '2016-11-15'
-    });
-    var cloudwatch = new AWS.CloudWatch({
-      accessKeyId: awsData.accessKeyId,
-      secretAccessKey: awsData.secretAccessKey,
-      region: awsData.region,
-      apiVersion: '2016-11-15'
-    });
-    var autoscaling = new AWS.AutoScaling({
-      accessKeyId: awsData.accessKeyId,
-      secretAccessKey: awsData.secretAccessKey,
-      region: awsData.region,
-      apiVersion: '2016-11-15'
-    });
-    var elbv2 = new AWS.ELBv2({
-      accessKeyId: awsData.accessKeyId,
-      secretAccessKey: awsData.secretAccessKey,
-      region: awsData.region,
-      apiVersion: '2015-12-01'
-    });
-    var s3 = new AWS.S3({
-      accessKeyId: awsData.accessKeyId,
-      secretAccessKey: awsData.secretAccessKey,
-      region: awsData.region,
-      apiVersion: '2015-12-01'
-    });
-    var deferred = Q.defer();
-
-    awsGeneral.getAwsAutoScaleInfo(username, routeContext)
-      .then(function (awsDeployInfo) {
-        if (awsDeployInfo) {
-          try{
-            var params = {
-              Bucket: awsDeployInfo.awsKubeAutoScaleConfig.s3bucketInfo.name
-            };
-            s3.listObjects(params, function(err, data) {
-              if (err) console.log(err, err.stack); // an error occurred
-              else {
-                console.log(data);
-                var keyArr = [];
-                for(i=0;i<data.Contents.length;i++) {
-
-                  keyArr.push({"Key":data.Contents[i].Key});
-                }
-                var params = {
-                  Bucket: awsDeployInfo.awsKubeAutoScaleConfig.s3bucketInfo.name,
-                  Delete: {
-                    Objects: keyArr,
-                    Quiet: false
-                  }
-                };
-                s3.deleteObjects(params, function(err, data) {
-                  if (err) console.log(err, err.stack); // an error occurred
-                  else{
-                    console.log(data);           // successful response
-                    var paramsBucket = {
-                      Bucket: awsDeployInfo.awsKubeAutoScaleConfig.s3bucketInfo.name
-                    };
-                    s3.deleteBucket(paramsBucket, function (err, data) {
-                      if (err) console.log(err, err.stack); // an error occurred
-                      else console.log(data);           // successful response
-                    });
-                  }
-                });
-              }
-            });
-          }catch(err){console.log(err);}
-
-          var paramsAutoscaling = {
-            AutoScalingGroupName: awsDeployInfo.awsKubeAutoScaleConfig.scaling.AutoScalingGroupName,
-            ForceDelete: true
-          };
-          autoscaling.deleteAutoScalingGroup(paramsAutoscaling, function (err, data) {
-            if (err) console.log(err, err.stack); // an error occurred
-            else     console.log(data);           // successful response
-          });
-          setTimeout(function () {
-            var paramsLaunchConfig = {
-              LaunchConfigurationName: awsDeployInfo.awsKubeAutoScaleConfig.scaling.LaunchConfigurationName
-            };
-            autoscaling.deleteLaunchConfiguration(paramsLaunchConfig, function (err, data) {
-              if (err) console.log(err, err.stack); // an error occurred
-              else     console.log(data);           // successful response
-            });
-          }, 3000);
-
-          var paramsLoadBal = {
-            LoadBalancerArn: awsDeployInfo.awsKubeAutoScaleConfig.listener.LoadBalancerArn /* required */
-          };
-          elbv2.deleteLoadBalancer(paramsLoadBal, function (err, data) {
-            if (err) console.log(err, err.stack); // an error occurred
-            else     console.log(data);           // successful response
-          });
-          setTimeout(function () {
-            var paramsTargetGroup = {
-              TargetGroupArn: awsDeployInfo.awsKubeAutoScaleConfig.listener.DefaultActions[0].TargetGroupArn /* required */
-            };
-            elbv2.deleteTargetGroup(paramsTargetGroup, function (err, data) {
-              if (err) console.log(err, err.stack); // an error occurred
-              else     console.log(data);           // successful response
-            });
-          }, 60000);
-          setTimeout(function () {
-            var paramsTargetGroup = {
-              TargetGroupArn: awsDeployInfo.ipConfig.listener.DefaultActions[0].TargetGroupArn /* required */
-            };
-            elbv2.deleteTargetGroup(paramsTargetGroup, function (err, data) {
-              if (err) console.log(err, err.stack); // an error occurred
-              else     console.log(data);           // successful response
-            });
-          }, 60000);
-
-          res.render('awskubernetes/success', {
-            layout: '../awskubernetes/layouts/main',
-            user: username,
-            dataForm: req.body,
-            dataClient: "Request Sent for Terminatio"
-          });
-        }
-        else {
-          res.render('awskubernetes/success', {
-            layout: '../awskubernetes/layouts/main',
-            user: username,
-            dataForm: req.body,
-            dataClient: "No Information Found To Terminate"
-          });
-        }
-      });
-  }catch(err) {console.log(err);}
-}
-exports.getCurrentData = function(awsData,username,req,res) {
+};
+exports.terminateInstances = function(awsData,username,req, res) {
   var ec2 = new AWS.EC2({
     accessKeyId: awsData.accessKeyId,
     secretAccessKey: awsData.secretAccessKey,
@@ -577,421 +195,57 @@ exports.getCurrentData = function(awsData,username,req,res) {
     region: awsData.region,
     apiVersion: '2015-12-01'
   });
+  var deferred = Q.defer();
 
-  awsGeneral.getAwsAutoScaleInfo(username, routeContext)
-    .then(function (awsDeployInfo) {
-      if (awsDeployInfo) {
-          var d = new Date();
-          var MS_PER_MINUTE = 60000;
-          var params = {
-            EndTime: new Date, /* required */
-            MetricName: 'GroupTotalInstances', /* required */
-            Namespace: 'AWS/AutoScaling', /* required */
-            Period: 60, /* required */
-            StartTime: new Date(d.getTime() - 60 * MS_PER_MINUTE), /* required */
-            Dimensions: [
-              {
-                Name: 'AutoScalingGroupName', /* required */
-                Value: awsDeployInfo.awsKubeAutoScaleConfig.scaling.AutoScalingGroupName/* required */
-              },
-            ],
-            Statistics: [
-              "Average"
-              /* more items */
-            ]
-           // Unit: 'Count'
-          };
-          //console.log(params);
-        cloudwatch.getMetricStatistics(params, function (err, data) {
+  kubeMongoFunctions.getInstancesId(username)
+    .then(function (Ids) {
+      if (Ids.length) {
+        var params = {
+          InstanceIds: Ids,
+          DryRun: false
+        };
+        ec2.terminateInstances(params, function(err, data) {
           if (err) console.log(err, err.stack); // an error occurred
-          else {
-            var dataAll = {
-              "instances": data,
-              "cpuUtilization": '',
-              "desiredInstances": '',
-              "inserviceInstances": '',
-              "totalRequestCount": '',
-              "HTTPCode5XXCountELB": '',
-              "HTTPCode4XXCountELB": '',
-              "HTTPCode2XXCount": '',
-              "HTTPCode3XXCount": '',
-              "HTTPCode4XXCount": '',
-              "HTTPCode5XXCount": '',
-              "instanceType": awsDeployInfo.awsKubeAutoScaleConfig.launchConfig.InstanceType,
-              "latency": '',
-              "responseTime": ''
-            };
-            var params = {
-              EndTime: new Date, /* required */
-              MetricName: 'CPUUtilization', /* required */
-              Namespace: 'AWS/EC2', /* required */
-              Period: 60, /* required */
-              StartTime: new Date(d.getTime() - 60 * MS_PER_MINUTE), /* required */
-              Dimensions: [
-                {
-                  Name: 'AutoScalingGroupName', /* required */
-                  Value: awsDeployInfo.awsKubeAutoScaleConfig.scaling.AutoScalingGroupName/* required */
-                },
-                /* more items */
-              ],
-              Statistics: [
-                "Average"
-                /* more items */
-              ]
-              // Unit: 'Count'
-            };
-            //console.log(params);
-            cloudwatch.getMetricStatistics(params, function (err, data) {
-              if (err) console.log(err, err.stack); // an error occurred
-              else {
-                // successful response
-                dataAll.cpuUtilization = data;
-                var params = {
-                  EndTime: new Date, /* required */
-                  MetricName: 'GroupDesiredCapacity', /* required */
-                  Namespace: 'AWS/AutoScaling', /* required */
-                  Period: 60, /* required */
-                  StartTime: new Date(d.getTime() - 60 * MS_PER_MINUTE), /* required */
-                  Dimensions: [
-                    {
-                      Name: 'AutoScalingGroupName', /* required */
-                      Value: awsDeployInfo.awsKubeAutoScaleConfig.scaling.AutoScalingGroupName/* required */
-                    },
-                    /* more items */
-                  ],
-                  Statistics: [
-                    "Average"
-                    /* more items */
-                  ]
-                  // Unit: 'Count'
-                };
-                //console.log(params);
-                cloudwatch.getMetricStatistics(params, function (err, data) {
-                  if (err) console.log(err, err.stack); // an error occurred
-                  else {
-                    // successful response
-                    dataAll.desiredInstances = data;
-                    var params = {
-                      EndTime: new Date, /* required */
-                      MetricName: 'GroupInServiceInstances', /* required */
-                      Namespace: 'AWS/AutoScaling', /* required */
-                      Period: 60, /* required */
-                      StartTime: new Date(d.getTime() - 60 * MS_PER_MINUTE), /* required */
-                      Dimensions: [
-                        {
-                          Name: 'AutoScalingGroupName', /* required */
-                          Value: awsDeployInfo.awsKubeAutoScaleConfig.scaling.AutoScalingGroupName/* required */
-                        },
-                        /* more items */
-                      ],
-                      Statistics: [
-                        "Minimum"
-                        /* more items */
-                      ]
-                      // Unit: 'Count'
-                    };
-                    cloudwatch.getMetricStatistics(params, function (err, data) {
-                      if (err) console.log(err, err.stack); // an error occurred
-                      else {
-                        // successful response
-                        dataAll.inserviceInstances = data;
-                        // Isolate load balancer name from ARN
-                        lbarn = awsDeployInfo.awsKubeAutoScaleConfig.listener.LoadBalancerArn;
-                        lbtmp = lbarn.split("loadbalancer/").slice(1);
-                        lbname = lbtmp.join("loadbalancer/");
-                        var params = {
-                          EndTime: new Date, /* required */
-                          MetricName: 'HTTPCode_Target_2XX_Count', /* required */
-                          Namespace: 'AWS/ApplicationELB', /* required */
-                          Period: 60, /* required */
-                          StartTime: new Date(d.getTime() - 60 * MS_PER_MINUTE), /* required */
-                          Dimensions: [
-                            {
-                              Name: 'LoadBalancer', /* required */
-                              Value: lbname //'app/awsloadbal/0f546c0424c9ffc5' /* required */
-                            },
-                            /* more items */
-                          ],
-                          Statistics: [
-                            "Sum"
-                            /* more items */
-                          ]
-                          // Unit: 'Count'
-                        };
-                        cloudwatch.getMetricStatistics(params, function (err, data) {
-                          if (err) console.log(err, err.stack); // an error occurred
-                          else {
-                            // successful response
-                            dataAll.HTTPCode2XXCount = data;
-                            var params = {
-                              EndTime: new Date, /* required */
-                              MetricName: 'RequestCount', /* required */
-                              Namespace: 'AWS/ApplicationELB', /* required */
-                              Period: 60, /* required */
-                              StartTime: new Date(d.getTime() - 60 * MS_PER_MINUTE), /* required */
-                              Dimensions: [
-                                {
-                                  Name: 'LoadBalancer', /* required */
-                                  Value: lbname //'app/awsloadbal/0f546c0424c9ffc5' /* required */
-                                },
-                                /* more items */
-                              ],
-                              Statistics: [
-                                "Sum"
-                                /* more items */
-                              ]
-                              // Unit: 'Count'
-                            };
-                            cloudwatch.getMetricStatistics(params, function (err, data) {
-                              if (err) console.log(err, err.stack); // an error occurred
-                              else {
-                                // successful response
-                                dataAll.totalRequestCount = data;
-                                var params = {
-                                  EndTime: new Date, /* required */
-                                  MetricName: 'HTTPCode_Target_3XX_Count', /* required */
-                                  Namespace: 'AWS/ApplicationELB', /* required */
-                                  Period: 60, /* required */
-                                  StartTime: new Date(d.getTime() - 60 * MS_PER_MINUTE), /* required */
-                                  Dimensions: [
-                                    {
-                                      Name: 'LoadBalancer', /* required */
-                                      Value: lbname //'app/awsloadbal/0f546c0424c9ffc5' /* required */
-                                    },
-                                    /* more items */
-                                  ],
-                                  Statistics: [
-                                    "Sum"
-                                    /* more items */
-                                  ]
-                                  // Unit: 'Count'
-                                };
-                                cloudwatch.getMetricStatistics(params, function (err, data) {
-                                  if (err) console.log(err, err.stack); // an error occurred
-                                  else {
-                                    dataAll.HTTPCode3XXCount = data;
-                                    var params = {
-                                      EndTime: new Date, /* required */
-                                      MetricName: 'HTTPCode_Target_4XX_Count', /* required */
-                                      Namespace: 'AWS/ApplicationELB', /* required */
-                                      Period: 60, /* required */
-                                      StartTime: new Date(d.getTime() - 60 * MS_PER_MINUTE), /* required */
-                                      Dimensions: [
-                                        {
-                                          Name: 'LoadBalancer', /* required */
-                                          Value: lbname //'app/awsloadbal/0f546c0424c9ffc5' /* required */
-                                        },
-                                        /* more items */
-                                      ],
-                                      Statistics: [
-                                        "Sum"
-                                        /* more items */
-                                      ]
-                                      // Unit: 'Count'
-                                    };
-                                    cloudwatch.getMetricStatistics(params, function (err, data) {
-                                      if (err) console.log(err, err.stack); // an error occurred
-                                      else {
-                                        dataAll.HTTPCode4XXCount = data;
-                                        var params = {
-                                          EndTime: new Date, /* required */
-                                          MetricName: 'HTTPCode_Target_5XX_Count', /* required */
-                                          Namespace: 'AWS/ApplicationELB', /* required */
-                                          Period: 60, /* required */
-                                          StartTime: new Date(d.getTime() - 60 * MS_PER_MINUTE), /* required */
-                                          Dimensions: [
-                                            {
-                                              Name: 'LoadBalancer', /* required */
-                                              Value: lbname //'app/awsloadbal/0f546c0424c9ffc5' /* required */
-                                            },
-                                            /* more items */
-                                          ],
-                                          Statistics: [
-                                            "Sum"
-                                            /* more items */
-                                          ]
-                                          // Unit: 'Count'
-                                        };
-                                        cloudwatch.getMetricStatistics(params, function (err, data) {
-                                          if (err) console.log(err, err.stack); // an error occurred
-                                          else {
-                                            dataAll.HTTPCode5XXCount = data;
-                                            var params = {
-                                              EndTime: new Date, /* required */
-                                              MetricName: 'HTTPCode_ELB_4XX_Count', /* required */
-                                              Namespace: 'AWS/ApplicationELB', /* required */
-                                              Period: 60, /* required */
-                                              StartTime: new Date(d.getTime() - 60 * MS_PER_MINUTE), /* required */
-                                              Dimensions: [
-                                                {
-                                                  Name: 'LoadBalancer', /* required */
-                                                  Value: lbname //'app/awsloadbal/0f546c0424c9ffc5' /* required */
-                                                },
-                                                /* more items */
-                                              ],
-                                              Statistics: [
-                                                "Sum"
-                                                /* more items */
-                                              ]
-                                              // Unit: 'Count'
-                                            };
-                                            cloudwatch.getMetricStatistics(params, function (err, data) {
-                                              if (err) console.log(err, err.stack); // an error occurred
-                                              else {
-                                                dataAll.HTTPCode4XXCountELB = data;
-                                                var params = {
-                                                  EndTime: new Date, /* required */
-                                                  MetricName: 'HTTPCode_ELB_5XX_Count', /* required */
-                                                  Namespace: 'AWS/ApplicationELB', /* required */
-                                                  Period: 60, /* required */
-                                                  StartTime: new Date(d.getTime() - 60 * MS_PER_MINUTE), /* required */
-                                                  Dimensions: [
-                                                    {
-                                                      Name: 'LoadBalancer', /* required */
-                                                      Value: lbname //'app/awsloadbal/0f546c0424c9ffc5' /* required */
-                                                    },
-                                                    /* more items */
-                                                  ],
-                                                  Statistics: [
-                                                    "Sum"
-                                                    /* more items */
-                                                  ]
-                                                  // Unit: 'Count'
-                                                };
-                                                cloudwatch.getMetricStatistics(params, function (err, data) {
-                                                  if (err) console.log(err, err.stack); // an error occurred
-                                                  else {
-                                                    dataAll.HTTPCode5XXCountELB = data;
-                                                    awsGeneral.getLatencyData(username)
-                                                      .then(function (latencyarray) {
-                                                        if (latencyarray) {
-                                                          dataAll.latency = latencyarray;
-                                                          awsGeneral.getResponseTimeData(username)
-                                                            .then(function (resptimearray) {
-                                                              if (resptimearray) {
-                                                                dataAll.responseTime = resptimearray;
-                                                                // successful response
-                                                                awsAutoscaleKubernetesMongoFunctions.addCurrentRecordedData(username, dataAll);
-                                                                res.send(dataAll);
-                                                              }
-                                                            });
-                                                        }
-                                                      });
-                                                  }
-                                                });
-                                              }
-                                            });
-                                          }
-                                        });
-                                      }
-                                    });
-                                  }
-                                });
-                              }
-                            });
-                          }
-                        });
-                      }
-                    });
-                  }
-                });
-              }
-            });
-          }
+          else     console.log(data);           // successful response
+        });
+        res.render('success', {
+          user: username,
+          dataForm: req.body,
+          dataClient: "Kubernetes Instances Terminated"
+        });
+      }
+      else {
+        res.render('success', {
+          user: username,
+          dataForm: req.body,
+          dataClient: "No Instances Found to Terminate"
         });
       }
     });
 }
-exports.describeAutoscalingGroups = function(awsData,req, res) {
+exports.describeInstances = function(awsData,req, res) {
   var ec2 = new AWS.EC2({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
   var cloudwatch = new AWS.CloudWatch({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
   var autoscaling = new AWS.AutoScaling({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
   var elbv2 = new AWS.ELBv2({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2015-12-01'});
   var deferred = Q.defer();
   var params = {
-    AutoScalingGroupNames: [ ]
+    DryRun: false
   };
 
   var titlesArr = [];
   titlesArr.push({"title": "Name"});
-  titlesArr.push({"title": "LaunchConfigurationName"});
-  titlesArr.push({"title": "MinSize"});
-  titlesArr.push({"title": "MaxSize"});
-  titlesArr.push({"title": "DesiredCapacity"});
-  titlesArr.push({"title": "Instances"});
-  titlesArr.push({"title": "CreatedTime"});
-
-  var awsArr = [];
-  if(autoscaling) {
-    autoscaling.describeAutoScalingGroups(params, function(err, data) {
-      if (err){
-        console.log(err, err.stack); // an error occurred
-        var dataAll = [
-          {
-            "columns": titlesArr,
-            "data": awsArr
-          }
-        ];
-        deferred.resolve(dataAll);
-      }
-      else
-      {
-        var autoScalingGroupsArr = data.AutoScalingGroups;
-        autoScalingGroupsArr.forEach(function (autoScalingGroup) {
-          var row = [];
-          row.push(autoScalingGroup["AutoScalingGroupName"]);
-          row.push(autoScalingGroup["LaunchConfigurationName"]);
-          row.push(autoScalingGroup["MinSize"]);
-          row.push(autoScalingGroup["MaxSize"]);
-          row.push(autoScalingGroup["DesiredCapacity"]);
-          row.push(autoScalingGroup["Instances"].length);
-          row.push(autoScalingGroup["CreatedTime"]);
-          awsArr.push(row);
-        });
-        var dataAll = [{
-          "columns": titlesArr,
-          "data": awsArr
-        }
-        ];
-        deferred.resolve(dataAll);
-      }
-    });// successful response
-  }
-  else {
-    var dataAll = [{
-      "columns": titlesArr,
-      "data": awsArr
-    }
-    ];
-    deferred.resolve(dataAll);
-  }
-  return deferred.promise;
-}
-exports.describeLoadBalancer = function(awsData,req, res) {
-  var ec2 = new AWS.EC2({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
-  var cloudwatch = new AWS.CloudWatch({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
-  var autoscaling = new AWS.AutoScaling({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
-  var elbv2 = new AWS.ELBv2({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2015-12-01'});
-  var deferred = Q.defer();
-
-  var params = {
-    LoadBalancerArns: []
-  };
-
-  var titlesArr = [];
-  titlesArr.push({"title": "Name"});
-  titlesArr.push({"title": "DNSName"});
-  titlesArr.push({"title": "Type"});
-  titlesArr.push({"title": "Scheme"});
-  titlesArr.push({"title": "CreatedTime"});
+  titlesArr.push({"title": "InstanceID"});
+  titlesArr.push({"title": "ImageID"});
+  titlesArr.push({"title": "Public IP"});
+  titlesArr.push({"title": "LaunchTime"});
   titlesArr.push({"title": "State"});
 
-
   var awsArr = [];
-  if(elbv2) {
-    elbv2.describeLoadBalancers(params, function(err, data) {
-      if (err){
-        console.log(err, err.stack); // an error occurred
+  if(ec2) {
+    ec2.describeInstances(params, function (err, data) {
+      if (err) {
+        console.log("Error", err.stack);
         var dataAll = [
           {
             "columns": titlesArr,
@@ -999,18 +253,19 @@ exports.describeLoadBalancer = function(awsData,req, res) {
           }
         ];
         deferred.resolve(dataAll);
-      }
-      else
-      {
-        var loadbalancerArr = data.LoadBalancers;
-        loadbalancerArr.forEach(function (loadbalancer) {
-          var row = [];
-          row.push(loadbalancer["LoadBalancerName"]);
-          row.push(loadbalancer["DNSName"]);
-          row.push(loadbalancer["Type"]);
-          row.push(loadbalancer["Scheme"]);
-          row.push(loadbalancer["CreatedTime"]);
-          row.push(loadbalancer["State"]["Code"]);
+      } else {
+        instancesArr = data.Reservations;
+        instancesArr.forEach(function (instance) {
+          var row = []
+          if (instance["Instances"][0]["Tags"][0])
+            row.push(instance["Instances"][0]["Tags"][0]["Value"]);
+          else
+            row.push("None");
+          row.push(instance["Instances"][0]["InstanceID"]);
+          row.push(instance["Instances"][0]["ImageID"]);
+          row.push(instance["Instances"][0]["Public IP"]);
+          row.push(instance["Instances"][0]["LaunchTime"]);
+          row.push(instance["Instances"][0]["State"]["Name"]);
           awsArr.push(row);
         });
         var dataAll = [{
@@ -1020,7 +275,7 @@ exports.describeLoadBalancer = function(awsData,req, res) {
         ];
         deferred.resolve(dataAll);
       }
-    });// successful response
+    });
   }
   else {
     var dataAll = [{
@@ -1078,9 +333,9 @@ exports.loadHpaList = function (fields,data) {
     row.push(item["status"].desiredReplicas);
     row.push(item["status"].currentCPUUtilizationPercentage);
 
-    var temp= JSON.parse(item["metadata"]["annotations"]["autoscaling.alpha.kubernetes.io/conditions"]);
-    if(item["metadata"]["annotations"]["autoscaling.alpha.kubernetes.io/current-metrics"]) {
-      var tempStats = JSON.parse(item["metadata"]["annotations"]["autoscaling.alpha.kubernetes.io/current-metrics"]);
+    var temp= JSON.parse(item["metadata"]["annotations"]["autoscaling.alpha.awsKubernetes.io/conditions"]);
+    if(item["metadata"]["annotations"]["autoscaling.alpha.awsKubernetes.io/current-metrics"]) {
+      var tempStats = JSON.parse(item["metadata"]["annotations"]["autoscaling.alpha.awsKubernetes.io/current-metrics"]);
       for(i=0;i<tempStats.length; i++) {
         var row3 = [];
         row3.push(item["metadata"]["name"]);
@@ -1418,6 +673,31 @@ exports.loadTableTimeline= function(data) {
   ];
   return dataAll;
 }
+exports.saveTableTimeline= function(data) {
+  data.forEach(function(item) {
+    var saveRow = {};
+    saveRow = {
+      "name": item["involvedObject"]["name"],
+      "kind": item["involvedObject"]["kind"],
+      "namespace": item["involvedObject"]["namespace"],
+      "reason": item["reason"],
+      "firstTimestamp": item["firstTimestamp"],
+      "lastTimestamp": item["lastTimestamp"],
+      "count": item["count"],
+      "message": item["message"]
+    };
+    kubeMongoFunctions.savePodInfo(saveRow, 'testLoadTimeline')
+      .then(function (added) {
+        if (added) {
+          console.log("added informtion");
+        }
+        else {
+          console.log("user not found");
+        }
+      });
+  });
+
+}
 
 function getPodInfoForSave(url){
   var deferred = Q.defer();
@@ -1512,7 +792,7 @@ function getContainerInfoForSave(url){
       deferred.resolve(containersInfoJsonArr);
     }
     else {
-      deferred.resolve(containersInfoJsonArr);
+        deferred.resolve(containersInfoJsonArr);
     }
   });
   return deferred.promise;
@@ -1658,9 +938,9 @@ function getHpaInfoForSave(url){
       hpasInfo.forEach(function(hpa) {
         var hpaCurrentStatsFull = [];
         var hpaStatusFull = [];
-        var hpaStatus= JSON.parse(hpa["metadata"]["annotations"]["autoscaling.alpha.kubernetes.io/conditions"]);
-        if(hpa["metadata"]["annotations"]["autoscaling.alpha.kubernetes.io/current-metrics"]) {
-          var hpaStats = JSON.parse(hpa["metadata"]["annotations"]["autoscaling.alpha.kubernetes.io/current-metrics"]);
+        var hpaStatus= JSON.parse(hpa["metadata"]["annotations"]["autoscaling.alpha.awsKubernetes.io/conditions"]);
+        if(hpa["metadata"]["annotations"]["autoscaling.alpha.awsKubernetes.io/current-metrics"]) {
+          var hpaStats = JSON.parse(hpa["metadata"]["annotations"]["autoscaling.alpha.awsKubernetes.io/current-metrics"]);
           for (i = 0; i < hpaStats.length; i++) {
             var oneStat = {
               "type": hpaStats[i].type ,
@@ -1671,7 +951,7 @@ function getHpaInfoForSave(url){
             hpaCurrentStatsFull.push(oneStat);
           }
         }
-        if(hpaStatus[i])
+        if(hpaStatus)
         {
           var oneStatus ={
             "type": hpaStatus[i].type ,
@@ -1743,7 +1023,6 @@ function getEventsInfoForSave(url){
   });
   return deferred.promise;
 }
-
 exports.saveKubernetesData= function(username, objUrl){
   var timeStamp = new Date().getTime();
   var dataAll = {
@@ -1771,7 +1050,7 @@ exports.saveKubernetesData= function(username, objUrl){
                           getRpcInfoForSave(objUrl.urlRpc)
                             .then(function (rpcInfo) {
                               dataAll["data"]["rpcInfo"] = rpcInfo;
-                              awsAutoscaleKubernetesMongoFunctions.addRecordedData(username,dataAll)
+                              kubeMongoFunctions.addRecordedData(username,dataAll)
                                 .then(function (added) {
                                   if (added) {
                                     console.log("added recorded data informtion");
@@ -1816,7 +1095,7 @@ exports.saveKubernetesDataLoadTest= function(username,loadTestName,objUrl){
                           getRpcInfoForSave(objUrl.urlRpc)
                             .then(function (rpcInfo) {
                               dataAll["data"]["rpcInfo"] = rpcInfo;
-                              awsAutoscaleKubernetesMongoFunctions.addLoadTestKubernetesData(username,loadTestName,dataAll)
+                              kubeMongoFunctions.addLoadTestKubernetesData(username,loadTestName,dataAll)
                                 .then(function (added) {
                                   if (added) {
                                     console.log("added recorded data informtion");
@@ -1833,79 +1112,4 @@ exports.saveKubernetesDataLoadTest= function(username,loadTestName,objUrl){
         });
     });
 
-}
-exports.saveAutoscalingGroupData = function(awsData,username, testname) {
-  var ec2 = new AWS.EC2({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
-  var cloudwatch = new AWS.CloudWatch({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
-  var autoscaling = new AWS.AutoScaling({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
-  var elbv2 = new AWS.ELBv2({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2015-12-01'});
-  var deferred = Q.defer();
-  var params = {
-    AutoScalingGroupNames: [ ]
-  };
-
-  var awsArr = [];
-  if(autoscaling) {
-    autoscaling.describeAutoScalingGroups(params, function (err, data) {
-      if (err) {
-        console.log(err, err.stack); // an error occurred
-      }
-      else {
-        var autoScalingGroupsArr = data.AutoScalingGroups;
-        autoScalingGroupsArr.forEach(function (autoScalingGroup) {
-          var row = {
-            "AutoScalingGroupName": autoScalingGroup["AutoScalingGroupName"],
-            "LaunchConfigurationName": autoScalingGroup["LaunchConfigurationName"],
-            "MinSize": autoScalingGroup["MinSize"],
-            "MaxSize": autoScalingGroup["MaxSize"],
-            "DesiredCapacity": autoScalingGroup["DesiredCapacity"],
-            "InstancesDetails": autoScalingGroup["Instances"],
-            "Instances": autoScalingGroup["Instances"].length,
-            "CreatedTime": autoScalingGroup["CreatedTime"]
-          };
-            awsArr.push(row);
-        });
-        var d = new Date();
-        var MS_PER_MINUTE = 60000;
-        var params = {
-          EndTime: new Date, /* required */
-          MetricName: 'CPUUtilization', /* required */
-          Namespace: 'AWS/EC2', /* required */
-          Period: 60, /* required */
-          StartTime: new Date(d.getTime() - 60 * MS_PER_MINUTE), /* required */
-          Dimensions: [
-            {
-              Name: 'AutoScalingGroupName', /* required */
-              Value: awsArr[0].AutoScalingGroupName/* required */
-            },
-            /* more items */
-          ],
-          Statistics: [
-            "Average"
-          ]
-        };
-        cloudwatch.getMetricStatistics(params, function (err, data) {
-          if (err) console.log(err, err.stack); // an error occurred
-          else {
-            var timeStamp = new Date().getTime();
-            var dataAll = {
-              "time": timeStamp,
-              "data": awsArr[0],
-              "cpuUtilization": data
-            };
-            // successful response
-            awsAutoscaleKubernetesMongoFunctions.addAutoscalingData(username, testname, dataAll)
-              .then(function (added) {
-                if (added) {
-                  console.log("added recorded data informtion");
-                }
-                else {
-                  console.log("user not found");
-                }
-              });
-          }
-        });
-      }
-    });// successful response
-  }
 }

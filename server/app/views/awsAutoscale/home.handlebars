@@ -66,11 +66,11 @@
                                   <table class="table table-bordered text-center">
                                   <tr>
                                     <td>
-                                      <a href="/awsautoscale/getUserInfoForDeploy" class="btn btn-block btn-primary">Deploy</a>
+                                      <a href="/awsAutoscale/getUserInfoForDeploy" class="btn btn-block btn-primary">Deploy</a>
                                     </td>
                                     <tr>
                                       <td>
-                                        <a href="/awsautoscale/terminate" class="btn btn-block btn-success" style="background-color: darkred">Terminate</a>
+                                        <a href="/awsAutoscale/terminate" class="btn btn-block btn-danger">Terminate</a>
                                       </td>
                                     </tr>
                                     </tr>
@@ -233,7 +233,7 @@
       {
           alert(loadTestName);
         $.post(
-          "/kubernetes/getLoadTestData",{
+          "/awsKubernetes/getLoadTestData",{
             testName: loadTestName
           },
           function(data) {
@@ -322,7 +322,7 @@
         );
       }
     $.get(
-      "/awsautoscale/describeEc2Instances",
+      "/awsAutoscale/describeEc2Instances",
       function(data) {
         //data=JSON.parse(data);
         $("#instanceData").DataTable(data[0]);
@@ -331,7 +331,7 @@
       }
     );
       $.get(
-        "/awsautoscale/describeAwsAutoscaleGroups",
+        "/awsAutoscale/describeAwsAutoscaleGroups",
         function(data) {
           //data=JSON.parse(data);
           $("#autoscalegroupData").DataTable(data[0]);
@@ -340,7 +340,7 @@
         }
       );
       $.get(
-        "/awsautoscale/describeAwsLoadBalancer",
+        "/awsAutoscale/describeAwsLoadBalancer",
         function(data) {
           //data=JSON.parse(data);
           $("#awsloadBalancer").DataTable(data[0]);
@@ -349,7 +349,7 @@
         }
       );
       $.get(
-        "/awsautoscale/getcurrentData",
+        "/awsAutoscale/getcurrentData",
         function(data) {
           //data=JSON.parse(data);
           var instancesDataArr = data.instances.Datapoints;

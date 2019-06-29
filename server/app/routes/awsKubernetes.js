@@ -1,30 +1,30 @@
 const express               = require("express");
 const router                = express.Router();
 const funct                 = require("../functions");
-const kube                  = require("../auto_scaling_solutions/kubernetes/index");
-const kubeMongoFunctions    = require("../auto_scaling_solutions/kubernetes/kubeMongoFunctions");
+const kube                  = require("../auto_scaling_solutions/aws_kubernetes/index");
+const kubeMongoFunctions    = require("../auto_scaling_solutions/aws_kubernetes/kubeMongoFunctions");
 const request               = require("request");
 const loadtest              = require("loadtest");
 const awsGeneral            = require("../functions/awsgeneral");
 
-const routeContext = "kubernetes";
+const routeContext = "awsKubernetes";
 
 //===============ROUTES=================
 //displays our homepage
 router.get("/", function(req, res){
-  res.render("kubernetes/home",{layout: "../kubernetes/layouts/main",user: req.user} );
+  res.render("awsKubernetes/home",{layout: "../awsKubernetes/layouts/main",user: req.user} );
 });
 
 router.get("/charts", function(req, res){
-  res.render("kubernetes/charts", {layout: "../kubernetes/layouts/main",user: req.user} );
+  res.render("awsKubernetes/charts", {layout: "../awsKubernetes/layouts/main",user: req.user} );
 });
 
 router.get("/tables", function(req, res){
-  res.render("kubernetes/tables", {layout: "../kubernetes/layouts/main",user: req.user} );
+  res.render("awsKubernetes/tables", {layout: "../awsKubernetes/layouts/main",user: req.user} );
 });
 
 router.get("/timelineKubernetes", function(req, res){
-  res.render("kubernetes/timeline", {layout: "../kubernetes/layouts/main",user: req.user} );
+  res.render("awsKubernetes/timeline", {layout: "../awsKubernetes/layouts/main",user: req.user} );
 });
 
 router.get("/edituserInfo", function(req, res){
@@ -314,9 +314,9 @@ router.post("/basicLoadTest", function(req,res){
               console.log("Tests run successfully");
             });
             // here neet to trigger load and save the data
-            // save information of kubernetes every one second
-            res.render("kubernetes/success", {
-              layout: "../kubernetes/layouts/main",
+            // save information of awsKubernetes every one second
+            res.render("awsKubernetes/success", {
+              layout: "../awsKubernetes/layouts/main",
               user: req.user.username,
               dataForm: "Request send to Server, Plese check the graphs after the test is over",
               dataClient: "Request send to Server, Plese check the graphs after the test is over"
@@ -324,8 +324,8 @@ router.post("/basicLoadTest", function(req,res){
           }
           else {
             console.log("url not found");
-            res.render("kubernetes/failure", {
-              layout: "../kubernetes/layouts/main",
+            res.render("awsKubernetes/failure", {
+              layout: "../awsKubernetes/layouts/main",
               user: req.user.username,
               error: "App Service Is not running, PLease deploy first and then run"
             });
@@ -581,8 +581,8 @@ router.post("/loadTest", function(req,res){
                 .then(function (url) {
                   if (url) {
                     console.log("Found URL informtion");
-                    res.render("kubernetes/success", {
-                      layout: "../kubernetes/layouts/main",
+                    res.render("awsKubernetes/success", {
+                      layout: "../awsKubernetes/layouts/main",
                       user: req.user.username,
                       dataForm: "Request send to Server, Plese check the graphs after the test is over",
                       dataClient: "Request send to Server, Plese check the graphs after the test is over"
@@ -615,13 +615,13 @@ router.post("/loadTest", function(req,res){
                       console.log("Tests run successfully");
                     });
                     // here neet to trigger load and save the data
-                    // save information of kubernetes every one second
+                    // save information of awsKubernetes every one second
 
                   }
                   else {
                     console.log("url not found");
-                    res.render("kubernetes/failure", {
-                      layout: "../kubernetes/layouts/main",
+                    res.render("awsKubernetes/failure", {
+                      layout: "../awsKubernetes/layouts/main",
                       user: req.user.username,
                       error: "App Service Is not running, PLease deploy first and then run"
                     });
@@ -675,8 +675,8 @@ router.post("/triangleLoadTest", function(req,res){
 
               }, 2000);
               var requests = 1;
-              res.render("kubernetes/success", {
-                layout: "../kubernetes/layouts/main",
+              res.render("awsKubernetes/success", {
+                layout: "../awsKubernetes/layouts/main",
                 user: req.user.username,
                 dataForm: "Request send to Server, Plese check the graphs after the test is over",
                 dataClient: "Request send to Server, Plese check the graphs after the test is over"
@@ -778,8 +778,8 @@ router.post("/linearIncreaseLoadTest", function(req,res){
                   });
 
               }, 2000);
-              res.render("kubernetes/success", {
-                layout: "../kubernetes/layouts/main",
+              res.render("awsKubernetes/success", {
+                layout: "../awsKubernetes/layouts/main",
                 user: req.user.username,
                 dataForm: "Request send to Server, Plese check the graphs after the test is over",
                 dataClient: "Request send to Server, Plese check the graphs after the test is over"
@@ -872,8 +872,8 @@ router.post("/linearIncreaseConstantLoadTest", function(req,res){
                   });
 
               }, 2000);
-              res.render("kubernetes/success", {
-                layout: "../kubernetes/layouts/main",
+              res.render("awsKubernetes/success", {
+                layout: "../awsKubernetes/layouts/main",
                 user: req.user.username,
                 dataForm: "Request send to Server, Plese check the graphs after the test is over",
                 dataClient: "Request send to Server, Plese check the graphs after the test is over"
@@ -974,8 +974,8 @@ router.post("/upDownLoadTest", function(req,res){
                   });
 
               }, 2000);
-              res.render("kubernetes/success", {
-                layout: "../kubernetes/layouts/main",
+              res.render("awsKubernetes/success", {
+                layout: "../awsKubernetes/layouts/main",
                 user: req.user.username,
                 dataForm: "Request send to Server, Plese check the graphs after the test is over",
                 dataClient: "Request send to Server, Plese check the graphs after the test is over"
@@ -1048,8 +1048,8 @@ router.get("/startRecordingData", function(req,res){
     .then(function (set) {
       if (set) {
         console.log("Enabled");
-        res.render("kubernetes/success", {
-          layout: "../kubernetes/layouts/main",
+        res.render("awsKubernetes/success", {
+          layout: "../awsKubernetes/layouts/main",
           user: req.user.username,
           dataForm: "Started",
           dataClient: "Started"
@@ -1095,8 +1095,8 @@ router.get("/stopRecordingData", function(req,res){
     .then(function (set) {
       if (set) {
         console.log("Stopped");
-        res.render("kubernetes/success", {
-          layout: "../kubernetes/layouts/main",
+        res.render("awsKubernetes/success", {
+          layout: "../awsKubernetes/layouts/main",
           user: req.user.username,
           dataForm: "Stopped",
           dataClient: "Stopped"
@@ -1104,8 +1104,8 @@ router.get("/stopRecordingData", function(req,res){
       }
       else {
         console.log("Error");
-        res.render("kubernetes/failure", {
-          layout: "../kubernetes/layouts/main",
+        res.render("awsKubernetes/failure", {
+          layout: "../awsKubernetes/layouts/main",
           user: req.user.username,
           error: "Not able to stop"
         });

@@ -1,8 +1,8 @@
 const express                                 = require("express");
 const router                                  = express.Router();
 const funct                                   = require("../functions");
-const awsAutoscaleKubernetes                  = require("../auto_scaling_solutions/aws_kubernetes/index");
-const awsAutoscaleKubernetesMongoFunctions    = require("../auto_scaling_solutions/aws_kubernetes/awsAutoscaleKubernetesMongoFunctions");
+const awsAutoscaleKubernetes                  = require("../auto_scaling_solutions/aws_kubernetes_autoscale/index");
+const awsAutoscaleKubernetesMongoFunctions    = require("../auto_scaling_solutions/aws_kubernetes_autoscale/awsAutoscaleKubernetesMongoFunctions");
 const request                                 = require("request");
 const loadtest                                = require("loadtest");
 const awsGeneral                              = require("../functions/awsgeneral");
@@ -12,7 +12,7 @@ const routeContext = "awsKubeAutoScale";
 //===============ROUTES=================
 //displays our homepage
 router.get("/", function(req, res){
-  res.render("awskubernetes/home",{layout: "../awskubernetes/layouts/main",user: req.user} );
+  res.render("awsKubernetesAutoscale/home",{layout: "../awsKubernetesAutoscale/layouts/main",user: req.user} );
 });
 router.get("/edituserInfo", function(req, res){
   funct.getUserInfoForEdit(req.user.username, res, req);
@@ -21,7 +21,7 @@ router.get("/getUserInfoForDeploy", function(req, res){
   awsGeneral.getUserInfoForDeploy(req.user.username, res, req, routeContext);
 });
 router.get("/loadtesthome", function(req, res){
-  res.render("awskubernetes/loadtesthome",{layout: "../awskubernetes/layouts/main",user: req.user} );
+  res.render("awsKubernetesAutoscale/loadtesthome",{layout: "../awsKubernetesAutoscale/layouts/main",user: req.user} );
 });
 router.get("/describeEc2Instances", function(req, res) {
   awsGeneral.getUserInfoForDescription(req.user.username, res, req)
@@ -113,7 +113,7 @@ router.post("/deployawsautoscale", function(req, res){
         "vpcId": ""
       },
       "autoScale": {
-        "name": "awsautoscale",
+        "name": "awsAutoscale",
         "maxInst": data.maxInst,
         "minInst": data.minInst,
         "subnet": ""+data.awssubnetid,
@@ -215,10 +215,10 @@ router.get("/terminate", function(req, res) {
     });
 });
 router.get("/tables", function(req, res){
-  res.render("awskubernetes/tables", {layout: "../awskubernetes/layouts/main",user: req.user} );
+  res.render("awsKubernetesAutoscale/tables", {layout: "../awsKubernetesAutoscale/layouts/main",user: req.user} );
 });
 router.get("/timelineKubernetes", function(req, res){
-  res.render("awskubernetes/timeline", {layout: "../awskubernetes/layouts/main",user: req.user} );
+  res.render("awsKubernetesAutoscale/timeline", {layout: "../awsKubernetesAutoscale/layouts/main",user: req.user} );
 });
 router.get("/getPodsList", function(req, res) {
 
@@ -624,9 +624,9 @@ router.post("/loadTest", function(req,res){
                       console.log("Tests run successfully");
                     });
                     // here neet to trigger load and save the data
-                    // save information of kubernetes every one second
-                    res.render("awskubernetes/success", {
-                      layout: "../awskubernetes/layouts/main",
+                    // save information of awsKubernetes every one second
+                    res.render("awsKubernetesAutoscale/success", {
+                      layout: "../awsKubernetesAutoscale/layouts/main",
                       user: req.user.username,
                       dataForm: "Request send to Server, Plese check the graphs after the test is over",
                       dataClient: "Request send to Server, Plese check the graphs after the test is over"
@@ -634,8 +634,8 @@ router.post("/loadTest", function(req,res){
                   }
                   else {
                     console.log("url not found");
-                    res.render("awskubernetes/failure", {
-                      layout: "../awskubernetes/layouts/main",
+                    res.render("awsKubernetesAutoscale/failure", {
+                      layout: "../awsKubernetesAutoscale/layouts/main",
                       user: req.user.username,
                       error: "App Service Is not running, PLease deploy first and then run"
                     });
@@ -706,8 +706,8 @@ router.post("/triangleLoadTest", function(req,res){
 
               }, 2000);
               var requests = 1;
-              res.render("awskubernetes/success", {
-                layout: "../awskubernetes/layouts/main",
+              res.render("awsKubernetesAutoscale/success", {
+                layout: "../awsKubernetesAutoscale/layouts/main",
                 user: req.user.username,
                 dataForm: "Request send to Server, Plese check the graphs after the test is over",
                 dataClient: "Request send to Server, Plese check the graphs after the test is over"
@@ -765,8 +765,8 @@ router.post("/triangleLoadTest", function(req,res){
             }
             else {
               console.log("Error");
-              res.render("awskubernetes/failure", {
-                layout: "../awskubernetes/layouts/main",
+              res.render("awsKubernetesAutoscale/failure", {
+                layout: "../awsKubernetesAutoscale/layouts/main",
                 user: req.user.username,
                 error: "App Service Is not running, PLease deploy first and then run"
               });
@@ -832,8 +832,8 @@ router.post("/linearIncreaseLoadTest", function(req,res){
 
               }, 2000);
               var requests = 1;
-              res.render("awskubernetes/success", {
-                layout: "../awskubernetes/layouts/main",
+              res.render("awsKubernetesAutoscale/success", {
+                layout: "../awsKubernetesAutoscale/layouts/main",
                 user: req.user.username,
                 dataForm: "Request send to Server, Plese check the graphs after the test is over",
                 dataClient: "Request send to Server, Plese check the graphs after the test is over"
@@ -883,8 +883,8 @@ router.post("/linearIncreaseLoadTest", function(req,res){
             }
             else {
               console.log("Error");
-              res.render("awskubernetes/failure", {
-                layout: "../awskubernetes/layouts/main",
+              res.render("awsKubernetesAutoscale/failure", {
+                layout: "../awsKubernetesAutoscale/layouts/main",
                 user: req.user.username,
                 error: "App Service Is not running, PLease deploy first and then run"
               });
@@ -950,8 +950,8 @@ router.post("/linearIncreaseConstantLoadTest", function(req,res){
 
               }, 2000);
               var requests = 1;
-              res.render("awskubernetes/success", {
-                layout: "../awskubernetes/layouts/main",
+              res.render("awsKubernetesAutoscale/success", {
+                layout: "../awsKubernetesAutoscale/layouts/main",
                 user: req.user.username,
                 dataForm: "Request send to Server, Plese check the graphs after the test is over",
                 dataClient: "Request send to Server, Plese check the graphs after the test is over"
@@ -1009,8 +1009,8 @@ router.post("/linearIncreaseConstantLoadTest", function(req,res){
             }
             else {
               console.log("Error");
-              res.render("awskubernetes/failure", {
-                layout: "../awskubernetes/layouts/main",
+              res.render("awsKubernetesAutoscale/failure", {
+                layout: "../awsKubernetesAutoscale/layouts/main",
                 user: req.user.username,
                 error: "App Service Is not running, PLease deploy first and then run"
               });
@@ -1076,8 +1076,8 @@ router.post("/upDownLoadTest", function(req,res){
               }, 2000);
               var requests = 1;
               var flag = true;
-              res.render("awskubernetes/success", {
-                layout: "../awskubernetes/layouts/main",
+              res.render("awsKubernetesAutoscale/success", {
+                layout: "../awsKubernetesAutoscale/layouts/main",
                 user: req.user.username,
                 dataForm: "Request send to Server, Plese check the graphs after the test is over",
                 dataClient: "Request send to Server, Plese check the graphs after the test is over"
@@ -1136,8 +1136,8 @@ router.post("/upDownLoadTest", function(req,res){
             }
             else {
               console.log("Error");
-              res.render("awskubernetes/failure", {
-                layout: "../awskubernetes/layouts/main",
+              res.render("awsKubernetesAutoscale/failure", {
+                layout: "../awsKubernetesAutoscale/layouts/main",
                 user: req.user.username,
                 error: "App Service Is not running, PLease deploy first and then run"
               });
@@ -1212,8 +1212,8 @@ router.get("/startRecordingData", function(req,res){
     .then(function (set) {
       if (set) {
         console.log("Enabled");
-        res.render("awskubernetes/success", {
-          layout: "../awskubernetes/layouts/main",
+        res.render("awsKubernetesAutoscale/success", {
+          layout: "../awsKubernetesAutoscale/layouts/main",
           user: req.user.username,
           dataForm: "Started",
           dataClient: "Started"
@@ -1259,8 +1259,8 @@ router.get("/stopRecordingData", function(req,res){
     .then(function (set) {
       if (set) {
         console.log("Stopped");
-        res.render("awskubernetes/success", {
-          layout: "../awskubernetes/layouts/main",
+        res.render("awsKubernetesAutoscale/success", {
+          layout: "../awsKubernetesAutoscale/layouts/main",
           user: req.user.username,
           dataForm: "Stopped",
           dataClient: "Stopped"
@@ -1268,8 +1268,8 @@ router.get("/stopRecordingData", function(req,res){
       }
       else {
         console.log("Error");
-        res.render("awskubernetes/failure", {
-          layout: "../awskubernetes/layouts/main",
+        res.render("awsKubernetesAutoscale/failure", {
+          layout: "../awsKubernetesAutoscale/layouts/main",
           user: req.user.username,
           error: "Not able to stop"
         });
