@@ -1,26 +1,26 @@
 // config.js
 // This file contains private configuration details.
 module.exports = {
-  'mongodb': {
-    'host': process.env.MONGODB_HOST,
-    'port': '27017',
-    'dbUsersData': {
+  "mongodb": {
+    "host": process.env.MONGODB_HOST,
+    "port": "27017",
+    "dbUsersData": {
       "name": "dbUsersData",
-      'collectionName': 'usersData',
+      "collectionName": "usersData",
     },
-    'dbKubernetesTestData': {
+    "dbKubernetesTestData": {
       "name": "dbKubernetes"
     },
-    'dbawsAutoscale': {
+    "dbawsAutoscale": {
       "name": "dbawsAutoscale"
     },
-    'dbawsKubeAutoscale': {
+    "dbawsKubeAutoscale": {
       "name": "dbawsKubeAutoscale"
     }
   },
-  'server': {
-        'port': '8080',
-        'host': 'localhost'
+  "server": {
+        "port": "8080",
+        "host": "localhost"
     }
 };
 

@@ -1,11 +1,11 @@
-const bcrypt          = require('bcryptjs');
-const Q               = require('q');
-const config          = require('../../config');
+const bcrypt          = require("bcryptjs");
+const Q               = require("q");
+const config          = require("../../config");
 
 // MongoDB connection information
-const mongodbUrl = 'mongodb://' + config.mongodb.host + ':' + config.mongodb.port + '/' + config.mongodb.dbUsersData.name;
+const mongodbUrl = "mongodb://" + config.mongodb.host + ":" + config.mongodb.port + "/" + config.mongodb.dbUsersData.name;
 const collectionName = config.mongodb.dbUsersData.collectionName;
-const MongoClient = require('mongodb').MongoClient;
+const MongoClient = require("mongodb").MongoClient;
 
 exports.localReg = function (username, password) {
   const deferred = Q.defer();
@@ -13,10 +13,9 @@ exports.localReg = function (username, password) {
   MongoClient.connect(mongodbUrl, function (err, db) {
     let collection = db.collection(collectionName);
     //check if username is already assigned in our database
-    collection.findOne({'userInfo.username' : username})
+    collection.findOne({"userInfo.username" : username})
       .then(function (result) {
         if (null != result) {
-          console.log("USERNAME ALREADY EXISTS:", result.username);
           deferred.resolve(false); // username exists
         }
         else {
@@ -31,7 +30,6 @@ exports.localReg = function (username, password) {
               "avatar": "http://placepuppy.it/images/homepage/Beagle_puppy_6_weeks.JPG"
             }
           };
-          console.log("CREATING USER:", username);
           collection.insert(user)
             .then(function () {
               db.close();
@@ -49,20 +47,18 @@ exports.localAuth = function (username, password) {
   MongoClient.connect(mongodbUrl, function (err, db) {
     const collection = db.collection(collectionName);
 
-    collection.findOne({'userInfo.username' : username})
+    collection.findOne({"userInfo.username" : username})
       .then(function (result) {
         if (null == result) {
-          console.log("USERNAME NOT FOUND:", username);
           deferred.resolve(false);
         }
         else {
           const userInfo = result["userInfo"];
           const hash = userInfo.password;
-          console.log("FOUND USER: " + userInfo.username);
           if (bcrypt.compareSync(password, hash)) {
             deferred.resolve(userInfo);
-          } else {
-            console.log("AUTHENTICATION FAILED");
+          }
+          else {
             deferred.resolve(false);
           }
         }
@@ -77,17 +73,13 @@ exports.getUserInfo = function (user, res, req) {
     const collection = db.collection(collectionName);
 
     //check if username is already assigned in our database
-    collection.findOne({'userInfo.username' : user.username})
+    collection.findOne({"userInfo.username" : user.username})
       .then(function (result) {
         if (null != result) {
-          res.render('user', {
+          res.render("user", {
               user: user,
               info: result["userInfo"]
             });
-        }
-        else
-        {
-          console.log("UserInfo not found");
         }
       });
   });
@@ -97,18 +89,13 @@ exports.getUserInfoForEdit = function (user, res, req) {
   MongoClient.connect(mongodbUrl, function (err, db) {
     const collection = db.collection(collectionName);
     //check if username is already assigned in our database
-    collection.findOne({'userInfo.username' : user.username})
+    collection.findOne({"userInfo.username" : user.username})
       .then(function (result) {
         if (null != result) {
-          console.log("found");
-          res.render('editUser', {
+          res.render("editUser", {
             user: user,
             info: result["userInfo"]
           });
-        }
-        else
-        {
-          console.log("not found");
         }
       });
   });
@@ -120,11 +107,11 @@ exports.saveUserInfo = function (user, data, responseExData) {
   MongoClient.connect(mongodbUrl, function (err, db) {
     let collection = db.collection(collectionName);
     //check if username is already assigned in our database
-    collection.findOne({'userInfo.username' : user.username})
+    collection.findOne({"userInfo.username" : user.username})
       .then(function (result) {
         if (null != result)
         {
-          collection.update({'userInfo.username' : user.username},
+          collection.update({"userInfo.username" : user.username},
             {$set : {
               "userInfo.name": data.name,
               "userInfo.awstoken": data.awstoken,
@@ -146,7 +133,7 @@ exports.saveUserInfo = function (user, data, responseExData) {
             userInfo.awssubnetid2);
           // If all the above fields are in the collection, we are good to go
           user.awssetup = awsSetup;
-          collection.update({'userInfo.username' : user.username},
+          collection.update({"userInfo.username" : user.username},
             {$set : {
                 "userInfo.awssetup": awsSetup,
               }
@@ -171,7 +158,7 @@ exports.checkCSPSetup = function (user, data, res) {
   MongoClient.connect(mongodbUrl, function (err, db) {
     let collection = db.collection(collectionName);
     //check if username is already assigned in our database
-    collection.findOne({'userInfo.username' : user.username})
+    collection.findOne({"userInfo.username" : user.username})
       .then(function (result) {
         if (null != result)
         {
@@ -188,8 +175,7 @@ exports.checkCSPSetup = function (user, data, res) {
         }
         else
         {
-          console.log("user Not exists:", user.username);
-          deferred.resolve(false); // username not exists
+          deferred.resolve(false); // username doesn"t exist
         }
       });
   });

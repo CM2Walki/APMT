@@ -1,16 +1,16 @@
-const path                          = require('path');
-const express                       = require('express');
-const exphbs                        = require('express-handlebars');
-const passport                      = require('passport');
-const LocalStrategy                 = require('passport-local');
-const bodyParser                    = require('body-parser');
+const path                          = require("path");
+const express                       = require("express");
+const exphbs                        = require("express-handlebars");
+const passport                      = require("passport");
+const LocalStrategy                 = require("passport-local");
+const bodyParser                    = require("body-parser");
 const app                           = express();
-const session                       = require('express-session');
-const funct                         = require('./functions');
-const routes                        = require('./routes/general');
-const kubernetesRoutes              = require('./routes/kubernetes');
-const awsAutoscaleRoutes            = require('./routes/awsAutoscale');
-const awsAutoscaleKubernetesRoutes  = require('./routes/awskubernetes');
+const session                       = require("express-session");
+const funct                         = require("./functions");
+const routes                        = require("./routes/general");
+const kubernetesRoutes              = require("./routes/kubernetes");
+const awsAutoscaleRoutes            = require("./routes/awsAutoscale");
+const awsAutoscaleKubernetesRoutes  = require("./routes/awskubernetes");
 //===============PASSPORT=================
 
 // Passport session setup.
@@ -23,19 +23,17 @@ passport.deserializeUser(function(obj, done) {
 });
 
 // Use the LocalStrategy within Passport to login users.
-passport.use('local-signin', new LocalStrategy(
+passport.use("local-signin", new LocalStrategy(
   { passReqToCallback : true }, //allows us to pass back the request to the callback
   function(req, username, password, done) {
     funct.localAuth(username, password)
     .then(function (user) {
       if (user) {
-        console.log("LOGGED IN AS: " + user.username);
-        req.session.success = 'You are successfully logged in using ' + user.username + '!';
+        req.session.success = "You are successfully logged in using " + user.username + "!";
         done(null, user);
       }
       if (!user) {
-        console.log("COULD NOT LOG IN");
-        req.session.error = 'Login failed. E-Mail or Password invalid.'; //inform user could not log them in
+        req.session.error = "Login failed. E-Mail or Password invalid."; //inform user could not log them in
         done(null, user);
       }
     })
@@ -46,24 +44,19 @@ passport.use('local-signin', new LocalStrategy(
 ));
 
 // Use the LocalStrategy within Passport to Register/"signup" users.
-passport.use('local-signup', new LocalStrategy(
-  {passReqToCallback : true}, //allows us to pass back the request to the callback
+passport.use("local-signup", new LocalStrategy(
+  { passReqToCallback : true }, //allows us to pass back the request to the callback
   function(req, username, password, done) {
     funct.localReg(username, password)
     .then(function (user) {
       if (user) {
-        console.log("REGISTERED: " + user.username);
-        req.session.success = 'You are successfully registered and logged in ' + user.username + '!';
+        req.session.success = "You are successfully registered and logged in " + user.username + "!";
         done(null, user);
       }
       if (!user) {
-        console.log("COULD NOT REGISTER");
-        req.session.error = 'That E-Mail is already in use, please try a different one.'; //inform user could not log them in
+        req.session.error = "That E-Mail is already in use, please try a different one."; //inform user could not log them in
         done(null, user);
       }
-    })
-    .fail(function (err){
-      console.log(err.body);
     });
   }
 ));
@@ -71,9 +64,8 @@ passport.use('local-signup', new LocalStrategy(
 //===============EXPRESS=================
 
 // Configure Express
-
 app.use(session({
-  secret: 'you do not know me',
+  secret: "you do not know me",
   resave: true,
   saveUninitialized: true,
   cookie: { maxAge: 90000000 }
@@ -89,7 +81,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // Session-persisted message middleware
-app.use('/',function(req, res, next){
+app.use("/",function(req, res, next){
   var err = req.session.error,
       msg = req.session.notice,
       success = req.session.success;
@@ -107,12 +99,12 @@ app.use('/',function(req, res, next){
 
 // Configure express to use handlebars templates
 var hbs = exphbs.create({
-    defaultLayout: 'main',
-    layoutsDir: path.join(__dirname, 'views', 'layouts'),
+    defaultLayout: "main",
+    layoutsDir: path.join(__dirname, "views", "layouts"),
     partialsDir: path.join(__dirname),
     helpers: {
       toJSON: function (object) {
-        return JSON.stringify(object, null,'\t');
+        return JSON.stringify(object, null,"\t");
       },
       toJSONusername: function (object) {
         return object.username;
@@ -130,10 +122,10 @@ var hbs = exphbs.create({
         return object.awssecret;
       },
       toJSONawstokensecret: function (object) {
-        return object.awstoken.replace(/./g, '*');
+        return object.awstoken.replace(/./g, "*");
       },
       toJSONawssecretsecret: function (object) {
-        return object.awssecret.replace(/./g, '*');
+        return object.awssecret.replace(/./g, "*");
       },
       toJSONawskeyname: function (object) {
         return object.awskeyname;
@@ -153,20 +145,20 @@ var hbs = exphbs.create({
     }
 });
 
-app.engine('handlebars', hbs.engine);
+app.engine("handlebars", hbs.engine);
 
-app.set('view engine', 'handlebars');
+app.set("view engine", "handlebars");
 
-app.set('views', path.join(__dirname, 'views/'));
+app.set("views", path.join(__dirname, "views/"));
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, "public")));
 
-app.use('/awskubernetes',awsAutoscaleKubernetesRoutes);
+app.use("/awskubernetes",awsAutoscaleKubernetesRoutes);
 
-app.use('/kubernetes',kubernetesRoutes);
+app.use("/kubernetes",kubernetesRoutes);
 
-app.use('/awsautoscale',awsAutoscaleRoutes);
+app.use("/awsautoscale",awsAutoscaleRoutes);
 
-app.use('/',routes);
+app.use("/",routes);
 
 module.exports = app;

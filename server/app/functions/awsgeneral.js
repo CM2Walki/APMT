@@ -51,10 +51,6 @@ exports.getUserInfoForDeploy = function (username, res, req, context) {
             info: result["userInfo"]
           });
         }
-        else
-        {
-          console.log("not found");
-        }
       });
   });
 };
@@ -69,10 +65,6 @@ exports.getUserInfoForDescription = function (username, res, req) {
       .then(function (result) {
         if (null != result) {
           deferred.resolve(result["userInfo"]);
-        }
-        else
-        {
-          console.log("not found");
         }
       });
   });
@@ -170,10 +162,12 @@ exports.describeInstances = function(awsData, req, res) {
         const instancesArr = data.Reservations;
         instancesArr.forEach(function (instance) {
           let row = [];
-          if (instance["Instances"][0]["Tags"][0])
+          if (instance["Instances"][0]["Tags"][0]) {
             row.push(instance["Instances"][0]["Tags"][0]["Value"]);
-          else
+          }
+          else {
             row.push("None");
+          }
           row.push(instance["Instances"][0]["InstanceID"]);
           row.push(instance["Instances"][0]["ImageID"]);
           row.push(instance["Instances"][0]["Public IP"]);
@@ -215,7 +209,6 @@ exports.getLatencyData = function(username) {
         }
         else
         {
-          console.log("Error", username);
           deferred.resolve(latencyArray); // username not exists
         }
       });
@@ -239,7 +232,6 @@ exports.getResponseTimeData = function(username) {
         }
         else
         {
-          console.log("Error", username);
           deferred.resolve(responseTimeArray); // username not exists
         }
       });

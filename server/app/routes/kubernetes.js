@@ -40,7 +40,6 @@ router.get("/loadtesthome", function(req, res){
 });
 
 router.get("/getPodsList", function(req, res) {
-
   kubeMongoFunctions.getMasterIp(req.user.username)
     .then(function (ip) {
       if (ip) {

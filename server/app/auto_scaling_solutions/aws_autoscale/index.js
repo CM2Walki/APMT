@@ -311,7 +311,7 @@ exports.terminateAutoScale = function(awsData,username,req, res) {
   });
   var deferred = Q.defer();
 
-  awsGeneral.getAwsAutoScaleInfo(username)
+  awsGeneral.getAwsAutoScaleInfo(username, routeContext)
     .then(function (awsDeployInfo) {
       if (awsDeployInfo) {
 
@@ -392,7 +392,7 @@ exports.getCurrentData = function(awsData, username, req, res) {
     apiVersion: '2015-12-01'
   });
 
-  awsGeneral.getAwsAutoScaleInfo(username)
+  awsGeneral.getAwsAutoScaleInfo(username, routeContext)
     .then(function (awsDeployInfo) {
       if (awsDeployInfo) {
           var d = new Date();
