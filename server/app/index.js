@@ -81,8 +81,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 // Session-persisted message middleware
-app.use("/",function(req, res, next){
-  var err = req.session.error,
+app.use("/",function(req, res, next) {
+  const err = req.session.error,
       msg = req.session.notice,
       success = req.session.success;
 
@@ -98,7 +98,7 @@ app.use("/",function(req, res, next){
 });
 
 // Configure express to use handlebars templates
-var hbs = exphbs.create({
+const hbs = exphbs.create({
     defaultLayout: "main",
     layoutsDir: path.join(__dirname, "views", "layouts"),
     partialsDir: path.join(__dirname),
