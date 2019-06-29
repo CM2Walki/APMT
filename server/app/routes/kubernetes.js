@@ -1,38 +1,45 @@
-const express               = require('express');
+const express               = require("express");
 const router                = express.Router();
-const funct                 = require('../functions');
+const funct                 = require("../functions");
 const kube                  = require("../auto_scaling_solutions/kubernetes/index");
 const kubeMongoFunctions    = require("../auto_scaling_solutions/kubernetes/kubeMongoFunctions");
-const request               = require('request');
-const loadtest              = require('loadtest');
+const request               = require("request");
+const loadtest              = require("loadtest");
 const awsGeneral            = require("../functions/awsgeneral");
 
-const routeContext = 'kubernetes';
+const routeContext = "kubernetes";
 
 //===============ROUTES=================
 //displays our homepage
-router.get('/', function(req, res){
-  res.render('kubernetes/home',{layout: '../kubernetes/layouts/main',user: req.user} );
+router.get("/", function(req, res){
+  res.render("kubernetes/home",{layout: "../kubernetes/layouts/main",user: req.user} );
 });
-router.get('/charts', function(req, res){
-  res.render('kubernetes/charts', {layout: '../kubernetes/layouts/main',user: req.user} );
+
+router.get("/charts", function(req, res){
+  res.render("kubernetes/charts", {layout: "../kubernetes/layouts/main",user: req.user} );
 });
-router.get('/tables', function(req, res){
-  res.render('kubernetes/tables', {layout: '../kubernetes/layouts/main',user: req.user} );
+
+router.get("/tables", function(req, res){
+  res.render("kubernetes/tables", {layout: "../kubernetes/layouts/main",user: req.user} );
 });
-router.get('/timelineKubernetes', function(req, res){
-  res.render('kubernetes/timeline', {layout: '../kubernetes/layouts/main',user: req.user} );
+
+router.get("/timelineKubernetes", function(req, res){
+  res.render("kubernetes/timeline", {layout: "../kubernetes/layouts/main",user: req.user} );
 });
-router.get('/edituserInfo', function(req, res){
+
+router.get("/edituserInfo", function(req, res){
   funct.getUserInfoForEdit(req.user.username, res, req);
 });
-router.get('/deploykubernetesAws', function(req, res){
+
+router.get("/deploykubernetesAws", function(req, res){
   awsGeneral.getUserInfoForDeploy(req.user.username, res, req, routeContext);
 });
-router.get('/loadtesthome', function(req, res){
-  res.render('kubernetes/loadtesthome',{layout: '../kubernetes/layouts/main',user: req.user} );
+
+router.get("/loadtesthome", function(req, res){
+  res.render("kubernetes/loadtesthome",{layout: "../kubernetes/layouts/main",user: req.user} );
 });
-router.get('/getPodsList', function(req, res) {
+
+router.get("/getPodsList", function(req, res) {
 
   kubeMongoFunctions.getMasterIp(req.user.username)
     .then(function (ip) {
@@ -48,19 +55,20 @@ router.get('/getPodsList', function(req, res) {
           }
         }, function(error, response, body) {
           if (!error && response.statusCode === 200) {
-            var dataToSend = kube.loadPodTableList( ['name', 'namespace', 'creationTimestamp'], 'nodeName', 'phase', 'conditions',  body.items);
+            var dataToSend = kube.loadPodTableList( ["name", "namespace", "creationTimestamp"], "nodeName", "phase", "conditions",  body.items);
             res.send(dataToSend);
           }
         });
       }
       else {
         console.log("ip not found");
-        var dataToSend = kube.loadPodTableList( ['name', 'namespace', 'creationTimestamp'], 'nodeName', 'phase', 'conditions',  body.items);
+        var dataToSend = kube.loadPodTableList( ["name", "namespace", "creationTimestamp"], "nodeName", "phase", "conditions",  body.items);
         res.send(dataToSend);
       }
     });
 });
-router.get('/getTimeLineData', function(req, res) {
+
+router.get("/getTimeLineData", function(req, res) {
   kubeMongoFunctions.getMasterIp(req.user.username)
     .then(function (ip) {
       if (ip) {
@@ -87,7 +95,8 @@ router.get('/getTimeLineData', function(req, res) {
       }
     });
 });
-router.get('/getAutoScalingList', function(req, res) {
+
+router.get("/getAutoScalingList", function(req, res) {
   kubeMongoFunctions.getMasterIp(req.user.username)
     .then(function (ip) {
       if (ip) {
@@ -101,19 +110,20 @@ router.get('/getAutoScalingList', function(req, res) {
           }
         }, function(error, response, body) {
           if (!error && response.statusCode === 200) {
-            var dataToSend = kube.loadHpaList(['name','namespace', 'creationTimestamp'], body.items);
+            var dataToSend = kube.loadHpaList(["name","namespace", "creationTimestamp"], body.items);
             res.send(dataToSend);
           }
         });
       }
       else {
         console.log("ip not found");
-        var dataToSend = kube.loadHpaList(['name','namespace', 'creationTimestamp'], body.items);
+        var dataToSend = kube.loadHpaList(["name","namespace", "creationTimestamp"], body.items);
         res.send(dataToSend);
       }
     });
 });
-router.get('/getServicesList', function(req, res) {
+
+router.get("/getServicesList", function(req, res) {
   kubeMongoFunctions.getMasterIp(req.user.username)
     .then(function (ip) {
       if (ip) {
@@ -128,19 +138,20 @@ router.get('/getServicesList', function(req, res) {
           }
         }, function(error, response, body) {
           if (!error && response.statusCode === 200) {
-            var dataToSend = kube.loadTableServices( ['name', 'namespace', 'creationTimestamp'], body.items);
+            var dataToSend = kube.loadTableServices( ["name", "namespace", "creationTimestamp"], body.items);
             res.send(dataToSend);
           }
         });
       }
       else {
         console.log("ip not found");
-        var dataToSend = kube.loadTableServices( ['name', 'namespace', 'creationTimestamp'], body.items);
+        var dataToSend = kube.loadTableServices( ["name", "namespace", "creationTimestamp"], body.items);
         res.send(dataToSend);
       }
     });
 });
-router.get('/getReplicationControllers', function(req, res) {
+
+router.get("/getReplicationControllers", function(req, res) {
   kubeMongoFunctions.getMasterIp(req.user.username)
     .then(function (ip) {
       if (ip) {
@@ -155,19 +166,20 @@ router.get('/getReplicationControllers', function(req, res) {
           }
         }, function(error, response, body) {
           if (!error && response.statusCode === 200) {
-            var dataToSend = kube.loadReplicationControllerList( ['name', 'namespace', 'creationTimestamp'], body.items);
+            var dataToSend = kube.loadReplicationControllerList( ["name", "namespace", "creationTimestamp"], body.items);
             res.send(dataToSend);
           }
         });
       }
       else {
         console.log("ip not found");
-        var dataToSend = kube.loadReplicationControllerList( ['name', 'namespace', 'creationTimestamp'], body.items);
+        var dataToSend = kube.loadReplicationControllerList( ["name", "namespace", "creationTimestamp"], body.items);
         res.send(dataToSend);
       }
     });
 });
-router.get('/getNodesData', function(req, res) {
+
+router.get("/getNodesData", function(req, res) {
   kubeMongoFunctions.getMasterIp(req.user.username)
     .then(function (ip) {
       if (ip) {
@@ -182,19 +194,20 @@ router.get('/getNodesData', function(req, res) {
           }
         }, function(error, response, body) {
           if (!error && response.statusCode === 200) {
-            var dataToSend = kube.loadNodeList(['name', 'creationTimestamp'], body.items);
+            var dataToSend = kube.loadNodeList(["name", "creationTimestamp"], body.items);
             res.send(dataToSend);
           }
         });
       }
       else {
         console.log("ip not found");
-        var dataToSend = kube.loadNodeList(['name', 'creationTimestamp'], body.items);
+        var dataToSend = kube.loadNodeList(["name", "creationTimestamp"], body.items);
         res.send(dataToSend);
       }
     });
 });
-router.get('/describeEc2Instances', function(req, res) {
+
+router.get("/describeEc2Instances", function(req, res) {
   awsGeneral.getUserInfoForDescription(req.user.username, res, req)
     .then(function (data) {
       if (data) {
@@ -222,7 +235,8 @@ router.get('/describeEc2Instances', function(req, res) {
       }
     });
 });
-router.get('/terminateEc2Instances', function(req, res) {
+
+router.get("/terminateEc2Instances", function(req, res) {
   awsGeneral.getUserInfoForDescription(req.user.username, res, req)
     .then(function (data) {
       if (data) {
@@ -241,10 +255,10 @@ router.get('/terminateEc2Instances', function(req, res) {
     });
 });
 
-router.post('/basicLoadTest', function(req,res){
+router.post("/basicLoadTest", function(req,res){
   formElements = req.body;
   var startTime = new Date().getTime();
-  kubeMongoFunctions.initLoadTest('testLoadTimeline')
+  kubeMongoFunctions.initLoadTest("testLoadTimeline")
     .then(function (removed) {
       var interval = setInterval(function () {
         if (new Date().getTime() - startTime > formElements["maxTime"] * 1000 + 600000) {
@@ -278,14 +292,14 @@ router.post('/basicLoadTest', function(req,res){
       }, 2000);
     });
 
-  kubeMongoFunctions.initLoadTest('testLoad')
+  kubeMongoFunctions.initLoadTest("testLoad")
     .then(function (removed) {
 
       awsGeneral.getServiceURL(req.user.username, routeContext)
         .then(function (url) {
           if (url) {
             console.log("Found URL informtion");
-            var options = '';
+            var options = "";
             options = {
               url: url,
               concurrency: formElements["numConcurrClients"], //How many clients to start in parallel.
@@ -298,14 +312,14 @@ router.post('/basicLoadTest', function(req,res){
 
             loadtest.loadTest(options, function(error) {
               if (error) {
-                console.error('Got an error: %s', error);
+                console.error("Got an error: %s", error);
               }
-              console.log('Tests run successfully');
+              console.log("Tests run successfully");
             });
             // here neet to trigger load and save the data
             // save information of kubernetes every one second
-            res.render('kubernetes/success', {
-              layout: '../kubernetes/layouts/main',
+            res.render("kubernetes/success", {
+              layout: "../kubernetes/layouts/main",
               user: req.user.username,
               dataForm: "Request send to Server, Plese check the graphs after the test is over",
               dataClient: "Request send to Server, Plese check the graphs after the test is over"
@@ -313,8 +327,8 @@ router.post('/basicLoadTest', function(req,res){
           }
           else {
             console.log("url not found");
-            res.render('kubernetes/failure', {
-              layout: '../kubernetes/layouts/main',
+            res.render("kubernetes/failure", {
+              layout: "../kubernetes/layouts/main",
               user: req.user.username,
               error: "App Service Is not running, PLease deploy first and then run"
             });
@@ -322,7 +336,8 @@ router.post('/basicLoadTest', function(req,res){
         });
     });
 });
-router.post('/getLoadTestData', function(req,res){
+
+router.post("/getLoadTestData", function(req,res){
   formElements = req.body;
   var loadTestName = formElements.testName;
 
@@ -377,15 +392,15 @@ router.post('/getLoadTestData', function(req,res){
 
         else {
           var allData = {
-            "requestIndex" : '',
-            "datarequestElapsed" : '',
-            "datatotalTimeSeconds" : '',
-            "maxLatency" : '',
-            "minLatency" : '',
-            "meanLatency" : '',
-            "barRPS" : '',
-            "totalTimeSeconds" : '',
-            "errors" : ''
+            "requestIndex" : "",
+            "datarequestElapsed" : "",
+            "datatotalTimeSeconds" : "",
+            "maxLatency" : "",
+            "minLatency" : "",
+            "meanLatency" : "",
+            "barRPS" : "",
+            "totalTimeSeconds" : "",
+            "errors" : ""
           }
           res.send(allData);
         }
@@ -394,7 +409,8 @@ router.post('/getLoadTestData', function(req,res){
       }
       });
 });
-router.post('/getLoadKubernetesData', function(req,res){
+
+router.post("/getLoadKubernetesData", function(req,res){
   formElements = req.body;
   var loadTestName = formElements.testName;
   var timestamp = [];
@@ -437,11 +453,11 @@ router.post('/getLoadKubernetesData', function(req,res){
 
         else {
           var allData = {
-            "timestamp" : '',
-            "desiredReplicas" : '',
-            "currentReplicas" : '',
-            "cpuPercentageAvg" : '',
-            "cpuPercentageCurrent" : ''
+            "timestamp" : "",
+            "desiredReplicas" : "",
+            "currentReplicas" : "",
+            "cpuPercentageAvg" : "",
+            "cpuPercentageCurrent" : ""
           }
           res.send(allData);
         }
@@ -450,7 +466,8 @@ router.post('/getLoadKubernetesData', function(req,res){
       }
     });
 });
-router.post('/getLoadTestTimelineData', function(req,res){
+
+router.post("/getLoadTestTimelineData", function(req,res){
   formElements = req.body;
   var loadTestName = formElements.testName;
   kubeMongoFunctions.getLoadTestTimelineData(req.user.username,loadTestName)
@@ -459,21 +476,21 @@ router.post('/getLoadTestTimelineData', function(req,res){
       if (data.length) {
         for(i=0;i< data.length;i++)
         {
-          if(typeof(allData['' + data[i].name])=="undefined")
+          if(typeof(allData["" + data[i].name])=="undefined")
           {
-            allData['' + data[i].name] = {};
+            allData["" + data[i].name] = {};
           }
-          allData['' + data[i].name]["kind"] = data[i].kind;
-          allData[''+data[i].name]["namespace"] = data[i].namespace;
+          allData["" + data[i].name]["kind"] = data[i].kind;
+          allData[""+data[i].name]["namespace"] = data[i].namespace;
 
-          if(typeof(allData['' + data[i].name][''+data[i].reason])=="undefined")
+          if(typeof(allData["" + data[i].name][""+data[i].reason])=="undefined")
           {
-            allData['' + data[i].name][''+data[i].reason] = {};
+            allData["" + data[i].name][""+data[i].reason] = {};
           }
-          allData[''+data[i].name][''+data[i].reason]["firstTimestamp"] = Date.parse(data[i].firstTimestamp)/1000;
-          allData[''+data[i].name][''+data[i].reason]["lastTimestamp"] = Date.parse(data[i].lastTimestamp)/1000;
-          allData[''+data[i].name][''+data[i].reason]["count"] = data[i].count;
-          allData[''+data[i].name][''+data[i].reason]["message"] = data[i].message;
+          allData[""+data[i].name][""+data[i].reason]["firstTimestamp"] = Date.parse(data[i].firstTimestamp)/1000;
+          allData[""+data[i].name][""+data[i].reason]["lastTimestamp"] = Date.parse(data[i].lastTimestamp)/1000;
+          allData[""+data[i].name][""+data[i].reason]["count"] = data[i].count;
+          allData[""+data[i].name][""+data[i].reason]["message"] = data[i].message;
         }
 
 
@@ -485,20 +502,21 @@ router.post('/getLoadTestTimelineData', function(req,res){
       }
     });
 });
-router.post('/deploykubernetesaws', function(req, res){
+
+router.post("/deploykubernetesaws", function(req, res){
   var data = req.body;
 
   var kubedata =
     {
       "master": {
         "image": data.imageid,
-        "name": 'MasterNode',
+        "name": "MasterNode",
         "numInst": data.numInstMaster,
         "typeInst": data.typeInstMaster
       },
       "minion": {
         "image": data.imageid,
-        "name": 'MinionNode',
+        "name": "MinionNode",
         "numInst": data.numInstMinion,
         "typeInst": data.typeInstMinion
       },
@@ -526,7 +544,8 @@ router.post('/deploykubernetesaws', function(req, res){
 
   kube.deployOnAws(req.user.username,kubedata, awsdata,req, res);
 });
-router.post('/loadTest', function(req,res){
+
+router.post("/loadTest", function(req,res){
   formElements = req.body;
   var loadTestName = formElements.testName;
 
@@ -565,13 +584,13 @@ router.post('/loadTest', function(req,res){
                 .then(function (url) {
                   if (url) {
                     console.log("Found URL informtion");
-                    res.render('kubernetes/success', {
-                      layout: '../kubernetes/layouts/main',
+                    res.render("kubernetes/success", {
+                      layout: "../kubernetes/layouts/main",
                       user: req.user.username,
                       dataForm: "Request send to Server, Plese check the graphs after the test is over",
                       dataClient: "Request send to Server, Plese check the graphs after the test is over"
                     });
-                    var options = '';
+                    var options = "";
                     var username = req.user.username;
                     options = {
                       url: url,
@@ -594,9 +613,9 @@ router.post('/loadTest', function(req,res){
 
                     loadtest.loadTest(options, function(error) {
                       if (error) {
-                        console.error('Got an error: %s', error);
+                        console.error("Got an error: %s", error);
                       }
-                      console.log('Tests run successfully');
+                      console.log("Tests run successfully");
                     });
                     // here neet to trigger load and save the data
                     // save information of kubernetes every one second
@@ -604,8 +623,8 @@ router.post('/loadTest', function(req,res){
                   }
                   else {
                     console.log("url not found");
-                    res.render('kubernetes/failure', {
-                      layout: '../kubernetes/layouts/main',
+                    res.render("kubernetes/failure", {
+                      layout: "../kubernetes/layouts/main",
                       user: req.user.username,
                       error: "App Service Is not running, PLease deploy first and then run"
                     });
@@ -622,7 +641,8 @@ router.post('/loadTest', function(req,res){
       }
     });
 });
-router.post('/triangleLoadTest', function(req,res){
+
+router.post("/triangleLoadTest", function(req,res){
   formElements = req.body;
   var loadTestName = formElements.testName;
 
@@ -658,8 +678,8 @@ router.post('/triangleLoadTest', function(req,res){
 
               }, 2000);
               var requests = 1;
-              res.render('kubernetes/success', {
-                layout: '../kubernetes/layouts/main',
+              res.render("kubernetes/success", {
+                layout: "../kubernetes/layouts/main",
                 user: req.user.username,
                 dataForm: "Request send to Server, Plese check the graphs after the test is over",
                 dataClient: "Request send to Server, Plese check the graphs after the test is over"
@@ -676,7 +696,7 @@ router.post('/triangleLoadTest', function(req,res){
                     console.log(url);
 
                     console.log("requests"+requests);
-                    var options = '';
+                    var options = "";
                     var username = req.user.username;
                     options = {
                       url: url,
@@ -698,9 +718,9 @@ router.post('/triangleLoadTest', function(req,res){
                     };
                     loadtest.loadTest(options, function (error) {
                       if (error) {
-                        console.error('Got an error: %s', error);
+                        console.error("Got an error: %s", error);
                       }
-                      console.log('Tests run successfully');
+                      console.log("Tests run successfully");
                     });
                     if (((new Date().getTime() - startTime) < 300000)) {
                       requests+=5;
@@ -725,7 +745,8 @@ router.post('/triangleLoadTest', function(req,res){
       }
     });
 });
-router.post('/linearIncreaseLoadTest', function(req,res){
+
+router.post("/linearIncreaseLoadTest", function(req,res){
   formElements = req.body;
   var loadTestName = formElements.testName;
 
@@ -760,8 +781,8 @@ router.post('/linearIncreaseLoadTest', function(req,res){
                   });
 
               }, 2000);
-              res.render('kubernetes/success', {
-                layout: '../kubernetes/layouts/main',
+              res.render("kubernetes/success", {
+                layout: "../kubernetes/layouts/main",
                 user: req.user.username,
                 dataForm: "Request send to Server, Plese check the graphs after the test is over",
                 dataClient: "Request send to Server, Plese check the graphs after the test is over"
@@ -776,7 +797,7 @@ router.post('/linearIncreaseLoadTest', function(req,res){
                   .then(function (url) {
                     if (url) {
                       console.log("Found URL informtion");
-                      var options = '';
+                      var options = "";
                       var username = req.user.username;
 
                       options = {
@@ -799,9 +820,9 @@ router.post('/linearIncreaseLoadTest', function(req,res){
                       };
                       loadtest.loadTest(options, function (error) {
                         if (error) {
-                          console.error('Got an error: %s', error);
+                          console.error("Got an error: %s", error);
                         }
-                        console.log('Tests run successfully');
+                        console.log("Tests run successfully");
                       });
                       requests+=3;
                     }
@@ -818,7 +839,8 @@ router.post('/linearIncreaseLoadTest', function(req,res){
       }
     });
 });
-router.post('/linearIncreaseConstantLoadTest', function(req,res){
+
+router.post("/linearIncreaseConstantLoadTest", function(req,res){
   formElements = req.body;
   var loadTestName = formElements.testName;
 
@@ -853,8 +875,8 @@ router.post('/linearIncreaseConstantLoadTest', function(req,res){
                   });
 
               }, 2000);
-              res.render('kubernetes/success', {
-                layout: '../kubernetes/layouts/main',
+              res.render("kubernetes/success", {
+                layout: "../kubernetes/layouts/main",
                 user: req.user.username,
                 dataForm: "Request send to Server, Plese check the graphs after the test is over",
                 dataClient: "Request send to Server, Plese check the graphs after the test is over"
@@ -869,7 +891,7 @@ router.post('/linearIncreaseConstantLoadTest', function(req,res){
                   .then(function (url) {
                     if (url) {
                       console.log("Found URL informtion");
-                      var options = '';
+                      var options = "";
                       var username = req.user.username;
 
                       options = {
@@ -892,9 +914,9 @@ router.post('/linearIncreaseConstantLoadTest', function(req,res){
                       };
                       loadtest.loadTest(options, function (error) {
                         if (error) {
-                          console.error('Got an error: %s', error);
+                          console.error("Got an error: %s", error);
                         }
-                        console.log('Tests run successfully');
+                        console.log("Tests run successfully");
                       });
                       if(((new Date().getTime() - startTime) < 300000) && requests < 10000)
                       {
@@ -919,7 +941,8 @@ router.post('/linearIncreaseConstantLoadTest', function(req,res){
       }
     });
 });
-router.post('/upDownLoadTest', function(req,res){
+
+router.post("/upDownLoadTest", function(req,res){
   formElements = req.body;
   var loadTestName = formElements.testName;
   var flag=true;
@@ -954,8 +977,8 @@ router.post('/upDownLoadTest', function(req,res){
                   });
 
               }, 2000);
-              res.render('kubernetes/success', {
-                layout: '../kubernetes/layouts/main',
+              res.render("kubernetes/success", {
+                layout: "../kubernetes/layouts/main",
                 user: req.user.username,
                 dataForm: "Request send to Server, Plese check the graphs after the test is over",
                 dataClient: "Request send to Server, Plese check the graphs after the test is over"
@@ -970,7 +993,7 @@ router.post('/upDownLoadTest', function(req,res){
                   .then(function (url) {
                     if (url) {
                       console.log("Found URL informtion");
-                      var options = '';
+                      var options = "";
                       var username = req.user.username;
 
                       options = {
@@ -993,9 +1016,9 @@ router.post('/upDownLoadTest', function(req,res){
                       };
                       loadtest.loadTest(options, function (error) {
                         if (error) {
-                          console.error('Got an error: %s', error);
+                          console.error("Got an error: %s", error);
                         }
-                        console.log('Tests run successfully');
+                        console.log("Tests run successfully");
                       });
                       if(flag)
                       {
@@ -1021,14 +1044,15 @@ router.post('/upDownLoadTest', function(req,res){
       }
     });
 });
-router.get('/startRecordingData', function(req,res){
+
+router.get("/startRecordingData", function(req,res){
   var startTime = new Date().getTime();
   kubeMongoFunctions.setManualRecording(req.user.username, true)
     .then(function (set) {
       if (set) {
         console.log("Enabled");
-        res.render('kubernetes/success', {
-          layout: '../kubernetes/layouts/main',
+        res.render("kubernetes/success", {
+          layout: "../kubernetes/layouts/main",
           user: req.user.username,
           dataForm: "Started",
           dataClient: "Started"
@@ -1068,14 +1092,14 @@ router.get('/startRecordingData', function(req,res){
   }, 2000);
 });
 
-router.get('/stopRecordingData', function(req,res){
+router.get("/stopRecordingData", function(req,res){
   var startTime = new Date().getTime();
   kubeMongoFunctions.setManualRecording(req.user.username, false)
     .then(function (set) {
       if (set) {
         console.log("Stopped");
-        res.render('kubernetes/success', {
-          layout: '../kubernetes/layouts/main',
+        res.render("kubernetes/success", {
+          layout: "../kubernetes/layouts/main",
           user: req.user.username,
           dataForm: "Stopped",
           dataClient: "Stopped"
@@ -1083,25 +1107,27 @@ router.get('/stopRecordingData', function(req,res){
       }
       else {
         console.log("Error");
-        res.render('kubernetes/failure', {
-          layout: '../kubernetes/layouts/main',
+        res.render("kubernetes/failure", {
+          layout: "../kubernetes/layouts/main",
           user: req.user.username,
           error: "Not able to stop"
         });
       }
     });
 });
+
 router.use(function(req, res, next){
   // the status option, or res.statusCode = 404
   // are equivalent, however with the option we
   // get the "status" local available as well
-  res.render('404', {user: req.user});
+  res.render("404", {user: req.user});
 });
+
 router.use(function(err, req, res, next){
   // we may use properties of the error object
   // here and next(err) appropriately, or if
   // we possibly recovered from the error, simply next().
-  res.render('500', {user: req.user});
+  res.render("500", {user: req.user});
 });
 //logs user out of site, deleting them from the session, and returns to homepage
 

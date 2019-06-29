@@ -1,27 +1,27 @@
-const express                       = require('express');
+const express                       = require("express");
 const router                        = express.Router();
 const awsAutoscale                  = require("../auto_scaling_solutions/aws_autoscale/index");
 const awsAutoScaleMongoFunctions    = require("../auto_scaling_solutions/aws_autoscale/awsAutoscaleMongoFunctions");
-const loadtest                      = require('loadtest');
+const loadtest                      = require("loadtest");
 const awsGeneral                    = require("../functions/awsgeneral");
 
-const routeContext = 'awsAutoScale';
+const routeContext = "awsAutoScale";
 
 //===============ROUTES=================
 //displays our homepage
-router.get('/', function(req, res){
-  res.render('awsautoscale/home', {layout: '../awsautoscale/layouts/main',user: req.user} );
+router.get("/", function(req, res){
+  res.render("awsautoscale/home", {layout: "../awsautoscale/layouts/main", user: req.user} );
 });
 
-router.get('/getUserInfoForDeploy', function(req, res){
+router.get("/getUserInfoForDeploy", function(req, res){
   awsGeneral.getUserInfoForDeploy(req.user.username, res, req, routeContext);
 });
 
-router.get('/loadtesthome', function(req, res){
-  res.render('awsautoscale/loadtesthome',{layout: '../awsautoscale/layouts/main',user: req.user} );
+router.get("/loadtesthome", function(req, res){
+  res.render("awsautoscale/loadtesthome", {layout: "../awsautoscale/layouts/main", user: req.user} );
 });
 
-router.get('/describeEc2Instances', function(req, res) {
+router.get("/describeEc2Instances", function(req, res) {
   awsGeneral.getUserInfoForDescription(req.user.username, res, req)
     .then(function (data) {
       if (data) {
@@ -45,7 +45,7 @@ router.get('/describeEc2Instances', function(req, res) {
     });
 });
 
-router.get('/describeAwsAutoscaleGroups', function(req, res) {
+router.get("/describeAwsAutoscaleGroups", function(req, res) {
   awsGeneral.getUserInfoForDescription(req.user.username, res, req)
     .then(function (data) {
       if (data) {
@@ -69,7 +69,7 @@ router.get('/describeAwsAutoscaleGroups', function(req, res) {
     });
 });
 
-router.get('/describeAwsLoadBalancer', function(req, res) {
+router.get("/describeAwsLoadBalancer", function(req, res) {
   awsGeneral.getUserInfoForDescription(req.user.username, res, req)
     .then(function (data) {
       if (data) {
@@ -93,38 +93,38 @@ router.get('/describeAwsLoadBalancer', function(req, res) {
     });
 });
 
-router.post('/deployawsautoscale', function(req, res){
+router.post("/deployawsautoscale", function(req, res) {
   const data = req.body;
   const appUrl =  data.giturl;
-  const splitArr = appUrl.split('/');
+  const splitArr = appUrl.split("/");
   const appNameTemp = splitArr[splitArr.length -1];
-  const appNametemparr = appNameTemp.split('.');
+  const appNametemparr = appNameTemp.split(".");
   const appName = appNametemparr[0];
 
   const awsDeployData =
     {
       "image": data.imageid,
       "launchConfig": {
-        "name": 'awslaunchconfig',
+        "name": "awslaunchconfig",
         "typeInst": data.typeInst
       },
       "targetGroupConfig": {
-        "name": 'awstargetgroup',
-        "vpcId": ''
+        "name": "awstargetgroup",
+        "vpcId": ""
       },
       "autoScale": {
-        "name": 'awsautoscale',
+        "name": "awsautoscale",
         "maxInst": data.maxInst,
         "minInst": data.minInst,
         "subnet": "" + data.awssubnetid,
         "upPolicy": {
-          "name": 'awsautoscaleUpPolicy',
+          "name": "awsautoscaleUpPolicy",
           "adjustmentType": data.adjustmentType,
           "metricAggregationType": data.metricAggregationType,
           "policyType": data.policyType,
           "scalingAdjustment": data.scalingAdjustmentUp,
           "alarm": {
-            "name": 'awsautoscaleUpPolicyAlarm_increase',
+            "name": "awsautoscaleUpPolicyAlarm_increase",
             "ComparisonOperator": "GreaterThanOrEqualToThreshold",
             "metricName": data.metricName,
             "threshold": data.threshold,
@@ -134,13 +134,13 @@ router.post('/deployawsautoscale', function(req, res){
           }
         },
         "downPolicy": {
-          "name": 'awsautoscaledownPolicy',
+          "name": "awsautoscaledownPolicy",
           "adjustmentType": data.adjustmentType,
           "metricAggregationType": data.metricAggregationType,
           "policyType": data.policyType,
-          "scalingAdjustment": '-' + data.scalingAdjustmentDown,
+          "scalingAdjustment": "-" + data.scalingAdjustmentDown,
           "alarm": {
-            "name": 'awsautoscaleDownPolicyAlarm_Decrease',
+            "name": "awsautoscaleDownPolicyAlarm_Decrease",
             "ComparisonOperator": "LessThanOrEqualToThreshold",
             "metricName": data.metricName,
             "threshold": data.threshold,
@@ -151,7 +151,7 @@ router.post('/deployawsautoscale', function(req, res){
         }
       },
       "loadBal":{
-        "name": 'awsloadbal',
+        "name": "awsloadbal",
         "subnetsArr":[ ""+ data.awssubnetid,"" + data.awssubnetid2
           ],
       },
@@ -174,7 +174,7 @@ router.post('/deployawsautoscale', function(req, res){
   awsAutoscale.deployAutoscaler(req.user.username, awsDeployData, awsData, req, res);
 });
 
-router.get('/terminate', function(req, res) {
+router.get("/terminate", function(req, res) {
   awsGeneral.getUserInfoForDescription(req.user.username, res, req)
     .then(function (data) {
       if (data) {
@@ -193,7 +193,7 @@ router.get('/terminate', function(req, res) {
     });
 });
 
-router.post('/loadTest', function(req,res){
+router.post("/loadTest", function(req,res){
   formElements = req.body;
   var startTime = new Date().getTime();
   var loadTestName = formElements.testName;
@@ -226,10 +226,10 @@ router.post('/loadTest', function(req,res){
           .then(function (url) {
             if (url) {
               console.log("Found URL informtion");
-              var options = '';
+              var options = "";
               var username = req.user.username;
               options = {
-                url: 'http://'+url + '/api/test',
+                url: "http://"+ url + "/api/test",
                 concurrency: formElements["numConcurrClients"], //How many clients to start in parallel.
                 maxRequests: formElements["maxRequests"], //A max number of requests; after they are reached the test will end.
                 timeout: formElements["maxTimeOut"], //Timeout for each generated request in milliseconds. Setting this to 0 disables timeout (default).
@@ -249,14 +249,14 @@ router.post('/loadTest', function(req,res){
 
               loadtest.loadTest(options, function(error) {
                 if (error) {
-                  console.error('Got an error: %s', error);
+                  console.error("Got an error: %s", error);
                 }
-                console.log('Tests run successfully');
+                console.log("Tests run successfully");
               });
               // here neet to trigger load and save the data
               // save information of kubernetes every one second
-              res.render('awsautoscale/success', {
-                layout: '../awsautoscale/layouts/main',
+              res.render("awsautoscale/success", {
+                layout: "../awsautoscale/layouts/main",
                 user: req.user.username,
                 dataForm: "Request send to Server, Plese check the graphs after the test is over",
                 dataClient: "Request send to Server, Plese check the graphs after the test is over"
@@ -264,8 +264,8 @@ router.post('/loadTest', function(req,res){
             }
             else {
               console.log("url not found");
-              res.render('awsautoscale/failure', {
-                layout: '../awsautoscale/layouts/main',
+              res.render("awsautoscale/failure", {
+                layout: "../awsautoscale/layouts/main",
                 user: req.user.username,
                 error: "App Service Is not running, PLease deploy first and then run"
               });
@@ -278,7 +278,7 @@ router.post('/loadTest', function(req,res){
     });
 });
 
-router.post('/triangleLoadTest', function(req,res){
+router.post("/triangleLoadTest", function(req,res){
   formElements = req.body;
   var startTime = new Date().getTime();
   var loadTestName = formElements.testName;
@@ -307,8 +307,8 @@ router.post('/triangleLoadTest', function(req,res){
             });
         }, 2000);
         var requests = 1;
-        res.render('awsautoscale/success', {
-          layout: '../awsautoscale/layouts/main',
+        res.render("awsautoscale/success", {
+          layout: "../awsautoscale/layouts/main",
           user: req.user.username,
           dataForm: "Request send to Server, Plese check the graphs after the test is over",
           dataClient: "Request send to Server, Plese check the graphs after the test is over"
@@ -326,10 +326,10 @@ router.post('/triangleLoadTest', function(req,res){
                 console.log(url);
 
                 console.log("requests"+requests);
-                var options = '';
+                var options = "";
                 var username = req.user.username;
                 options = {
-                  url: 'http://'+url + '/api/test',
+                  url: "http://"+url + "/api/test",
                   concurrency: formElements["numConcurrClients"], //How many clients to start in parallel.
                   maxRequests: requests * 10, //A max number of requests; after they are reached the test will end.
                   timeout: 2500, //Timeout for each generated request in milliseconds. Setting this to 0 disables timeout (default).
@@ -348,9 +348,9 @@ router.post('/triangleLoadTest', function(req,res){
                 };
                 loadtest.loadTest(options, function (error) {
                   if (error) {
-                    console.error('Got an error: %s', error);
+                    console.error("Got an error: %s", error);
                   }
-                  console.log('Tests run successfully');
+                  console.log("Tests run successfully");
                 });
                 if (((new Date().getTime() - startTime) < 300000)) {
                   requests+=5;
@@ -367,8 +367,8 @@ router.post('/triangleLoadTest', function(req,res){
       }
       else {
         console.log("Error");
-        res.render('awsautoscale/failure', {
-          layout: '../awsautoscale/layouts/main',
+        res.render("awsautoscale/failure", {
+          layout: "../awsautoscale/layouts/main",
           user: req.user.username,
           error: "App Service Is not running, PLease deploy first and then run"
         });
@@ -376,7 +376,7 @@ router.post('/triangleLoadTest', function(req,res){
     });
 });
 
-router.post('/linearIncreaseLoadTest', function(req,res){
+router.post("/linearIncreaseLoadTest", function(req,res){
   formElements = req.body;
   var startTime = new Date().getTime();
   var loadTestName = formElements.testName;
@@ -406,8 +406,8 @@ router.post('/linearIncreaseLoadTest', function(req,res){
 
         }, 2000);
         var requests = 1;
-        res.render('awsautoscale/success', {
-          layout: '../awsautoscale/layouts/main',
+        res.render("awsautoscale/success", {
+          layout: "../awsautoscale/layouts/main",
           user: req.user.username,
           dataForm: "Request send to Server, Plese check the graphs after the test is over",
           dataClient: "Request send to Server, Plese check the graphs after the test is over"
@@ -425,10 +425,10 @@ router.post('/linearIncreaseLoadTest', function(req,res){
                 console.log(url);
 
                 console.log("requests"+requests);
-                var options = '';
+                var options = "";
                 var username = req.user.username;
                 options = {
-                  url: 'http://'+url + '/api/test',
+                  url: "http://"+url + "/api/test",
                   concurrency: formElements["numConcurrClients"], //How many clients to start in parallel.
                   maxRequests: requests * 10, //A max number of requests; after they are reached the test will end.
                   timeout: 2500, //Timeout for each generated request in milliseconds. Setting this to 0 disables timeout (default).
@@ -447,9 +447,9 @@ router.post('/linearIncreaseLoadTest', function(req,res){
                 };
                 loadtest.loadTest(options, function (error) {
                   if (error) {
-                    console.error('Got an error: %s', error);
+                    console.error("Got an error: %s", error);
                   }
-                  console.log('Tests run successfully');
+                  console.log("Tests run successfully");
                 });
                 requests=requests+3;
                 }
@@ -458,8 +458,8 @@ router.post('/linearIncreaseLoadTest', function(req,res){
       }
       else {
         console.log("Error");
-        res.render('awsautoscale/failure', {
-          layout: '../awsautoscale/layouts/main',
+        res.render("awsautoscale/failure", {
+          layout: "../awsautoscale/layouts/main",
           user: req.user.username,
           error: "App Service Is not running, PLease deploy first and then run"
         });
@@ -467,7 +467,7 @@ router.post('/linearIncreaseLoadTest', function(req,res){
     });
 });
 
-router.post('/linearIncreaseConstantLoadTest', function(req,res){
+router.post("/linearIncreaseConstantLoadTest", function(req, res) {
   formElements = req.body;
   var startTime = new Date().getTime();
   var loadTestName = formElements.testName;
@@ -497,8 +497,8 @@ router.post('/linearIncreaseConstantLoadTest', function(req,res){
 
         }, 2000);
         var requests = 1;
-        res.render('awsautoscale/success', {
-          layout: '../awsautoscale/layouts/main',
+        res.render("awsautoscale/success", {
+          layout: "../awsautoscale/layouts/main",
           user: req.user.username,
           dataForm: "Request send to Server, Plese check the graphs after the test is over",
           dataClient: "Request send to Server, Plese check the graphs after the test is over"
@@ -515,10 +515,10 @@ router.post('/linearIncreaseConstantLoadTest', function(req,res){
                 console.log(url);
 
                 console.log("requests"+requests);
-                var options = '';
+                var options = "";
                 var username = req.user.username;
                 options = {
-                  url: 'http://'+url + '/api/test',
+                  url: "http://"+url + "/api/test",
                   concurrency: formElements["numConcurrClients"], //How many clients to start in parallel.
                   maxRequests: requests * 10, //A max number of requests; after they are reached the test will end.
                   timeout: 2500, //Timeout for each generated request in milliseconds. Setting this to 0 disables timeout (default).
@@ -537,9 +537,9 @@ router.post('/linearIncreaseConstantLoadTest', function(req,res){
                 };
                 loadtest.loadTest(options, function (error) {
                   if (error) {
-                    console.error('Got an error: %s', error);
+                    console.error("Got an error: %s", error);
                   }
-                  console.log('Tests run successfully');
+                  console.log("Tests run successfully");
                 });
                 if(((new Date().getTime() - startTime) < 300000) && requests < 10000)
                 {
@@ -556,8 +556,8 @@ router.post('/linearIncreaseConstantLoadTest', function(req,res){
       }
       else {
         console.log("Error");
-        res.render('awsautoscale/failure', {
-          layout: '../awsautoscale/layouts/main',
+        res.render("awsautoscale/failure", {
+          layout: "../awsautoscale/layouts/main",
           user: req.user.username,
           error: "App Service Is not running, PLease deploy first and then run"
         });
@@ -565,7 +565,7 @@ router.post('/linearIncreaseConstantLoadTest', function(req,res){
     });
 });
 
-router.post('/upDownLoadTest', function(req,res){
+router.post("/upDownLoadTest", function(req,res){
   formElements = req.body;
   var flag=true;
   var startTime = new Date().getTime();
@@ -596,8 +596,8 @@ router.post('/upDownLoadTest', function(req,res){
 
         }, 2000);
         var requests = 1;
-        res.render('awsautoscale/success', {
-          layout: '../awsautoscale/layouts/main',
+        res.render("awsautoscale/success", {
+          layout: "../awsautoscale/layouts/main",
           user: req.user.username,
           dataForm: "Request send to Server, Plese check the graphs after the test is over",
           dataClient: "Request send to Server, Plese check the graphs after the test is over"
@@ -615,10 +615,10 @@ router.post('/upDownLoadTest', function(req,res){
                 console.log(url);
 
                 console.log("requests"+requests);
-                var options = '';
+                var options = "";
                 var username = req.user.username;
                 options = {
-                  url: 'http://'+url + '/api/test',
+                  url: "http://"+url + "/api/test",
                   concurrency: formElements["numConcurrClients"], //How many clients to start in parallel.
                   maxRequests: requests * 10, //A max number of requests; after they are reached the test will end.
                   timeout: 2500, //Timeout for each generated request in milliseconds. Setting this to 0 disables timeout (default).
@@ -637,9 +637,9 @@ router.post('/upDownLoadTest', function(req,res){
                 };
                 loadtest.loadTest(options, function (error) {
                   if (error) {
-                    console.error('Got an error: %s', error);
+                    console.error("Got an error: %s", error);
                   }
-                  console.log('Tests run successfully');
+                  console.log("Tests run successfully");
                 });
                 if(flag)
                 {
@@ -657,8 +657,8 @@ router.post('/upDownLoadTest', function(req,res){
       }
       else {
         console.log("Error");
-        res.render('awsautoscale/failure', {
-          layout: '../awsautoscale/layouts/main',
+        res.render("awsautoscale/failure", {
+          layout: "../awsautoscale/layouts/main",
           user: req.user.username,
           error: "App Service Is not running, PLease deploy first and then run"
         });
@@ -666,7 +666,7 @@ router.post('/upDownLoadTest', function(req,res){
     });
 });
 
-router.post('/getLoadTestData', function(req,res){
+router.post("/getLoadTestData", function(req,res){
   formElements = req.body;
   var loadTestName = formElements.testName;
 
@@ -713,22 +713,22 @@ router.post('/getLoadTestData', function(req,res){
       }
       else {
         var allData = {
-          "requestIndex" : '',
-          "datarequestElapsed" : '',
-          "datatotalTimeSeconds" : '',
-          "maxLatency" : '',
-          "minLatency" : '',
-          "meanLatency" : '',
-          "barRPS" : '',
-          "totalTimeSeconds" : '',
-          "errors" : ''
+          "requestIndex" : "",
+          "datarequestElapsed" : "",
+          "datatotalTimeSeconds" : "",
+          "maxLatency" : "",
+          "minLatency" : "",
+          "meanLatency" : "",
+          "barRPS" : "",
+          "totalTimeSeconds" : "",
+          "errors" : ""
         };
         res.send(allData);
       }
     });
 });
 
-router.get('/getCurrentData', function(req, res){
+router.get("/getCurrentData", function(req, res){
   awsGeneral.getUserInfoForDescription(req.user.username, res, req)
     .then(function (data) {
       if (data) {
@@ -752,14 +752,14 @@ router.use(function(req, res, next){
   // the status option, or res.statusCode = 404
   // are equivalent, however with the option we
   // get the "status" local available as well
-  //res.render('404',{user: req.user});
+  res.render("404", {user: req.user});
 });
 
 router.use(function(err, req, res, next){
   // we may use properties of the error object
   // here and next(err) appropriately, or if
   // we possibly recovered from the error, simply next().
-  //res.render('500',{user: req.user});
+  res.render("500", {user: req.user});
 });
 //logs user out of site, deleting them from the session, and returns to homepage
 

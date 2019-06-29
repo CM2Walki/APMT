@@ -1,26 +1,26 @@
-const Q                 = require('q');
-const config            = require('../../config');
-const AWS               = require('aws-sdk');
+const Q                 = require("q");
+const config            = require("../../config");
+const AWS               = require("aws-sdk");
 
 // MongoDB connection information
-const mongodbUrlConfig = 'mongodb://'+ config.mongodb.host + ':' + config.mongodb.port + '/'
+const mongodbUrlConfig = "mongodb://"+ config.mongodb.host + ":" + config.mongodb.port + "/"
                                         + config.mongodb.dbUsersData.name;
 const collectionNameConfig = config.mongodb.dbUsersData.collectionName;
 
-const mongodbUrlAwsAutoScale = 'mongodb://' + config.mongodb.host + ':' + config.mongodb.port + '/'
+const mongodbUrlAwsAutoScale = "mongodb://" + config.mongodb.host + ":" + config.mongodb.port + "/"
                                         + config.mongodb.dbawsAutoscale.name;
 
-const MongoClient = require('mongodb').MongoClient;
+const MongoClient = require("mongodb").MongoClient;
 
 exports.addConfigData = function (username, data, context) {
   const deferred = Q.defer();
   MongoClient.connect(mongodbUrlConfig, function (err, db) {
     let collection = db.collection(collectionNameConfig);
-    collection.findOne({'userInfo.username' : username})
+    collection.findOne({"userInfo.username" : username})
       .then(function (result) {
         if (null != result)
         {
-          collection.update({'userInfo.username' : username},
+          collection.update({"userInfo.username" : username},
             {
               $set : {
                 [context + ".awsAutoscaleConfig"]: data
@@ -42,11 +42,11 @@ exports.getUserInfoForDeploy = function (username, res, req, context) {
   MongoClient.connect(mongodbUrlConfig, function (err, db) {
     const collection = db.collection(collectionNameConfig);
     //check if username is already assigned in our database
-    collection.findOne({'userInfo.username' : username})
+    collection.findOne({"userInfo.username" : username})
       .then(function (result) {
         if (null != result) {
-          res.render(context + '/deploy', {
-            layout: '../' + context + '/layouts/main',
+          res.render(context + "/deploy", {
+            layout: "../" + context + "/layouts/main",
             user: username,
             info: result["userInfo"]
           });
@@ -65,7 +65,7 @@ exports.getUserInfoForDescription = function (username, res, req) {
     const collection = db.collection(collectionNameConfig);
 
     //check if username is already assigned in our database
-    collection.findOne({'userInfo.username' : username})
+    collection.findOne({"userInfo.username" : username})
       .then(function (result) {
         if (null != result) {
           deferred.resolve(result["userInfo"]);
@@ -86,7 +86,7 @@ exports.getAwsAutoScaleInfo = function(username, context) {
     const collection = db.collection(collectionNameConfig);
 
     //check if username is already assigned in our database
-    collection.findOne({'userInfo.username' : username})
+    collection.findOne({"userInfo.username" : username})
       .then(function (result) {
         if (null != result)
         {
@@ -109,7 +109,7 @@ exports.getServiceURL = function(username, context) {
     const collection = db.collection(collectionNameConfig);
 
     //check if username is already assigned in our database
-    collection.findOne({'userInfo.username' : username})
+    collection.findOne({"userInfo.username" : username})
       .then(function (result) {
         if (null != result)
         {
@@ -141,7 +141,7 @@ exports.describeInstances = function(awsData, req, res) {
   const ec2 = new AWS.EC2({ accessKeyId: awsData.accessKeyId,
                             secretAccessKey: awsData.secretAccessKey,
                             region: awsData.region,
-                            apiVersion: '2016-11-15'});
+                            apiVersion: "2016-11-15"});
   const deferred = Q.defer();
   const params = {
     DryRun: false
@@ -202,8 +202,8 @@ exports.describeInstances = function(awsData, req, res) {
 exports.getLatencyData = function(username) {
   const deferred = Q.defer();
   let latencyArray = {};
-  MongoClient.connect('mongodb://' + config.mongodb.host + ':' + config.mongodb.port + '/dbPerfData', function (err, db) {
-    const collection = db.collection('usersPerfData');
+  MongoClient.connect("mongodb://" + config.mongodb.host + ":" + config.mongodb.port + "/dbPerfData", function (err, db) {
+    const collection = db.collection("usersPerfData");
 
     //check if username is already assigned in our database
     collection.findOne({"username": username}, {"LatencyDatapoints" : []})
@@ -226,8 +226,8 @@ exports.getLatencyData = function(username) {
 exports.getResponseTimeData = function(username) {
   const deferred = Q.defer();
   let responseTimeArray = {};
-  MongoClient.connect('mongodb://' + config.mongodb.host + ':' + config.mongodb.port + '/dbPerfData', function (err, db) {
-    const collection = db.collection('usersPerfData');
+  MongoClient.connect("mongodb://" + config.mongodb.host + ":" + config.mongodb.port + "/dbPerfData", function (err, db) {
+    const collection = db.collection("usersPerfData");
 
     //check if username is already assigned in our database
     collection.findOne({"username": username}, {"ResponseTimeDatapoints": []})

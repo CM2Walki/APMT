@@ -1,29 +1,29 @@
-const express                                 = require('express');
+const express                                 = require("express");
 const router                                  = express.Router();
-const funct                                   = require('../functions');
+const funct                                   = require("../functions");
 const awsAutoscaleKubernetes                  = require("../auto_scaling_solutions/aws_kubernetes/index");
 const awsAutoscaleKubernetesMongoFunctions    = require("../auto_scaling_solutions/aws_kubernetes/awsAutoscaleKubernetesMongoFunctions");
-const request                                 = require('request');
-const loadtest                                = require('loadtest');
+const request                                 = require("request");
+const loadtest                                = require("loadtest");
 const awsGeneral                              = require("../functions/awsgeneral");
 
-const routeContext = 'awsKubeAutoScale';
+const routeContext = "awsKubeAutoScale";
 
 //===============ROUTES=================
 //displays our homepage
-router.get('/', function(req, res){
-  res.render('awskubernetes/home',{layout: '../awskubernetes/layouts/main',user: req.user} );
+router.get("/", function(req, res){
+  res.render("awskubernetes/home",{layout: "../awskubernetes/layouts/main",user: req.user} );
 });
-router.get('/edituserInfo', function(req, res){
+router.get("/edituserInfo", function(req, res){
   funct.getUserInfoForEdit(req.user.username, res, req);
 });
-router.get('/getUserInfoForDeploy', function(req, res){
+router.get("/getUserInfoForDeploy", function(req, res){
   awsGeneral.getUserInfoForDeploy(req.user.username, res, req, routeContext);
 });
-router.get('/loadtesthome', function(req, res){
-  res.render('awskubernetes/loadtesthome',{layout: '../awskubernetes/layouts/main',user: req.user} );
+router.get("/loadtesthome", function(req, res){
+  res.render("awskubernetes/loadtesthome",{layout: "../awskubernetes/layouts/main",user: req.user} );
 });
-router.get('/describeEc2Instances', function(req, res) {
+router.get("/describeEc2Instances", function(req, res) {
   awsGeneral.getUserInfoForDescription(req.user.username, res, req)
     .then(function (data) {
       if (data) {
@@ -46,7 +46,7 @@ router.get('/describeEc2Instances', function(req, res) {
       }
     });
 });
-router.get('/describeAwsAutoscaleGroups', function(req, res) {
+router.get("/describeAwsAutoscaleGroups", function(req, res) {
   awsGeneral.getUserInfoForDescription(req.user.username, res, req)
     .then(function (data) {
       if (data) {
@@ -69,7 +69,7 @@ router.get('/describeAwsAutoscaleGroups', function(req, res) {
       }
     });
 });
-router.get('/describeAwsLoadBalancer', function(req, res) {
+router.get("/describeAwsLoadBalancer", function(req, res) {
   awsGeneral.getUserInfoForDescription(req.user.username, res, req)
     .then(function (data) {
       if (data) {
@@ -92,39 +92,39 @@ router.get('/describeAwsLoadBalancer', function(req, res) {
       }
     });
 });
-router.post('/deployawsautoscale', function(req, res){
+router.post("/deployawsautoscale", function(req, res){
   var data = req.body;
 
   var appUrl =  data.giturl;
-  var splitArr = appUrl.split('/');
+  var splitArr = appUrl.split("/");
   var appNameTemp = splitArr[splitArr.length -1];
-  var appNametemparr = appNameTemp.split('.');
+  var appNametemparr = appNameTemp.split(".");
   var appName = appNametemparr[0];
 
   var awsDeployData =
     {
       "image": data.imageid,
       "launchConfig": {
-        "name": 'awslaunchconfig',
+        "name": "awslaunchconfig",
         "typeInst": data.typeInst
       },
       "targetGroupConfig": {
-        "name": 'awstargetgroup',
-        "vpcId": ''
+        "name": "awstargetgroup",
+        "vpcId": ""
       },
       "autoScale": {
-        "name": 'awsautoscale',
+        "name": "awsautoscale",
         "maxInst": data.maxInst,
         "minInst": data.minInst,
         "subnet": ""+data.awssubnetid,
         "upPolicy": {
-          "name": 'awsautoscaleUpPolicy',
+          "name": "awsautoscaleUpPolicy",
           "adjustmentType": data.adjustmentType,
           "metricAggregationType": data.metricAggregationType,
           "policyType": data.policyType,
           "scalingAdjustment": data.scalingAdjustmentUp,
           "alarm": {
-            "name": 'awsautoscaleUpPolicyAlarm_increase',
+            "name": "awsautoscaleUpPolicyAlarm_increase",
             "ComparisonOperator": "GreaterThanOrEqualToThreshold",
             "metricName": data.metricName,
             "threshold": data.threshold,
@@ -134,13 +134,13 @@ router.post('/deployawsautoscale', function(req, res){
           }
         },
         "downPolicy": {
-          "name": 'awsautoscaledownPolicy',
+          "name": "awsautoscaledownPolicy",
           "adjustmentType": data.adjustmentType,
           "metricAggregationType": data.metricAggregationType,
           "policyType": data.policyType,
-          "scalingAdjustment": '-' + data.scalingAdjustmentDown,
+          "scalingAdjustment": "-" + data.scalingAdjustmentDown,
           "alarm": {
-            "name": 'awsautoscaleDownPolicyAlarm_Decrease',
+            "name": "awsautoscaleDownPolicyAlarm_Decrease",
             "ComparisonOperator": "LessThanOrEqualToThreshold",
             "metricName": data.metricName,
             "threshold": data.threshold,
@@ -151,7 +151,7 @@ router.post('/deployawsautoscale', function(req, res){
         }
       },
       "loadBal":{
-        "name": 'awsloadbal',
+        "name": "awsloadbal",
         "subnetsArr":[ ""+data.awssubnetid,""+data.awssubnetid2
           /* more items */
           ],
@@ -175,11 +175,11 @@ router.post('/deployawsautoscale', function(req, res){
   var kubedata = {
       "master": {
         "image": data.imageid,
-        "name": 'MasterNode',
+        "name": "MasterNode",
       },
       "minion": {
         "image": data.imageid,
-        "name": 'MinionNode',
+        "name": "MinionNode",
       },
       "scalingParams": {
         //"policy": data.scalingParam,
@@ -196,7 +196,7 @@ router.post('/deployawsautoscale', function(req, res){
 
   awsAutoscaleKubernetes.deployAutoscaler(req.user.username,awsDeployData,kubedata, awsdata,req, res);
 });
-router.get('/terminate', function(req, res) {
+router.get("/terminate", function(req, res) {
   awsGeneral.getUserInfoForDescription(req.user.username, res, req)
     .then(function (data) {
       if (data) {
@@ -214,13 +214,13 @@ router.get('/terminate', function(req, res) {
       }
     });
 });
-router.get('/tables', function(req, res){
-  res.render('awskubernetes/tables', {layout: '../awskubernetes/layouts/main',user: req.user} );
+router.get("/tables", function(req, res){
+  res.render("awskubernetes/tables", {layout: "../awskubernetes/layouts/main",user: req.user} );
 });
-router.get('/timelineKubernetes', function(req, res){
-  res.render('awskubernetes/timeline', {layout: '../awskubernetes/layouts/main',user: req.user} );
+router.get("/timelineKubernetes", function(req, res){
+  res.render("awskubernetes/timeline", {layout: "../awskubernetes/layouts/main",user: req.user} );
 });
-router.get('/getPodsList', function(req, res) {
+router.get("/getPodsList", function(req, res) {
 
   awsAutoscaleKubernetesMongoFunctions.getMasterIp(req.user.username)
     .then(function (ip) {
@@ -236,19 +236,19 @@ router.get('/getPodsList', function(req, res) {
           }
         }, function(error, response, body) {
           if (!error && response.statusCode === 200) {
-            var dataToSend = awsAutoscaleKubernetes.loadPodTableList( ['name', 'namespace', 'creationTimestamp'], 'nodeName', 'phase', 'conditions',  body.items);
+            var dataToSend = awsAutoscaleKubernetes.loadPodTableList( ["name", "namespace", "creationTimestamp"], "nodeName", "phase", "conditions",  body.items);
             res.send(dataToSend);
           }
         });
       }
       else {
         console.log("ip not found");
-        var dataToSend = awsAutoscaleKubernetes.loadPodTableList( ['name', 'namespace', 'creationTimestamp'], 'nodeName', 'phase', 'conditions',  body.items);
+        var dataToSend = awsAutoscaleKubernetes.loadPodTableList( ["name", "namespace", "creationTimestamp"], "nodeName", "phase", "conditions",  body.items);
         res.send(dataToSend);
       }
     });
 });
-router.get('/getTimeLineData', function(req, res) {
+router.get("/getTimeLineData", function(req, res) {
   awsAutoscaleKubernetesMongoFunctions.getMasterIp(req.user.username)
     .then(function (ip) {
       if (ip) {
@@ -275,7 +275,7 @@ router.get('/getTimeLineData', function(req, res) {
       }
     });
 });
-router.get('/getAutoScalingList', function(req, res) {
+router.get("/getAutoScalingList", function(req, res) {
   awsAutoscaleKubernetesMongoFunctions.getMasterIp(req.user.username)
     .then(function (ip) {
       if (ip) {
@@ -289,19 +289,19 @@ router.get('/getAutoScalingList', function(req, res) {
           }
         }, function(error, response, body) {
           if (!error && response.statusCode === 200) {
-            var dataToSend = awsAutoscaleKubernetes.loadHpaList(['name','namespace', 'creationTimestamp'], body.items);
+            var dataToSend = awsAutoscaleKubernetes.loadHpaList(["name","namespace", "creationTimestamp"], body.items);
             res.send(dataToSend);
           }
         });
       }
       else {
         console.log("ip not found");
-        var dataToSend = awsAutoscaleKubernetes.loadHpaList(['name','namespace', 'creationTimestamp'], body.items);
+        var dataToSend = awsAutoscaleKubernetes.loadHpaList(["name","namespace", "creationTimestamp"], body.items);
         res.send(dataToSend);
       }
     });
 });
-router.get('/getServicesList', function(req, res) {
+router.get("/getServicesList", function(req, res) {
   awsAutoscaleKubernetesMongoFunctions.getMasterIp(req.user.username)
     .then(function (ip) {
       if (ip) {
@@ -316,19 +316,19 @@ router.get('/getServicesList', function(req, res) {
           }
         }, function(error, response, body) {
           if (!error && response.statusCode === 200) {
-            var dataToSend = awsAutoscaleKubernetes.loadTableServices( ['name', 'namespace', 'creationTimestamp'], body.items);
+            var dataToSend = awsAutoscaleKubernetes.loadTableServices( ["name", "namespace", "creationTimestamp"], body.items);
             res.send(dataToSend);
           }
         });
       }
       else {
         console.log("ip not found");
-        var dataToSend = awsAutoscaleKubernetes.loadTableServices( ['name', 'namespace', 'creationTimestamp'], body.items);
+        var dataToSend = awsAutoscaleKubernetes.loadTableServices( ["name", "namespace", "creationTimestamp"], body.items);
         res.send(dataToSend);
       }
     });
 });
-router.get('/getReplicationControllers', function(req, res) {
+router.get("/getReplicationControllers", function(req, res) {
   awsAutoscaleKubernetesMongoFunctions.getMasterIp(req.user.username)
     .then(function (ip) {
       if (ip) {
@@ -343,19 +343,19 @@ router.get('/getReplicationControllers', function(req, res) {
           }
         }, function(error, response, body) {
           if (!error && response.statusCode === 200) {
-            var dataToSend = awsAutoscaleKubernetes.loadReplicationControllerList( ['name', 'namespace', 'creationTimestamp'], body.items);
+            var dataToSend = awsAutoscaleKubernetes.loadReplicationControllerList( ["name", "namespace", "creationTimestamp"], body.items);
             res.send(dataToSend);
           }
         });
       }
       else {
         console.log("ip not found");
-        var dataToSend = awsAutoscaleKubernetes.loadReplicationControllerList( ['name', 'namespace', 'creationTimestamp'], body.items);
+        var dataToSend = awsAutoscaleKubernetes.loadReplicationControllerList( ["name", "namespace", "creationTimestamp"], body.items);
         res.send(dataToSend);
       }
     });
 });
-router.get('/getNodesData', function(req, res) {
+router.get("/getNodesData", function(req, res) {
   awsAutoscaleKubernetesMongoFunctions.getMasterIp(req.user.username)
     .then(function (ip) {
       if (ip) {
@@ -370,19 +370,19 @@ router.get('/getNodesData', function(req, res) {
           }
         }, function(error, response, body) {
           if (!error && response.statusCode === 200) {
-            var dataToSend = awsAutoscaleKubernetes.loadNodeList(['name', 'creationTimestamp'], body.items);
+            var dataToSend = awsAutoscaleKubernetes.loadNodeList(["name", "creationTimestamp"], body.items);
             res.send(dataToSend);
           }
         });
       }
       else {
         console.log("ip not found");
-        var dataToSend = awsAutoscaleKubernetes.loadNodeList(['name', 'creationTimestamp'], body.items);
+        var dataToSend = awsAutoscaleKubernetes.loadNodeList(["name", "creationTimestamp"], body.items);
         res.send(dataToSend);
       }
     });
 });
-router.post('/getLoadKubernetesData', function(req,res){
+router.post("/getLoadKubernetesData", function(req,res){
   formElements = req.body;
   var loadTestName = formElements.testName;
   var timestamp = [];
@@ -438,11 +438,11 @@ router.post('/getLoadKubernetesData', function(req,res){
 
         else {
           var allData = {
-            "timestamp" : '',
-            "desiredReplicas" : '',
-            "currentReplicas" : '',
-            "cpuPercentageAvg" : '',
-            "cpuPercentageCurrent" : ''
+            "timestamp" : "",
+            "desiredReplicas" : "",
+            "currentReplicas" : "",
+            "cpuPercentageAvg" : "",
+            "cpuPercentageCurrent" : ""
           }
           res.send(allData);
         }
@@ -451,7 +451,7 @@ router.post('/getLoadKubernetesData', function(req,res){
       }
     });
 });
-router.post('/getautoScaleData', function(req,res){
+router.post("/getautoScaleData", function(req,res){
   formElements = req.body;
   var loadTestName = formElements.testName;
   var timestamp = [];
@@ -482,10 +482,10 @@ router.post('/getautoScaleData', function(req,res){
 
         else {
           var allData = {
-            "timestamp" : '',
-            "desiredInstances" : '',
-            "currentInstances" : '',
-            "cpuPercentage" : ''
+            "timestamp" : "",
+            "desiredInstances" : "",
+            "currentInstances" : "",
+            "cpuPercentage" : ""
           };
           res.send(allData);
         }
@@ -494,7 +494,7 @@ router.post('/getautoScaleData', function(req,res){
       }
     });
 });
-router.post('/getLoadTestTimelineData', function(req,res){
+router.post("/getLoadTestTimelineData", function(req,res){
   formElements = req.body;
   var loadTestName = formElements.testName;
   awsAutoscaleKubernetesMongoFunctions.getLoadTestTimelineData(req.user.username,loadTestName)
@@ -503,21 +503,21 @@ router.post('/getLoadTestTimelineData', function(req,res){
       if (data.length) {
         for(i=0;i< data.length;i++)
         {
-          if(typeof(allData['' + data[i].name])=="undefined")
+          if(typeof(allData["" + data[i].name])=="undefined")
           {
-            allData['' + data[i].name] = {};
+            allData["" + data[i].name] = {};
           }
-          allData['' + data[i].name]["kind"] = data[i].kind;
-          allData[''+data[i].name]["namespace"] = data[i].namespace;
+          allData["" + data[i].name]["kind"] = data[i].kind;
+          allData[""+data[i].name]["namespace"] = data[i].namespace;
 
-          if(typeof(allData['' + data[i].name][''+data[i].reason])=="undefined")
+          if(typeof(allData["" + data[i].name][""+data[i].reason])=="undefined")
           {
-            allData['' + data[i].name][''+data[i].reason] = {};
+            allData["" + data[i].name][""+data[i].reason] = {};
           }
-          allData[''+data[i].name][''+data[i].reason]["firstTimestamp"] = Date.parse(data[i].firstTimestamp)/1000;
-          allData[''+data[i].name][''+data[i].reason]["lastTimestamp"] = Date.parse(data[i].lastTimestamp)/1000;
-          allData[''+data[i].name][''+data[i].reason]["count"] = data[i].count;
-          allData[''+data[i].name][''+data[i].reason]["message"] = data[i].message;
+          allData[""+data[i].name][""+data[i].reason]["firstTimestamp"] = Date.parse(data[i].firstTimestamp)/1000;
+          allData[""+data[i].name][""+data[i].reason]["lastTimestamp"] = Date.parse(data[i].lastTimestamp)/1000;
+          allData[""+data[i].name][""+data[i].reason]["count"] = data[i].count;
+          allData[""+data[i].name][""+data[i].reason]["message"] = data[i].message;
         }
 
 
@@ -531,11 +531,11 @@ router.post('/getLoadTestTimelineData', function(req,res){
 });
 
 
-router.get('/edituserInfo', function(req, res){
+router.get("/edituserInfo", function(req, res){
   funct.getUserInfoForEdit(req.user.username, res, req);
 });
 
-router.post('/loadTest', function(req,res){
+router.post("/loadTest", function(req,res){
   formElements = req.body;
   var startTime = new Date().getTime();
   var loadTestName = formElements.testName;
@@ -596,10 +596,10 @@ router.post('/loadTest', function(req,res){
                 .then(function (url) {
                   if (url) {
                     console.log("Found URL informtion");
-                    var options = '';
+                    var options = "";
                     var username = req.user.username;
                     options = {
-                      url: 'http://' + url + '/api/test',
+                      url: "http://" + url + "/api/test",
                       concurrency: formElements["numConcurrClients"], //How many clients to start in parallel.
                       maxRequests: formElements["maxRequests"], //A max number of requests; after they are reached the test will end.
                       timeout: formElements["maxTimeOut"], //Timeout for each generated request in milliseconds. Setting this to 0 disables timeout (default).
@@ -619,14 +619,14 @@ router.post('/loadTest', function(req,res){
 
                     loadtest.loadTest(options, function (error) {
                       if (error) {
-                        console.error('Got an error: %s', error);
+                        console.error("Got an error: %s", error);
                       }
-                      console.log('Tests run successfully');
+                      console.log("Tests run successfully");
                     });
                     // here neet to trigger load and save the data
                     // save information of kubernetes every one second
-                    res.render('awskubernetes/success', {
-                      layout: '../awskubernetes/layouts/main',
+                    res.render("awskubernetes/success", {
+                      layout: "../awskubernetes/layouts/main",
                       user: req.user.username,
                       dataForm: "Request send to Server, Plese check the graphs after the test is over",
                       dataClient: "Request send to Server, Plese check the graphs after the test is over"
@@ -634,8 +634,8 @@ router.post('/loadTest', function(req,res){
                   }
                   else {
                     console.log("url not found");
-                    res.render('awskubernetes/failure', {
-                      layout: '../awskubernetes/layouts/main',
+                    res.render("awskubernetes/failure", {
+                      layout: "../awskubernetes/layouts/main",
                       user: req.user.username,
                       error: "App Service Is not running, PLease deploy first and then run"
                     });
@@ -649,7 +649,7 @@ router.post('/loadTest', function(req,res){
       }
     });
 });
-router.post('/triangleLoadTest', function(req,res){
+router.post("/triangleLoadTest", function(req,res){
   formElements = req.body;
   var startTime = new Date().getTime();
   var loadTestName = formElements.testName;
@@ -706,8 +706,8 @@ router.post('/triangleLoadTest', function(req,res){
 
               }, 2000);
               var requests = 1;
-              res.render('awskubernetes/success', {
-                layout: '../awskubernetes/layouts/main',
+              res.render("awskubernetes/success", {
+                layout: "../awskubernetes/layouts/main",
                 user: req.user.username,
                 dataForm: "Request send to Server, Plese check the graphs after the test is over",
                 dataClient: "Request send to Server, Plese check the graphs after the test is over"
@@ -724,10 +724,10 @@ router.post('/triangleLoadTest', function(req,res){
                       console.log(url);
 
                       console.log("requests"+requests);
-                      var options = '';
+                      var options = "";
                       var username = req.user.username;
                       options = {
-                        url: 'http://'+url + '/api/test',
+                        url: "http://"+url + "/api/test",
                         concurrency: formElements["numConcurrClients"], //How many clients to start in parallel.
                         maxRequests: requests * 10, //A max number of requests; after they are reached the test will end.
                         timeout: 6500, //Timeout for each generated request in milliseconds. Setting this to 0 disables timeout (default).
@@ -746,9 +746,9 @@ router.post('/triangleLoadTest', function(req,res){
                       };
                       loadtest.loadTest(options, function (error) {
                         if (error) {
-                          console.error('Got an error: %s', error);
+                          console.error("Got an error: %s", error);
                         }
-                        console.log('Tests run successfully');
+                        console.log("Tests run successfully");
                       });
                       if (((new Date().getTime() - startTime) < 600000)) {
                         requests+=5;
@@ -765,8 +765,8 @@ router.post('/triangleLoadTest', function(req,res){
             }
             else {
               console.log("Error");
-              res.render('awskubernetes/failure', {
-                layout: '../awskubernetes/layouts/main',
+              res.render("awskubernetes/failure", {
+                layout: "../awskubernetes/layouts/main",
                 user: req.user.username,
                 error: "App Service Is not running, PLease deploy first and then run"
               });
@@ -775,7 +775,7 @@ router.post('/triangleLoadTest', function(req,res){
       }
     });
 });
-router.post('/linearIncreaseLoadTest', function(req,res){
+router.post("/linearIncreaseLoadTest", function(req,res){
   formElements = req.body;
   var startTime = new Date().getTime();
   var loadTestName = formElements.testName;
@@ -832,8 +832,8 @@ router.post('/linearIncreaseLoadTest', function(req,res){
 
               }, 2000);
               var requests = 1;
-              res.render('awskubernetes/success', {
-                layout: '../awskubernetes/layouts/main',
+              res.render("awskubernetes/success", {
+                layout: "../awskubernetes/layouts/main",
                 user: req.user.username,
                 dataForm: "Request send to Server, Plese check the graphs after the test is over",
                 dataClient: "Request send to Server, Plese check the graphs after the test is over"
@@ -850,10 +850,10 @@ router.post('/linearIncreaseLoadTest', function(req,res){
                       console.log(url);
 
                       console.log("requests"+requests);
-                      var options = '';
+                      var options = "";
                       var username = req.user.username;
                       options = {
-                        url: 'http://'+url + '/api/test',
+                        url: "http://"+url + "/api/test",
                         concurrency: formElements["numConcurrClients"], //How many clients to start in parallel.
                         maxRequests: requests * 10, //A max number of requests; after they are reached the test will end.
                         timeout: 6500, //Timeout for each generated request in milliseconds. Setting this to 0 disables timeout (default).
@@ -872,9 +872,9 @@ router.post('/linearIncreaseLoadTest', function(req,res){
                       };
                       loadtest.loadTest(options, function (error) {
                         if (error) {
-                          console.error('Got an error: %s', error);
+                          console.error("Got an error: %s", error);
                         }
-                        console.log('Tests run successfully');
+                        console.log("Tests run successfully");
                       });
                       requests+=2;
                     }
@@ -883,8 +883,8 @@ router.post('/linearIncreaseLoadTest', function(req,res){
             }
             else {
               console.log("Error");
-              res.render('awskubernetes/failure', {
-                layout: '../awskubernetes/layouts/main',
+              res.render("awskubernetes/failure", {
+                layout: "../awskubernetes/layouts/main",
                 user: req.user.username,
                 error: "App Service Is not running, PLease deploy first and then run"
               });
@@ -893,7 +893,7 @@ router.post('/linearIncreaseLoadTest', function(req,res){
       }
     });
 });
-router.post('/linearIncreaseConstantLoadTest', function(req,res){
+router.post("/linearIncreaseConstantLoadTest", function(req,res){
   formElements = req.body;
   var startTime = new Date().getTime();
   var loadTestName = formElements.testName;
@@ -950,8 +950,8 @@ router.post('/linearIncreaseConstantLoadTest', function(req,res){
 
               }, 2000);
               var requests = 1;
-              res.render('awskubernetes/success', {
-                layout: '../awskubernetes/layouts/main',
+              res.render("awskubernetes/success", {
+                layout: "../awskubernetes/layouts/main",
                 user: req.user.username,
                 dataForm: "Request send to Server, Plese check the graphs after the test is over",
                 dataClient: "Request send to Server, Plese check the graphs after the test is over"
@@ -968,10 +968,10 @@ router.post('/linearIncreaseConstantLoadTest', function(req,res){
                       console.log(url);
 
                       console.log("requests"+requests);
-                      var options = '';
+                      var options = "";
                       var username = req.user.username;
                       options = {
-                        url: 'http://'+url + '/api/test',
+                        url: "http://"+url + "/api/test",
                         concurrency: formElements["numConcurrClients"], //How many clients to start in parallel.
                         maxRequests: requests * 10, //A max number of requests; after they are reached the test will end.
                         timeout: 6500, //Timeout for each generated request in milliseconds. Setting this to 0 disables timeout (default).
@@ -990,9 +990,9 @@ router.post('/linearIncreaseConstantLoadTest', function(req,res){
                       };
                       loadtest.loadTest(options, function (error) {
                         if (error) {
-                          console.error('Got an error: %s', error);
+                          console.error("Got an error: %s", error);
                         }
-                        console.log('Tests run successfully');
+                        console.log("Tests run successfully");
                       });
                       if(((new Date().getTime() - startTime) < 600000) && requests < 10000)
                       {
@@ -1009,8 +1009,8 @@ router.post('/linearIncreaseConstantLoadTest', function(req,res){
             }
             else {
               console.log("Error");
-              res.render('awskubernetes/failure', {
-                layout: '../awskubernetes/layouts/main',
+              res.render("awskubernetes/failure", {
+                layout: "../awskubernetes/layouts/main",
                 user: req.user.username,
                 error: "App Service Is not running, PLease deploy first and then run"
               });
@@ -1019,7 +1019,7 @@ router.post('/linearIncreaseConstantLoadTest', function(req,res){
       }
     });
 });
-router.post('/upDownLoadTest', function(req,res){
+router.post("/upDownLoadTest", function(req,res){
   formElements = req.body;
   var startTime = new Date().getTime();
   var loadTestName = formElements.testName;
@@ -1076,8 +1076,8 @@ router.post('/upDownLoadTest', function(req,res){
               }, 2000);
               var requests = 1;
               var flag = true;
-              res.render('awskubernetes/success', {
-                layout: '../awskubernetes/layouts/main',
+              res.render("awskubernetes/success", {
+                layout: "../awskubernetes/layouts/main",
                 user: req.user.username,
                 dataForm: "Request send to Server, Plese check the graphs after the test is over",
                 dataClient: "Request send to Server, Plese check the graphs after the test is over"
@@ -1094,10 +1094,10 @@ router.post('/upDownLoadTest', function(req,res){
                       console.log(url);
 
                       console.log("requests"+requests);
-                      var options = '';
+                      var options = "";
                       var username = req.user.username;
                       options = {
-                        url: 'http://'+url + '/api/test',
+                        url: "http://"+url + "/api/test",
                         concurrency: formElements["numConcurrClients"], //How many clients to start in parallel.
                         maxRequests: requests * 10, //A max number of requests; after they are reached the test will end.
                         timeout: 6500, //Timeout for each generated request in milliseconds. Setting this to 0 disables timeout (default).
@@ -1116,9 +1116,9 @@ router.post('/upDownLoadTest', function(req,res){
                       };
                       loadtest.loadTest(options, function (error) {
                         if (error) {
-                          console.error('Got an error: %s', error);
+                          console.error("Got an error: %s", error);
                         }
-                        console.log('Tests run successfully');
+                        console.log("Tests run successfully");
                       });
                       if(flag)
                       {
@@ -1136,8 +1136,8 @@ router.post('/upDownLoadTest', function(req,res){
             }
             else {
               console.log("Error");
-              res.render('awskubernetes/failure', {
-                layout: '../awskubernetes/layouts/main',
+              res.render("awskubernetes/failure", {
+                layout: "../awskubernetes/layouts/main",
                 user: req.user.username,
                 error: "App Service Is not running, PLease deploy first and then run"
               });
@@ -1148,7 +1148,7 @@ router.post('/upDownLoadTest', function(req,res){
 });
 
 
-router.post('/getLoadTestData', function(req,res){
+router.post("/getLoadTestData", function(req,res){
   formElements = req.body;
   var loadTestName = formElements.testName;
 
@@ -1192,28 +1192,28 @@ router.post('/getLoadTestData', function(req,res){
       }
       else {
         var allData = {
-          "requestIndex" : '',
-          "datarequestElapsed" : '',
-          "datatotalTimeSeconds" : '',
-          "maxLatency" : '',
-          "minLatency" : '',
-          "meanLatency" : '',
-          "barRPS" : '',
-          "totalTimeSeconds" : '',
-          "errors" : ''
+          "requestIndex" : "",
+          "datarequestElapsed" : "",
+          "datatotalTimeSeconds" : "",
+          "maxLatency" : "",
+          "minLatency" : "",
+          "meanLatency" : "",
+          "barRPS" : "",
+          "totalTimeSeconds" : "",
+          "errors" : ""
         }
         res.send(allData);
       }
     });
 });
-router.get('/startRecordingData', function(req,res){
+router.get("/startRecordingData", function(req,res){
   var startTime = new Date().getTime();
   awsAutoscaleKubernetesMongoFunctions.setManualRecording(req.user.username, true)
     .then(function (set) {
       if (set) {
         console.log("Enabled");
-        res.render('awskubernetes/success', {
-          layout: '../awskubernetes/layouts/main',
+        res.render("awskubernetes/success", {
+          layout: "../awskubernetes/layouts/main",
           user: req.user.username,
           dataForm: "Started",
           dataClient: "Started"
@@ -1253,14 +1253,14 @@ router.get('/startRecordingData', function(req,res){
   }, 2000);
 });
 
-router.get('/stopRecordingData', function(req,res){
+router.get("/stopRecordingData", function(req,res){
   var startTime = new Date().getTime();
   awsAutoscaleKubernetesMongoFunctions.setManualRecording(req.user.username, false)
     .then(function (set) {
       if (set) {
         console.log("Stopped");
-        res.render('awskubernetes/success', {
-          layout: '../awskubernetes/layouts/main',
+        res.render("awskubernetes/success", {
+          layout: "../awskubernetes/layouts/main",
           user: req.user.username,
           dataForm: "Stopped",
           dataClient: "Stopped"
@@ -1268,8 +1268,8 @@ router.get('/stopRecordingData', function(req,res){
       }
       else {
         console.log("Error");
-        res.render('awskubernetes/failure', {
-          layout: '../awskubernetes/layouts/main',
+        res.render("awskubernetes/failure", {
+          layout: "../awskubernetes/layouts/main",
           user: req.user.username,
           error: "Not able to stop"
         });
@@ -1277,7 +1277,7 @@ router.get('/stopRecordingData', function(req,res){
     });
 });
 
-router.get('/getCurrentData', function(req,res){
+router.get("/getCurrentData", function(req,res){
   awsGeneral.getUserInfoForDescription(req.user.username, res, req)
     .then(function (data) {
       if (data) {
@@ -1300,13 +1300,13 @@ router.use(function(req, res, next){
   // the status option, or res.statusCode = 404
   // are equivalent, however with the option we
   // get the "status" local available as well
-  //res.render('404',{user: req.user});
+  //res.render("404",{user: req.user});
 });
 router.use(function(err, req, res, next){
   // we may use properties of the error object
   // here and next(err) appropriately, or if
   // we possibly recovered from the error, simply next().
-  //res.render('500',{user: req.user});
+  //res.render("500",{user: req.user});
 });
 //logs user out of site, deleting them from the session, and returns to homepage
 
