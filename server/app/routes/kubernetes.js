@@ -35,9 +35,7 @@ router.get("/deploykubernetesAws", function(req, res){
   awsGeneral.getUserInfoForDeploy(req.user.username, res, req, routeContext);
 });
 
-router.get("/loadtesthome", function(req, res){
-  res.render("kubernetes/loadtesthome",{layout: "../kubernetes/layouts/main",user: req.user} );
-});
+
 
 router.get("/getPodsList", function(req, res) {
   kubeMongoFunctions.getMasterIp(req.user.username)

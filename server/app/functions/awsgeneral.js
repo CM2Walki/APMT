@@ -82,7 +82,7 @@ exports.getAwsAutoScaleInfo = function(username, context) {
       .then(function (result) {
         if (null != result)
         {
-          deployInfo = result[context]["awsAutoscaleConfig"];
+          deployInfo = result["awsKubeAutoScale"];
           deferred.resolve(deployInfo); // username exists
         }
         else
