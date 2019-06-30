@@ -31,13 +31,11 @@ router.get("/signin", function(req, res) {
 });
 
 router.get("/register", function(req, res) {
-    res.render("register");
+  res.render("register");
 });
 
 // logs user out of site, deleting them from the session, and returns to homepage
 router.get("/logout", function(req, res, next) {
-  const name = req.user.username;
-  console.log("LOGGING OUT " + req.user.username);
   req.logout();
   res.redirect("/");
 });
@@ -67,8 +65,6 @@ router.post("/saveuserInfo", function(req, res){
   funct.saveUserInfo(req.user, req.body, res.body)
     .then(function (user) {
       if (user) {
-        console.log("added information");
-        //dataForm:
         res.render("success", {
           user: req.user,
           dataForm: req.body,
@@ -76,7 +72,6 @@ router.post("/saveuserInfo", function(req, res){
         });
       }
       else {
-        console.log("user not found");
         res.render("failure", {
           user: req.user.username,
           error: "Not able to submit, check your data"

@@ -11,6 +11,8 @@ const routes                        = require("./routes/general");
 const kubernetesRoutes              = require("./routes/awsKubernetes");
 const awsAutoscaleRoutes            = require("./routes/awsAutoscale");
 const awsAutoscaleKubernetesRoutes  = require("./routes/awsKubernetesAutoscale");
+const loadtestK6Routes              = require("./routes/loadtestK6");
+
 //===============PASSPORT=================
 
 // Passport session setup.
@@ -153,12 +155,14 @@ app.set("views", path.join(__dirname, "views/"));
 
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/awsKubernetesAutoscale",awsAutoscaleKubernetesRoutes);
+app.use("/awsKubernetesAutoscale", awsAutoscaleKubernetesRoutes);
 
-app.use("/awsKubernetes",kubernetesRoutes);
+app.use("/awsKubernetes", kubernetesRoutes);
 
-app.use("/awsAutoscale",awsAutoscaleRoutes);
+app.use("/awsAutoscale", awsAutoscaleRoutes);
 
-app.use("/",routes);
+app.use("/loadtestK6", loadtestK6Routes);
+
+app.use("/", routes);
 
 module.exports = app;

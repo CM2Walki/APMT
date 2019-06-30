@@ -14,6 +14,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
   <!-- Bootstrap 3.3.6 -->
 
+
   <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
@@ -59,17 +60,17 @@ scratch. This page gets rid of all links and provides the needed markup only.
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Autoscaling Solutions <span class="caret"></span></a>
             <ul class="dropdown-menu" role="menu">
               {{#if user.awssetup}}
-              <li><a href="/awsKubernetes">AWS Kubernetes</a></li>
-              <li class="divider"></li>
-              <li><a href="/awsAutoscale">AWS Autoscale</a></li>
-              <li class="divider"></li>
-              <li><a href="/awsKubernetesAutoscale">AWS Kubernetes & Autoscale</a></li>
+                <li><a href="/awsKubernetes">AWS Kubernetes</a></li>
+                <li class="divider"></li>
+                <li><a href="/awsAutoscale">AWS Autoscale</a></li>
+                <li class="divider"></li>
+                <li><a href="/awsKubernetesAutoscale">AWS Kubernetes & Autoscale</a></li>
               {{else}}
-              <li><a href="#0">AWS Kubernetes <img src="images/lock.png" style="vertical-align: sub;" width="14" height="14" alt="locked"></a></li>
-              <li class="divider"></li>
-              <li><a href="#0">AWS Autoscale <img src="images/lock.png" style="vertical-align: sub;" width="14" height="14" alt="locked"></a></li>
-              <li class="divider"></li>
-              <li><a href="#0">AWS Kubernetes & Autoscale <img src="images/lock.png" style="vertical-align: sub;" width="14" height="14" alt="locked"></a></li>
+                <li><a href="#0">AWS Kubernetes <img src="images/lock.png" style="vertical-align: sub;" width="14" height="14" alt="locked"></a></li>
+                <li class="divider"></li>
+                <li><a href="#0">AWS Autoscale <img src="images/lock.png" style="vertical-align: sub;" width="14" height="14" alt="locked"></a></li>
+                <li class="divider"></li>
+                <li><a href="#0">AWS Kubernetes & Autoscale <img src="images/lock.png" style="vertical-align: sub;" width="14" height="14" alt="locked"></a></li>
               {{/if}}
             </ul>
           </li>
@@ -99,11 +100,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
     {{#if error}}
       <p class="alert alert-warning">{{error}}</p>
     {{/if}}
-
     {{#if success}}
       <p class="alert alert-success">{{success}}</p>
     {{/if}}
-
     {{#if notice}}
       <p class="alert alert-info">{{notice}}</p>
     {{/if}}
@@ -119,3 +118,4 @@ scratch. This page gets rid of all links and provides the needed markup only.
 </div>
 </body>
 </html>
+

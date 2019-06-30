@@ -7,9 +7,6 @@ const mongodbUrlConfig = "mongodb://"+ config.mongodb.host + ":" + config.mongod
                                         + config.mongodb.dbUsersData.name;
 const collectionNameConfig = config.mongodb.dbUsersData.collectionName;
 
-const mongodbUrlAwsAutoScale = "mongodb://" + config.mongodb.host + ":" + config.mongodb.port + "/"
-                                        + config.mongodb.dbawsAutoscale.name;
-
 const MongoClient = require("mongodb").MongoClient;
 
 exports.addConfigData = function (username, data, context) {
@@ -91,6 +88,130 @@ exports.getAwsAutoScaleInfo = function(username, context) {
         }
       });
   });
+  return deferred.promise;
+};
+
+// Returns a compact version of all auto scaling groups starting with "autoScalingPrefix"
+// Cluster Name; Launch Configuration Name; Instance Count; Creation Time
+exports.describeAutoscalingGroupsCompact = function(awsData, req, res, autoScalingPrefix) {
+  const autoScaling = new AWS.AutoScaling({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
+  const deferred = Q.defer();
+  const params = {
+    AutoScalingGroupNames: []
+  };
+
+  let titlesArr = [];
+  titlesArr.push({"title": "Cluster Name"});
+  titlesArr.push({"title": "Launch Configuration"});
+  titlesArr.push({"title": "Instance Count"});
+  titlesArr.push({"title": "Creation Time"});
+
+  let awsArr = [];
+  if(autoScaling) {
+    autoScaling.describeAutoScalingGroups(params, function(err, data) {
+      if (err) {
+        console.log(err, err.stack); // an error occurred
+        const dataAll = [
+          {
+            "columns": titlesArr,
+            "data": awsArr
+          }];
+        deferred.resolve(dataAll);
+      }
+      else
+      {
+        const autoScalingGroupsArr = data.AutoScalingGroups;
+        autoScalingGroupsArr.forEach(function (autoScalingGroup) {
+          if (autoScalingGroup["AutoScalingGroupName"].startsWith(autoScalingPrefix))
+          {
+            let row = [];
+            row.push(autoScalingGroup["AutoScalingGroupName"]);
+            row.push(autoScalingGroup["LaunchConfigurationName"]);
+            row.push(autoScalingGroup["Instances"].length);
+            row.push(autoScalingGroup["CreatedTime"]);
+            awsArr.push(row);
+          }
+        });
+        const dataAll = [{
+          "columns": titlesArr,
+          "data": awsArr
+        }];
+        deferred.resolve(dataAll);
+      }
+    });// successful response
+  }
+  else {
+    const dataAll = [{
+      "columns": titlesArr,
+      "data": awsArr
+    }];
+    deferred.resolve(dataAll);
+  }
+  return deferred.promise;
+};
+
+// Returns a full version of all auto scaling groups starting with "autoScalingPrefix"
+// Name; LaunchConfigurationName; MinSize; MaxSize; DesiredCapacity; Instances; CreatedTime
+exports.describeAutoscalingGroupsFull = function(awsData, req, res, autoScalingPrefix) {
+  const autoScaling = new AWS.AutoScaling({accessKeyId: awsData.accessKeyId,secretAccessKey: awsData.secretAccessKey,region: awsData.region, apiVersion: '2016-11-15'});
+  const deferred = Q.defer();
+  const params = {
+    AutoScalingGroupNames: []
+  };
+
+  let titlesArr = [];
+  titlesArr.push({"title": "Cluster Name"});
+  titlesArr.push({"title": "Launch Configuration"});
+  titlesArr.push({"title": "Min Size"});
+  titlesArr.push({"title": "Max Size"});
+  titlesArr.push({"title": "Desired Capacity"});
+  titlesArr.push({"title": "Instance Cound"});
+  titlesArr.push({"title": "Creation Time"});
+
+  let awsArr = [];
+  if(autoScaling) {
+    autoScaling.describeAutoScalingGroups(params, function(err, data) {
+      if (err) {
+        console.log(err, err.stack); // an error occurred
+        const dataAll = [
+          {
+            "columns": titlesArr,
+            "data": awsArr
+          }];
+        deferred.resolve(dataAll);
+      }
+      else
+      {
+        const autoScalingGroupsArr = data.AutoScalingGroups;
+        autoScalingGroupsArr.forEach(function (autoScalingGroup) {
+          if (autoScalingGroup["AutoScalingGroupName"].startsWith(autoScalingPrefix))
+          {
+            let row = [];
+            row.push(autoScalingGroup["AutoScalingGroupName"]);
+            row.push(autoScalingGroup["LaunchConfigurationName"]);
+            row.push(autoScalingGroup["MinSize"]);
+            row.push(autoScalingGroup["MaxSize"]);
+            row.push(autoScalingGroup["DesiredCapacity"]);
+            row.push(autoScalingGroup["Instances"].length);
+            row.push(autoScalingGroup["CreatedTime"]);
+            awsArr.push(row);
+          }
+        });
+        const dataAll = [{
+          "columns": titlesArr,
+          "data": awsArr
+        }];
+        deferred.resolve(dataAll);
+      }
+    });// successful response
+  }
+  else {
+    const dataAll = [{
+      "columns": titlesArr,
+      "data": awsArr
+    }];
+    deferred.resolve(dataAll);
+  }
   return deferred.promise;
 };
 

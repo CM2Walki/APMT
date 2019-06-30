@@ -471,13 +471,13 @@ exports.describeAutoscalingGroups = function(awsData, req, res) {
   };
 
   var titlesArr = [];
-  titlesArr.push({"title": "Name"});
-  titlesArr.push({"title": "LaunchConfigurationName"});
-  titlesArr.push({"title": "MinSize"});
-  titlesArr.push({"title": "MaxSize"});
-  titlesArr.push({"title": "DesiredCapacity"});
-  titlesArr.push({"title": "Instances"});
-  titlesArr.push({"title": "CreatedTime"});
+  titlesArr.push({"title": "Cluster Name"});
+  titlesArr.push({"title": "Launch Configuration"});
+  titlesArr.push({"title": "Min Size"});
+  titlesArr.push({"title": "Max Size"});
+  titlesArr.push({"title": "Desired Capacity"});
+  titlesArr.push({"title": "Instance Count"});
+  titlesArr.push({"title": "Creation Time"});
 
   var awsArr = [];
   if(autoscaling) {
